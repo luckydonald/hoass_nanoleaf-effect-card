@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   **Visual editor now uses native Home Assistant components**:
+    -   `ha-entity-picker` for entity selection with autocomplete
+    -   `ha-formfield` with `ha-radio` for display mode selection
+    -   `ha-switch` for toggle options
+    -   `ha-icon-picker` for effect icon selection
+    -   Full GUI effects editor with add/remove/reorder functionality
+    -   Drag-and-drop to reorder effects
+    -   Multiple colors per effect with add button
+    -   No YAML editing required for basic configuration
+
 ### Fixed
 
 -   Visual editor now works correctly - bundled editor code directly into card.js to fix "setConfig is not a function" error
