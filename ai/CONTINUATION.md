@@ -47,13 +47,13 @@ Quick developer debug commands (macOS zsh):
 
 -   Serve locally to test demo:
     ```bash
-    npm install
-    npm run serve
+    yarn install
+    yarn serve
     # Open printed http://localhost:PORT/demo.html in browser
     ```
 -   Run unit tests (JS environment):
     ```bash
-    npm test
+    yarn test
     ```
 
 If something still fails after resuming, copy the console output and the last few commits; I can pick up from the exact failure and fix it immediately.
