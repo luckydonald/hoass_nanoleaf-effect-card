@@ -123,3 +123,20 @@ Probably because of re-rendering the whole input section on every change.
 The icon also needs to be set twice to show up.
 
 The "Add Effect" is not showing any label.
+
+—————
+
+Make the way the color(s) are displayed in the button configurable as radio buttons:
+
+-   "Full Background"
+-   "Small Bar" (a small color bar below the icon and name shows the gradient instead of the whole button background)
+-   "Text" (Icon and text are in the gradient colors)
+-   "Border" (The button border is in the gradient colors)
+-   "None"
+    ("Full Background" is the current implementation)
+
+Additionally, add the following toggles:
+
+-   "Always show colors" (show the colors even if the effect is not active, otherwise only show colors when the effect is active)"
+-   "Animated Icon" (have the icon cycles through colors instead of the whole button background)
+-   "Always animate icon" (animate the icon even if the effect is not active, otherwise only animate when the effect is active)
