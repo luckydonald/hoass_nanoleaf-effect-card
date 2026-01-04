@@ -12,12 +12,12 @@ Thank you for considering contributing to the Nanoleaf Effect Card! Here are som
 
 2. **Install dependencies**
    ```bash
-   npm install
+   yarn install
    ```
 
 3. **Start development server**
    ```bash
-   npm run dev
+   yarn dev
    ```
    This will start a local server on port 3000.
 
