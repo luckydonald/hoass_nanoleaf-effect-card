@@ -31,7 +31,7 @@ entities:
           name: true # default: true
       effects:
           - name: 'Rainbow'
-            icon: 'mdi:rainbow'
+            icon: 'mdi:looks'
             color: '#FF00FF'
             # you could overwrite the button_style for each button:
             button_style:

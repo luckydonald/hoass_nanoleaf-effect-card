@@ -12,7 +12,7 @@ entities:
       display: buttons
       effects:
           - name: 'Rainbow'
-            icon: 'mdi:rainbow'
+            icon: 'mdi:looks'
             color: '#FF00FF'
           - name: 'Sunrise'
             icon: 'mdi:weather-sunset-up'
@@ -36,7 +36,7 @@ entity: light.nanoleaf_shapes
 display: dropdown
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
     - name: 'Sunrise'
       icon: 'mdi:weather-sunset-up'
@@ -67,7 +67,7 @@ entities:
           name: true
       effects:
           - name: 'Rainbow'
-            icon: 'mdi:rainbow'
+            icon: 'mdi:looks'
             color: '#FF00FF'
             button_style:
                 inactive_color: '#AAAAAA'
@@ -126,7 +126,7 @@ button_style:
     name: false
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
     - name: 'Sunrise'
       icon: 'mdi:weather-sunset-up'
@@ -175,7 +175,7 @@ features:
       display: dropdown
       effects:
           - name: 'Rainbow'
-            icon: 'mdi:rainbow'
+            icon: 'mdi:looks'
             color: '#FF00FF'
           - name: 'Sunrise'
             icon: 'mdi:weather-sunset-up'
@@ -197,7 +197,7 @@ cards:
             display: buttons
             effects:
                 - name: 'Rainbow'
-                  icon: 'mdi:rainbow'
+                  icon: 'mdi:looks'
                   color: '#FF00FF'
                 - name: 'Party'
                   icon: 'mdi:party-popper'
