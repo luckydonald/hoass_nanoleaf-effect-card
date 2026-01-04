@@ -16,6 +16,14 @@ class NanoleafEffectCard extends HTMLElement {
             throw new Error('You need to define an entity');
         }
 
+        const defaultColorDisplays = {
+            full_background: { active: true, inactive: false },
+            small_bar: { active: false, inactive: true },
+            text: { active: false, inactive: false },
+            border: { active: false, inactive: false },
+            animated_icon: { active: true, inactive: false },
+        };
+
         this._config = {
             entity: config.entity,
             display: config.display || 'buttons',
@@ -23,8 +31,15 @@ class NanoleafEffectCard extends HTMLElement {
                 inactive_color: config.button_style?.inactive_color || '#CCCCCC',
                 icon: config.button_style?.icon !== false,
                 name: config.button_style?.name !== false,
+                color_display: { ...defaultColorDisplays, ...(config.button_style?.color_display || {}) },
             },
-            effects: config.effects || [],
+            effects: (config.effects || []).map((ef) => ({
+                ...ef,
+                button_style: {
+                    ...(ef.button_style || {}),
+                    color_display: { ...defaultColorDisplays, ...((ef.button_style || {}).color_display || {}) },
+                },
+            })),
         };
 
         this.render();
@@ -77,19 +92,21 @@ class NanoleafEffectCard extends HTMLElement {
       :host { display: block; }
       .effect-card { padding: 16px; }
 
-      .dropdown-container { display: flex; align-items: center; gap: 8px; }
-      .effect-dropdown { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: 14px; cursor: pointer; }
-
       .buttons-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
 
       .effect-button { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px; border: none; border-radius: 8px; background: var(--card-background-color); color: var(--primary-text-color); cursor: pointer; transition: all 0.3s ease; min-height: 60px; position: relative; overflow: hidden; }
-      .effect-button:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-      .effect-button.active { border: 2px solid var(--primary-color); box-shadow: 0 0 10px rgba(var(--rgb-primary-color), 0.5); }
-      .effect-button.inactive { opacity: 0.6; }
-      .button-icon { font-size: 24px; margin-bottom: 4px; }
+      .effect-button:hover { transform: scale(1.02); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+      .effect-button.active { box-shadow: 0 0 12px rgba(var(--rgb-primary-color), 0.08); }
+      .effect-button.inactive { opacity: 0.9; }
+      .button-icon { font-size: 24px; margin-bottom: 4px; display:inline-flex; align-items:center; justify-content:center; }
       .button-name { font-size: 12px; text-align: center; word-wrap: break-word; }
-      .color-animation { animation: colorCycle 3s infinite; }
-      @keyframes colorCycle { 0%, 100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(180deg); } }
+
+      .color-bar { transition: all 0.3s ease; }
+
+      .icon-animated ha-icon { animation: hueRotate 3s linear infinite; }
+
+      @keyframes hueRotate { 0% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(180deg); } 100% { filter: hue-rotate(360deg); } }
+
       ha-icon { --mdc-icon-size: 24px; }
     `;
     }
@@ -118,7 +135,10 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     renderButtons(currentEffect, isOn) {
-        const effects = [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'] }, ...this._config.effects];
+        const effects = [
+            { name: 'Off', icon: 'mdi:power', colors: ['#666666'], button_style: { color_display: {} } },
+            ...this._config.effects,
+        ];
 
         return `
       <div class="effect-card">
@@ -127,25 +147,45 @@ class NanoleafEffectCard extends HTMLElement {
               .map((effect) => {
                   const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
                   const colors = this.getEffectColors(effect);
-                  const buttonStyle = effect.button_style || this._config.button_style;
+                  const buttonStyle = { ...(this._config.button_style || {}), ...(effect.button_style || {}) };
                   const inactiveColor = buttonStyle.inactive_color || '#CCCCCC';
                   const showIcon = buttonStyle.icon !== false;
                   const showName = buttonStyle.name !== false;
 
+                  // Decide which styles apply depending on active/inactive flags
+                  const colorDisplay = buttonStyle.color_display || {};
+
+                  const applyStyle = (styleKey) => {
+                      const cfg = colorDisplay[styleKey] || {};
+                      return (isActive && cfg.active) || (!isActive && cfg.inactive);
+                  };
+
+                  const bgGradient = `linear-gradient(135deg, ${colors.join(', ')})`;
                   const bgColor = isActive ? colors[0] : inactiveColor;
-                  const bgGradient =
-                      isActive && colors.length > 1 ? `linear-gradient(135deg, ${colors.join(', ')})` : bgColor;
+
+                  // prepare inline styles
+                  const fullBg = applyStyle('full_background')
+                      ? `background: ${bgGradient};`
+                      : `background: ${bgColor};`;
+                  const borderStyle = applyStyle('border')
+                      ? `border: 2px solid transparent; border-image: linear-gradient(135deg, ${colors.join(', ')}) 1;`
+                      : '';
+                  const textGradientStyle = applyStyle('text')
+                      ? `background: ${bgGradient}; -webkit-background-clip: text; color: transparent;`
+                      : '';
+                  const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
                   return `
               <button 
                 class="effect-button ${isActive ? 'active' : 'inactive'}" 
                 data-effect="${effect.name}"
-                style="background: ${bgGradient}; color: ${this.getContrastColor(colors[0] || inactiveColor)};"
+                style="${fullBg} ${borderStyle} color: ${this.getContrastColor(colors[0] || inactiveColor)};"
               >
+                <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
                 ${
                     showIcon
                         ? `
-                  <div class="button-icon ${isActive && colors.length > 1 ? 'color-animation' : ''}">
+                  <div class="button-icon ${iconAnimatedClass}" style="${textGradientStyle}">
                     <ha-icon icon="${effect.icon || 'mdi:lightbulb'}"></ha-icon>
                   </div>
                 `
@@ -154,10 +194,16 @@ class NanoleafEffectCard extends HTMLElement {
                 ${
                     showName
                         ? `
-                  <div class="button-name">${effect.name}</div>
+                  <div class="button-name" style="${textGradientStyle}">${effect.name}</div>
                 `
                         : ''
                 }
+                ${
+                    applyStyle('small_bar')
+                        ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient};"></div>`
+                        : ''
+                }
+                </div>
               </button>
             `;
               })

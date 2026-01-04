@@ -366,6 +366,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
               ${this.renderColorInputs(effect, index)}
             </div>
           </div>
+          <nanoleaf-effect-button-style
+            class="button-style"
+            .value="${effect.button_style || {}}"
+          ></nanoleaf-effect-button-style>
         </div>
         <div class="effect-actions">
           <button class="icon-button delete" data-index="${index}" title="Delete effect">
@@ -557,7 +561,107 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 this.render();
             });
         });
+
+        // Button style value-changed events
+        this.shadowRoot.querySelectorAll('nanoleaf-effect-button-style').forEach((comp) => {
+            comp.addEventListener('value-changed', (e) => {
+                const index = parseInt(comp.closest('.effect-item').dataset.index);
+                const effects = [...(this._config.effects || [])];
+                effects[index] = { ...effects[index], button_style: e.detail.value };
+                this._config = { ...this._config, effects };
+                this.configChanged(this._config);
+            });
+        });
+    }
+}
+
+// Small helper component to edit color-display styles per effect
+class NanoleafEffectButtonStyle extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._value = this._value || {};
+    }
+
+    set value(v) {
+        this._value = v || {};
+        this.render();
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    connectedCallback() {
+        this.render();
+    }
+
+    render() {
+        const v = this._value || {};
+        const styles = [
+            { key: 'full_background', label: 'Full Background' },
+            { key: 'small_bar', label: 'Small Bar' },
+            { key: 'text', label: 'Text' },
+            { key: 'border', label: 'Border' },
+            { key: 'animated_icon', label: 'Animated Icon' },
+        ];
+
+        this.shadowRoot.innerHTML = `
+      <style>
+        .group { display:flex; flex-direction:column; gap:6px; }
+        .item { display:flex; align-items:center; gap:8px; }
+        .label { width:140px; font-size:13px; color:var(--primary-text-color); }
+        .toggles { display:flex; gap:8px; }
+        .toggle-btn { padding:6px 8px; border:1px solid var(--divider-color); border-radius:6px; background:transparent; cursor:pointer; font-size:12px; }
+        .toggle-btn.active { background:var(--primary-color); color:white; border-color:var(--primary-color); }
+      </style>
+      <div class="group">
+        ${styles
+            .map((s) => {
+                const cfg = v[s.key] || { active: false, inactive: false };
+                return `
+          <div class="item" data-key="${s.key}">
+            <div class="label">${s.label}</div>
+            <div class="toggles">
+              <button class="toggle-btn btn-active ${cfg.active ? 'active' : ''}" data-mode="active">Active</button>
+              <button class="toggle-btn btn-inactive ${
+                  cfg.inactive ? 'active' : ''
+              }" data-mode="inactive">Inactive</button>
+            </div>
+          </div>
+        `;
+            })
+            .join('')}
+      </div>
+    `;
+
+        // Attach handlers
+        this.shadowRoot.querySelectorAll('.item').forEach((item) => {
+            const key = item.dataset.key;
+            const btnActive = item.querySelector('.btn-active');
+            const btnInactive = item.querySelector('.btn-inactive');
+
+            const update = () => {
+                const current = this._value[key] || { active: false, inactive: false };
+                current.active = btnActive.classList.contains('active');
+                current.inactive = btnInactive.classList.contains('active');
+                this._value = { ...this._value, [key]: current };
+                this.dispatchEvent(
+                    new CustomEvent('value-changed', { detail: { value: this._value }, bubbles: true, composed: true })
+                );
+            };
+
+            btnActive.addEventListener('click', (e) => {
+                btnActive.classList.toggle('active');
+                update();
+            });
+            btnInactive.addEventListener('click', (e) => {
+                btnInactive.classList.toggle('active');
+                update();
+            });
+        });
     }
 }
 
 customElements.define('nanoleaf-effect-card-editor', NanoleafEffectCardEditor);
+customElements.define('nanoleaf-effect-button-style', NanoleafEffectButtonStyle);
