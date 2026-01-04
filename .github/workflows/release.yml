@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Update version in files
+      run: |
+        # Update package.json
+        npm version ${{ steps.get_version.outputs.VERSION }} --no-git-tag-version
+        
+        # Update version in card.js
+        sed -i "s/v0.0.0/v${{ steps.get_version.outputs.VERSION }}/g" card.js
+
+    - name: Create release artifact
+      run: |
+        zip -r nanoleaf-effect-card-${{ steps.get_version.outputs.VERSION }}.zip \
+          card.js \
+          card-editor.js \
+          README.md \
+          LICENSE \
+          hacs.json
+
+    - name: Upload release artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./nanoleaf-effect-card-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_name: nanoleaf-effect-card-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_content_type: application/zip
+
