@@ -201,6 +201,14 @@ If you encounter any issues or have suggestions, please [open an issue](https://
 
 MIT License - see LICENSE file for details
 
+## Developer Documentation
+
+For developers and maintainers, additional documentation is available in the `ai/` folder:
+
+-   **ai/STATUS.md** - Complete project status report
+-   **ai/QUICK-REFERENCE.md** - Developer quick reference
+-   **ai/README.md** - Index of all AI documentation
+
 ## Credits
 
 Inspired by the excellent `rgb-light-card` and other Home Assistant custom cards.
