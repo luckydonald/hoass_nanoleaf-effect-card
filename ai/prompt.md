@@ -126,17 +126,18 @@ The "Add Effect" is not showing any label.
 
 —————
 
-Make the way the color(s) are displayed in the button configurable as radio buttons:
+Make the way the color(s) are displayed in the button configurable:
 
--   "Full Background"
--   "Small Bar" (a small color bar below the icon and name shows the gradient instead of the whole button background)
+There should be the following styles:
+
+-   "Full Background" (the whole button background shows the gradient)
+-   "Small Bar" (a small color bar below the icon and name shows the gradient instead of the whole button background, like a rounded progress bar)
 -   "Text" (Icon and text are in the gradient colors)
 -   "Border" (The button border is in the gradient colors)
--   "None"
-    ("Full Background" is the current implementation)
-
-Additionally, add the following toggles:
-
--   "Always show colors" (show the colors even if the effect is not active, otherwise only show colors when the effect is active)"
 -   "Animated Icon" (have the icon cycles through colors instead of the whole button background)
--   "Always animate icon" (animate the icon even if the effect is not active, otherwise only animate when the effect is active)
+
+For each of those styles, you can set "Off", "Active", "Inactive", or "Both". (config: just a combination of those 2 booleans)
+Probably that'd be a component on it's own, e.g. `<nanoleaf-effect-button-style>` which generates those 4 options, by toggling "Active" and "Inactive" buttons.
+Styled similarly to a bootstrap button group, with the 2 options next to each other, and toggling them on/off by clicking.
+
+That way you can e.g. have the "Full Background" style only for the active effect, while inactive effects get the bar, and always the animated icon (add that to the example config yaml, too)
