@@ -98,7 +98,14 @@ The Markdown files.
 And importantly, everything related to deployment and build pipelines, in docs, scripts and other files which just used `card.js` before.
 Make sure `card-editor.js` can be served by the webserver after installing. Check that it is in the release, build steps, hacs defintion, web server config or whatever needed. The previous `card.js` works fine.
 
-
 —————
 
 Somewhere in the file split to `card-editor.js`, the `card.js` element broke, it is no longer displaying anything.
+
+—————
+
+Fix the editor input not loading the existing config when editing an existing card.
+Additionally, when typing in the effect-name-input it seems to reset the other fields, also it unfocuses the text input.
+Probably because of re-rendering the whole input section on every change.
+The icon also needs to be set twice to show up.
+When typing in the e
