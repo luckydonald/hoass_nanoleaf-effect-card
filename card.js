@@ -367,6 +367,10 @@ class NanoleafEffectCard extends HTMLElement {
         return luminance > 0.5 ? '#000000' : '#FFFFFF';
     }
 
+    /**
+     * Attaches event listeners to interactive elements.
+     * Called after render() to set up button/dropdown interactions.
+     */
     attachEventListeners() {
         if (this._config.display === 'dropdown') {
             const dropdown = this.shadowRoot.querySelector('.effect-dropdown');
@@ -384,6 +388,13 @@ class NanoleafEffectCard extends HTMLElement {
         }
     }
 
+    /**
+     * Handles effect selection from user interaction.
+     * Calls Home Assistant services to turn light on/off or change effect.
+     * Validates effect against entity's effect_list before applying.
+     *
+     * @param {string} effectName - Name of the selected effect, or 'Off' to turn off
+     */
     handleEffectSelect(effectName) {
         if (!this._hass) return;
 
@@ -416,11 +427,27 @@ class NanoleafEffectCard extends HTMLElement {
         }
     }
 
+    /**
+     * Returns the configuration editor element.
+     * Dynamically imports card-editor.js and returns the editor custom element.
+     * Called by Home Assistant when user clicks "Edit" on the card.
+     *
+     * @static
+     * @async
+     * @returns {Promise<HTMLElement>} The editor element
+     */
     static async getConfigElement() {
         await import('./card-editor.js');
         return document.createElement('nanoleaf-effect-card-editor');
     }
 
+    /**
+     * Returns stub configuration for the card.
+     * Used by Home Assistant visual editor to provide initial config.
+     *
+     * @static
+     * @returns {Object} Default configuration object
+     */
     static getStubConfig() {
         return {
             entity: '',
