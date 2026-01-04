@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-   Visual editor now works correctly - bundled editor code directly into card.js to fix "setConfig is not a function" error
+-   HACS installation instructions now use correct "Dashboard" category instead of "Lovelace"
+
+### Changed
+
+-   Editor code is now bundled in card.js instead of dynamically imported from card-editor.js
+-   card-editor.js kept as reference file for development
+
 ### Added
 
 -   Initial release of Nanoleaf Effect Card
