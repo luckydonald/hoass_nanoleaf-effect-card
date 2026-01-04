@@ -61,3 +61,10 @@ entities:
                 - '#4B0082'
                 - '#2F4F4F'
 ```
+
+———————
+
+For the demo.html, generate a polyfill for `<ha-icon icon="mdi:weather-sunset-up"></ha-icon>` and similar.
+
+Just embed those dynamically - for that one the url would be:
+`https://mdi.bessarabov.com/img/icon/w/e/weather-sunset-up.svg`. The /w/e/ are the first two characters of the icon name.
