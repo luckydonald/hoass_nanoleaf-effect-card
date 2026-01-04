@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nanoleaf Effect Card - Demo</title>
+    <style>
+        :root {
+            --primary-color: #03a9f4;
+            --rgb-primary-color: 3, 169, 244;
+            --primary-text-color: #212121;
+            --secondary-text-color: #727272;
+            --divider-color: #e0e0e0;
+            --card-background-color: #ffffff;
+            --code-editor-background-color: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .demo-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--primary-text-color);
+        }
+
+        ha-card {
+            display: block;
+            background: var(--card-background-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        ha-icon {
+            display: inline-flex;
+        }
+
+        .info {
+            background: #e3f2fd;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Nanoleaf Effect Card Demo</h1>
+
+        <div class="info">
+            <h3>Demo Mode</h3>
+            <p>This is a standalone demo with mock Home Assistant data.</p>
+            <p>In actual use, this card integrates with Home Assistant and controls real Nanoleaf devices.</p>
+        </div>
+
+        <div class="demo-card">
+            <div class="demo-title">Button Layout Example</div>
+            <nanoleaf-effect-card id="demo-buttons"></nanoleaf-effect-card>
+        </div>
+
+        <div class="demo-card">
+            <div class="demo-title">Dropdown Layout Example</div>
+            <nanoleaf-effect-card id="demo-dropdown"></nanoleaf-effect-card>
+        </div>
+
+        <div class="demo-card">
+            <div class="demo-title">Icon-Only Buttons</div>
+            <nanoleaf-effect-card id="demo-icons-only"></nanoleaf-effect-card>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the card
+        import './card.js';
+
+        // Mock Home Assistant
+        const mockHass = {
+            states: {
+                'light.demo_nanoleaf': {
+                    entity_id: 'light.demo_nanoleaf',
+                    state: 'on',
+                    attributes: {
+                        effect: 'Rainbow',
+                        effect_list: ['Rainbow', 'Sunrise', 'Party', 'Relax', 'Ocean', 'Fire', 'Forest', 'Nightlight']
+                    }
+                }
+            },
+            callService: (domain, service, data) => {
+                console.log(`Mock service call: ${domain}.${service}`, data);
+
+                // Simulate state change
+                const entity = mockHass.states[data.entity_id];
+                if (service === 'turn_off') {
+                    entity.state = 'off';
+                    delete entity.attributes.effect;
+                } else if (service === 'turn_on') {
+                    entity.state = 'on';
+                    if (data.effect) {
+                        entity.attributes.effect = data.effect;
+                    }
+                }
+
+                // Update all cards
+                updateCards();
+            }
+        };
+
+        // Configuration for button layout
+        const buttonConfig = {
+            entity: 'light.demo_nanoleaf',
+            display: 'buttons',
+            effects: [
+                { name: 'Rainbow', icon: 'mdi:rainbow', colors: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3'] },
+                { name: 'Sunrise', icon: 'mdi:weather-sunset-up', colors: ['#FFA500', '#FFFF00', '#FF4500'] },
+                { name: 'Party', icon: 'mdi:party-popper', colors: ['#FF0000', '#00FF00', '#0000FF'] },
+                { name: 'Relax', icon: 'mdi:spa', colors: ['#ADD8E6', '#90EE90', '#FFB6C1'] },
+                { name: 'Ocean', icon: 'mdi:waves', colors: ['#006994', '#0099CC', '#66CCFF'] },
+                { name: 'Fire', icon: 'mdi:fire', colors: ['#FF4500', '#FF6347', '#FF8C00'] },
+                { name: 'Forest', icon: 'mdi:tree', colors: ['#228B22', '#32CD32', '#90EE90'] },
+                { name: 'Nightlight', icon: 'mdi:weather-night', colors: ['#00008B', '#4B0082', '#2F4F4F'] }
+            ]
+        };
+
+        // Configuration for dropdown layout
+        const dropdownConfig = {
+            entity: 'light.demo_nanoleaf',
+            display: 'dropdown',
+            effects: buttonConfig.effects
+        };
+
+        // Configuration for icon-only buttons
+        const iconOnlyConfig = {
+            entity: 'light.demo_nanoleaf',
+            display: 'buttons',
+            button_style: {
+                icon: true,
+                name: false
+            },
+            effects: buttonConfig.effects.slice(0, 6)
+        };
+
+        // Initialize cards
+        const buttonCard = document.getElementById('demo-buttons');
+        const dropdownCard = document.getElementById('demo-dropdown');
+        const iconOnlyCard = document.getElementById('demo-icons-only');
+
+        buttonCard.setConfig(buttonConfig);
+        dropdownCard.setConfig(dropdownConfig);
+        iconOnlyCard.setConfig(iconOnlyConfig);
+
+        // Set hass for all cards
+        function updateCards() {
+            buttonCard.hass = mockHass;
+            dropdownCard.hass = mockHass;
+            iconOnlyCard.hass = mockHass;
+        }
+
+        updateCards();
+
+        console.log('%c Nanoleaf Effect Card Demo Loaded ', 'background: #03a9f4; color: white; font-weight: bold; padding: 4px 8px;');
+        console.log('Click any effect to see mock service calls in the console.');
+    </script>
+</body>
+</html>
+
