@@ -190,7 +190,7 @@ HACS references card.js, which loads card-editor.js dynamically.
 
 ### New Documentation Files
 
-#### ARCHITECTURE.md ✅
+#### ai/ARCHITECTURE.md ✅
 
 **Created**: Comprehensive architecture documentation
 
@@ -206,7 +206,7 @@ HACS references card.js, which loads card-editor.js dynamically.
 -   Performance metrics
 -   Troubleshooting guide
 
-**Location**: Root (user-facing technical doc)
+**Location**: ai/ folder (developer/technical documentation)
 
 ---
 
@@ -382,7 +382,7 @@ HACS references card.js, which loads card-editor.js dynamically.
 -   [README.md](../README.md) - Main documentation
 -   [QUICKSTART.md](../QUICKSTART.md) - Quick start guide
 -   [info.md](../info.md) - HACS info page
--   [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture
+-   [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture (in ai/)
 
 ### Developer Documentation
 
