@@ -4,7 +4,6 @@ about: Suggest an idea for this project
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
-
 ---
 
 **Is your feature request related to a problem? Please describe.**
@@ -21,6 +20,7 @@ Describe how this feature would be used and who would benefit from it.
 
 **Example Configuration**
 If applicable, provide an example of how you envision this feature being configured:
+
 ```yaml
 type: 'custom:nanoleaf-effect-card'
 entity: light.nanoleaf_shapes
@@ -29,4 +29,3 @@ entity: light.nanoleaf_shapes
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
-

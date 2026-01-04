@@ -39,60 +39,68 @@ hoass_nanoleaf-effect-card/
 ## 🎯 Key Files
 
 ### Core Implementation
-- **card.js** - Main custom element implementing the Nanoleaf effect card
-- **card-editor.js** - Visual configuration editor for the card
-- **hacs.json** - HACS integration configuration
+
+-   **card.js** - Main custom element implementing the Nanoleaf effect card
+-   **card-editor.js** - Visual configuration editor for the card
+-   **hacs.json** - HACS integration configuration
 
 ### Documentation
-- **README.md** - Complete documentation with features, configuration, and troubleshooting
-- **QUICKSTART.md** - Step-by-step setup guide
-- **examples.md** - Various configuration examples
-- **info.md** - HACS repository information page
+
+-   **README.md** - Complete documentation with features, configuration, and troubleshooting
+-   **QUICKSTART.md** - Step-by-step setup guide
+-   **examples.md** - Various configuration examples
+-   **info.md** - HACS repository information page
 
 ### Development
-- **card.test.js** - Unit tests with Vitest
-- **vitest.config.js** - Test runner configuration
-- **demo.html** - Standalone demo for local testing
-- **package.json** - Dependencies and scripts
+
+-   **card.test.js** - Unit tests with Vitest
+-   **vitest.config.js** - Test runner configuration
+-   **demo.html** - Standalone demo for local testing
+-   **package.json** - Dependencies and scripts
 
 ## 🚀 Features Implemented
 
 ### Display Modes
-- ✅ Button grid layout
-- ✅ Dropdown compact layout
-- ✅ Responsive design
+
+-   ✅ Button grid layout
+-   ✅ Dropdown compact layout
+-   ✅ Responsive design
 
 ### Visual Features
-- ✅ Single color effects
-- ✅ Multi-color gradient effects
-- ✅ Color cycling animation for active effects
-- ✅ Custom MDI icons per effect
-- ✅ Automatic text contrast calculation
-- ✅ "Off" button/option
+
+-   ✅ Single color effects
+-   ✅ Multi-color gradient effects
+-   ✅ Color cycling animation for active effects
+-   ✅ Custom MDI icons per effect
+-   ✅ Automatic text contrast calculation
+-   ✅ "Off" button/option
 
 ### Customization
-- ✅ Global button styling
-- ✅ Per-effect button styling
-- ✅ Show/hide icons
-- ✅ Show/hide effect names
-- ✅ Custom inactive colors
+
+-   ✅ Global button styling
+-   ✅ Per-effect button styling
+-   ✅ Show/hide icons
+-   ✅ Show/hide effect names
+-   ✅ Custom inactive colors
 
 ### Integration
-- ✅ Works in Entities cards
-- ✅ Works as Tile card features
-- ✅ HACS compatible
-- ✅ Visual editor support
-- ✅ Entity validation
-- ✅ Effect list validation
+
+-   ✅ Works in Entities cards
+-   ✅ Works as Tile card features
+-   ✅ HACS compatible
+-   ✅ Visual editor support
+-   ✅ Entity validation
+-   ✅ Effect list validation
 
 ### Developer Experience
-- ✅ Unit tests
-- ✅ CI/CD workflows
-- ✅ Code formatting (Prettier)
-- ✅ Git hooks (Husky)
-- ✅ Comprehensive documentation
-- ✅ Issue templates
-- ✅ Contributing guidelines
+
+-   ✅ Unit tests
+-   ✅ CI/CD workflows
+-   ✅ Code formatting (Prettier)
+-   ✅ Git hooks (Husky)
+-   ✅ Comprehensive documentation
+-   ✅ Issue templates
+-   ✅ Contributing guidelines
 
 ## 📦 NPM Scripts
 
@@ -109,6 +117,7 @@ npm run ngrok        # Expose dev server via ngrok
 ## 🧪 Testing
 
 Run the demo locally:
+
 ```bash
 npm install
 npm run dev
@@ -116,12 +125,13 @@ npm run dev
 ```
 
 Test in Home Assistant:
+
 1. Add resource pointing to dev server:
-   ```yaml
-   resources:
-     - url: http://YOUR_IP:3000/card.js
-       type: module
-   ```
+    ```yaml
+    resources:
+        - url: http://YOUR_IP:3000/card.js
+          type: module
+    ```
 2. Add card to dashboard
 3. Test effects and display modes
 
@@ -141,39 +151,40 @@ type: 'custom:nanoleaf-effect-card'
 entity: light.nanoleaf_shapes
 display: buttons
 button_style:
-  inactive_color: '#CCCCCC'
-  icon: true
-  name: true
+    inactive_color: '#CCCCCC'
+    icon: true
+    name: true
 effects:
-  - name: 'Rainbow'
-    icon: 'mdi:rainbow'
-    colors:
-      - '#FF0000'
-      - '#FFFF00'
-      - '#00FF00'
-      - '#0000FF'
-  - name: 'Sunrise'
-    icon: 'mdi:weather-sunset-up'
-    colors:
-      - '#FFA500'
-      - '#FFFF00'
+    - name: 'Rainbow'
+      icon: 'mdi:rainbow'
+      colors:
+          - '#FF0000'
+          - '#FFFF00'
+          - '#00FF00'
+          - '#0000FF'
+    - name: 'Sunrise'
+      icon: 'mdi:weather-sunset-up'
+      colors:
+          - '#FFA500'
+          - '#FFFF00'
 ```
 
 ## 🎨 Design Philosophy
 
-- **User-Friendly**: Visual effect selection with icons and colors
-- **Flexible**: Multiple display modes and customization options
-- **Performant**: CSS animations, no polling, efficient rendering
-- **Maintainable**: Well-documented, tested, follows best practices
-- **Accessible**: Proper contrast, keyboard navigation support
+-   **User-Friendly**: Visual effect selection with icons and colors
+-   **Flexible**: Multiple display modes and customization options
+-   **Performant**: CSS animations, no polling, efficient rendering
+-   **Maintainable**: Well-documented, tested, follows best practices
+-   **Accessible**: Proper contrast, keyboard navigation support
 
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Development setup
-- Code style guidelines
-- Testing requirements
-- PR process
+
+-   Development setup
+-   Code style guidelines
+-   Testing requirements
+-   PR process
 
 ## 📄 License
 
@@ -181,13 +192,12 @@ MIT License - See [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- Repository: https://github.com/luckydonald/hoass_nanoleaf-effect-card
-- Issues: https://github.com/luckydonald/hoass_nanoleaf-effect-card/issues
-- HACS: Compatible with Home Assistant Community Store
+-   Repository: https://github.com/luckydonald/hoass_nanoleaf-effect-card
+-   Issues: https://github.com/luckydonald/hoass_nanoleaf-effect-card/issues
+-   HACS: Compatible with Home Assistant Community Store
 
 ---
 
 **Version**: 0.0.0 (Initial Release)
 **Status**: Ready for initial release
 **Last Updated**: January 4, 2026
-
