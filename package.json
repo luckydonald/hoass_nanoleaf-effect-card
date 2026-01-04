@@ -1,0 +1,49 @@
+{
+    "name": "rgb-light-card",
+    "description": "A Home Assistant card for setting effets of Nanoleaf Panels",
+    "version": "0.0.0",
+    "author": "luckydonald",
+    "bugs": "https://github.com/luckydonald/hoass_nanoleaf-effect-card/issues",
+    "scripts": {
+        "dev": "serve --cors .",
+        "serve": "serve --cors .",
+        "ngrok": "ngrok http http://localhost:3000",
+        "prettier": "prettier --write --ignore-path .gitignore .",
+        "check-prettier": "prettier --check --ignore-path .gitignore . ",
+        "test": "vitest run",
+        "coverage": "vitest run --coverage",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "@bokub/prettier-config": "^1.1.0",
+        "@vitest/coverage-v8": "^2.0.5",
+        "browser-env": "^3.3.0",
+        "husky": "^9.1.6",
+        "lint-staged": "^15.2.10",
+        "prettier": "^2.2.1",
+        "serve": "^14.2.3",
+        "vitest": "^2.0.5",
+        "yamljs": "^0.3.0"
+    },
+    "files": [
+        "card.js"
+    ],
+    "homepage": "https://github.com/luckydonald/hoass_nanoleaf-effect-card",
+    "keywords": [
+        "automation",
+        "custom-cards",
+        "hass",
+        "home-assistant",
+        "homeassistant",
+        "nanoleaf",
+        "light",
+        "effects"
+    ],
+    "license": "MIT",
+    "main": "card.js",
+    "prettier": "@bokub/prettier-config",
+    "repository": "luckydonald/hoass_nanoleaf-effect-card",
+    "lint-staged": {
+        "*": "prettier --write --ignore-unknown"
+    }
+}
