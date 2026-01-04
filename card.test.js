@@ -1,15 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { JSDOM } from 'jsdom';
 
 // Setup DOM environment
-const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+const dom = new JSDOM('<!DOCTYPE html><html lang="en"><body></body></html>');
 global.document = dom.window.document;
 global.window = dom.window;
 global.HTMLElement = dom.window.HTMLElement;
 global.customElements = dom.window.customElements;
 
 // Import the card after setting up the DOM so customElements are registered
-import './card.js';
+beforeAll(async () => {
+    await import('./card.js');
+});
 
 describe('NanoleafEffectCard', () => {
     let card;
