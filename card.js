@@ -107,6 +107,12 @@ class NanoleafEffectCard extends HTMLElement {
 
       @keyframes hueRotate { 0% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(180deg); } 100% { filter: hue-rotate(360deg); } }
 
+      /* Hover-based styles applied by data attributes */
+      button[data-hover-border="true"]:hover { border: 2px solid transparent; border-image: inherit; }
+      button[data-hover-full_background="true"]:hover { background: var(--hover-bg, inherit); }
+      button[data-hover-text="true"]:hover .button-name, button[data-hover-text="true"]:hover .button-icon { background: var(--hover-bg, inherit); -webkit-background-clip: text; color: transparent; }
+      button[data-hover-small_bar="true"]:hover .color-bar { opacity: 1; }
+
       ha-icon { --mdc-icon-size: 24px; }
     `;
     }
@@ -160,6 +166,11 @@ class NanoleafEffectCard extends HTMLElement {
                       return (isActive && cfg.active) || (!isActive && cfg.inactive);
                   };
 
+                  const applyHover = (styleKey) => {
+                      const cfg = colorDisplay[styleKey] || {};
+                      return cfg.hover === true;
+                  };
+
                   const bgGradient = `linear-gradient(135deg, ${colors.join(', ')})`;
                   const bgColor = isActive ? colors[0] : inactiveColor;
 
@@ -175,11 +186,21 @@ class NanoleafEffectCard extends HTMLElement {
                       : '';
                   const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
+                  // hover data attrs
+                  const hoverAttrs = [];
+                  if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
+                  if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
+                  if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
+                  if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
+
                   return `
               <button 
                 class="effect-button ${isActive ? 'active' : 'inactive'}" 
                 data-effect="${effect.name}"
-                style="${fullBg} ${borderStyle} color: ${this.getContrastColor(colors[0] || inactiveColor)};"
+                ${hoverAttrs.join(' ')}
+                style="${fullBg} ${borderStyle} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
+                      colors[0] || inactiveColor
+                  )};"
               >
                 <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
                 ${
@@ -200,7 +221,9 @@ class NanoleafEffectCard extends HTMLElement {
                 }
                 ${
                     applyStyle('small_bar')
-                        ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient};"></div>`
+                        ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${
+                              applyHover('small_bar') ? 0.6 : 1
+                          };"></div>`
                         : ''
                 }
                 </div>
