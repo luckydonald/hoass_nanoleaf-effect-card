@@ -93,4 +93,6 @@ static async getConfigElement() {
 }
 ```
 
+Also update the documentation for now having both `card.js` and `card-editor.js`.
+
 as before.
