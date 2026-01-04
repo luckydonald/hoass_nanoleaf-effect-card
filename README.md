@@ -132,6 +132,70 @@ effects:
           - '#2F4F4F'
 ```
 
+### Color display presets (new)
+
+You can control how effect colors are displayed using `button_style.color_display`. Each style is an object with booleans for `active`, `inactive`, and `hover`.
+
+Example:
+
+```yaml
+type: 'custom:nanoleaf-effect-card'
+entity: light.nanoleaf_shapes
+button_style:
+    inactive_color: '#CCCCCC'
+    icon: true
+    name: true
+    color_display:
+        full_background:
+            active: true
+            inactive: false
+            hover: false
+        small_bar:
+            active: false
+            inactive: true
+            hover: false
+        text:
+            active: false
+            inactive: false
+            hover: true
+        border:
+            active: false
+            inactive: false
+            hover: true
+        animated_icon:
+            active: true
+            inactive: false
+            hover: false
+effects:
+    - name: 'Rainbow'
+      icon: 'mdi:looks'
+      colors: ['#FF0000', '#FF7F00', '#FFFF00']
+      button_style:
+          color_display:
+              full_background:
+                  active: true
+                  inactive: false
+                  hover: false
+              small_bar:
+                  active: false
+                  inactive: true
+                  hover: false
+```
+
+Editor component
+
+The visual editor includes a new style chooser component exposed as `<nanoleaf-effect-card-card-editor-button-style-chooser>` which is used in the global Button Style area and per-effect within the editor. It allows toggling Active/Inactive/Hover for each style.
+
+Local development
+
+Prefer `yarn` for local development and testing:
+
+```bash
+yarn install
+yarn serve
+yarn test
+```
+
 ## Configuration Options
 
 | Option                        | Type    | Required | Default   | Description                           |

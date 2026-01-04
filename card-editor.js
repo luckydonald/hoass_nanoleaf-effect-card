@@ -300,6 +300,12 @@ class NanoleafEffectCardEditor extends HTMLElement {
           </ha-formfield>
         </div>
 
+        <div class="setting">
+          <label>Color Display Styles</label>
+          <nanoleaf-effect-card-card-editor-button-style-chooser id="global-style-chooser" compact></nanoleaf-effect-card-card-editor-button-style-chooser>
+          <div class="info">Configure how colors are displayed for active/inactive/hover states</div>
+        </div>
+
         <div class="section-title">Effects</div>
         <div class="info" style="margin-bottom: 8px;">
           Configure effects that match your Nanoleaf's effect list.
@@ -320,6 +326,72 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // After injecting HTML, attach listeners and set proper element properties
         this.attachEventListeners();
+
+        // Initialize element properties that can't be set via innerHTML
+        const entityPicker = this.shadowRoot.querySelector('#entity-picker');
+        if (entityPicker) {
+            entityPicker.hass = this._hass;
+            if (this._config.entity) entityPicker.value = this._config.entity;
+        }
+
+        // initialize global style chooser value
+        const globalChooser = this.shadowRoot.querySelector('#global-style-chooser');
+        if (globalChooser) {
+            try {
+                globalChooser.value = this._config.button_style?.color_display || {};
+            } catch (e) {}
+            globalChooser.addEventListener('value-changed', (e) => {
+                this._config = {
+                    ...this._config,
+                    button_style: { ...(this._config.button_style || {}), color_display: e.detail.value },
+                };
+                this.configChanged(this._config);
+            });
+        }
+
+        // Set radio checked states
+        this.shadowRoot.querySelectorAll('ha-radio').forEach((radio) => {
+            if (radio.value === (this._config.display || 'buttons')) {
+                radio.checked = true;
+            } else {
+                radio.checked = false;
+            }
+        });
+
+        // Set icon-picker values and color inputs for effects
+        this.shadowRoot.querySelectorAll('.effect-icon').forEach((picker, idx) => {
+            const val =
+                (this._config.effects && this._config.effects[idx] && this._config.effects[idx].icon) ||
+                'mdi:lightbulb';
+            try {
+                picker.value = val;
+            } catch (e) {
+                /* some environments may not expose property */
+            }
+        });
+        this.shadowRoot.querySelectorAll('.color-input').forEach((input, idx) => {
+            // color inputs already have value attribute in markup; ensure it's synced
+            const effectIndex = parseInt(input.dataset.effectIndex);
+            const colorIndex = parseInt(input.dataset.colorIndex);
+            const color =
+                this._config.effects?.[effectIndex]?.colors?.[colorIndex] ||
+                this._config.effects?.[effectIndex]?.color ||
+                '#CCCCCC';
+            input.value = color;
+        });
+
+        // Initialize per-effect style chooser components
+        this.shadowRoot
+            .querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser')
+            .forEach((comp, idx) => {
+                try {
+                    comp.value =
+                        (this._config.effects &&
+                            this._config.effects[idx] &&
+                            this._config.effects[idx].button_style?.color_display) ||
+                        {};
+                } catch (e) {}
+            });
     }
 
     /**
@@ -366,10 +438,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
               ${this.renderColorInputs(effect, index)}
             </div>
           </div>
-          <nanoleaf-effect-button-style
+          <nanoleaf-effect-card-card-editor-button-style-chooser
             class="button-style"
             .value="${effect.button_style || {}}"
-          ></nanoleaf-effect-button-style>
+          ></nanoleaf-effect-card-card-editor-button-style-chooser>
         </div>
         <div class="effect-actions">
           <button class="icon-button delete" data-index="${index}" title="Delete effect">
@@ -563,7 +635,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         });
 
         // Button style value-changed events
-        this.shadowRoot.querySelectorAll('nanoleaf-effect-button-style').forEach((comp) => {
+        this.shadowRoot.querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser').forEach((comp) => {
             comp.addEventListener('value-changed', (e) => {
                 const index = parseInt(comp.closest('.effect-item').dataset.index);
                 const effects = [...(this._config.effects || [])];
@@ -576,7 +648,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
 }
 
 // Small helper component to edit color-display styles per effect
-class NanoleafEffectButtonStyle extends HTMLElement {
+class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -607,44 +679,49 @@ class NanoleafEffectButtonStyle extends HTMLElement {
         ];
 
         this.shadowRoot.innerHTML = `
-      <style>
+       <style>
         .group { display:flex; flex-direction:column; gap:6px; }
+        .group.compact { flex-direction:row; flex-wrap:wrap; gap:12px; }
         .item { display:flex; align-items:center; gap:8px; }
+        .item.compact { flex-direction:column; align-items:flex-start; width:160px; }
         .label { width:140px; font-size:13px; color:var(--primary-text-color); }
         .toggles { display:flex; gap:8px; }
-        .toggle-btn { padding:6px 8px; border:1px solid var(--divider-color); border-radius:6px; background:transparent; cursor:pointer; font-size:12px; }
-        .toggle-btn.active { background:var(--primary-color); color:white; border-color:var(--primary-color); }
-      </style>
-      <div class="group">
-        ${styles
-            .map((s) => {
-                const cfg = v[s.key] || { active: false, inactive: false };
-                return `
-          <div class="item" data-key="${s.key}">
+         .toggle-btn { padding:6px 8px; border:1px solid var(--divider-color); border-radius:6px; background:transparent; cursor:pointer; font-size:12px; }
+         .toggle-btn.active { background:var(--primary-color); color:white; border-color:var(--primary-color); }
+       </style>
+      <div class="group ${this.hasAttribute('compact') ? 'compact' : ''}">
+         ${styles
+             .map((s) => {
+                 const cfg = v[s.key] || { active: false, inactive: false, hover: false };
+                 return `
+          <div class="item ${this.hasAttribute('compact') ? 'compact' : ''}" data-key="${s.key}">
             <div class="label">${s.label}</div>
             <div class="toggles">
               <button class="toggle-btn btn-active ${cfg.active ? 'active' : ''}" data-mode="active">Active</button>
               <button class="toggle-btn btn-inactive ${
                   cfg.inactive ? 'active' : ''
               }" data-mode="inactive">Inactive</button>
+              <button class="toggle-btn btn-hover ${cfg.hover ? 'active' : ''}" data-mode="hover">Hover</button>
             </div>
           </div>
         `;
-            })
-            .join('')}
-      </div>
-    `;
+             })
+             .join('')}
+       </div>
+     `;
 
         // Attach handlers
         this.shadowRoot.querySelectorAll('.item').forEach((item) => {
             const key = item.dataset.key;
             const btnActive = item.querySelector('.btn-active');
             const btnInactive = item.querySelector('.btn-inactive');
+            const btnHover = item.querySelector('.btn-hover');
 
             const update = () => {
                 const current = this._value[key] || { active: false, inactive: false };
                 current.active = btnActive.classList.contains('active');
                 current.inactive = btnInactive.classList.contains('active');
+                current.hover = btnHover ? btnHover.classList.contains('active') : false;
                 this._value = { ...this._value, [key]: current };
                 this.dispatchEvent(
                     new CustomEvent('value-changed', { detail: { value: this._value }, bubbles: true, composed: true })
@@ -659,9 +736,18 @@ class NanoleafEffectButtonStyle extends HTMLElement {
                 btnInactive.classList.toggle('active');
                 update();
             });
+            if (btnHover) {
+                btnHover.addEventListener('click', (e) => {
+                    btnHover.classList.toggle('active');
+                    update();
+                });
+            }
         });
     }
 }
 
 customElements.define('nanoleaf-effect-card-editor', NanoleafEffectCardEditor);
-customElements.define('nanoleaf-effect-button-style', NanoleafEffectButtonStyle);
+customElements.define(
+    'nanoleaf-effect-card-card-editor-button-style-chooser',
+    NanoleafEffectCardCardEditorButtonStyleChooser
+);
