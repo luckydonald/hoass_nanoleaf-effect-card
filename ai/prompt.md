@@ -72,3 +72,10 @@ Just embed those dynamically - for that one the url would be:
 ————————
 
 Please put all summaries and such you wanna write for me into the `ai/` subfolder.
+
+————————
+
+Can you use the normal native entity picker? Probably `<ha-entity-picker id="input" allow-custom-entity add-button></ha-entity-picker>`
+And a normal toggle instead of the display mode dropdown? So, <ha-formfield> and then <ha-radio>?
+
+For effects there should be a sub editor to set those values natively, instead of with raw html. (or yaml), this tag list like thing where you can reorder, too.
