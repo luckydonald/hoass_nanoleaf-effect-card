@@ -5,36 +5,40 @@ Thank you for considering contributing to the Nanoleaf Effect Card! Here are som
 ## Development Setup
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/luckydonald/hoass_nanoleaf-effect-card.git
-   cd hoass_nanoleaf-effect-card
-   ```
+
+    ```bash
+    git clone https://github.com/luckydonald/hoass_nanoleaf-effect-card.git
+    cd hoass_nanoleaf-effect-card
+    ```
 
 2. **Install dependencies**
-   ```bash
-   yarn install
-   ```
+
+    ```bash
+    yarn install
+    ```
 
 3. **Start development server**
-   ```bash
-   yarn dev
-   ```
-   This will start a local server on port 3000.
+
+    ```bash
+    yarn dev
+    ```
+
+    This will start a local server on port 3000.
 
 4. **Configure Home Assistant**
    Add the development resource to your Lovelace configuration:
-   ```yaml
-   resources:
-     - url: http://localhost:3000/card.js
-       type: module
-   ```
+    ```yaml
+    resources:
+        - url: http://localhost:3000/card.js
+          type: module
+    ```
 
 ## Code Style
 
-- Use consistent indentation (2 spaces)
-- Follow existing code patterns
-- Add comments for complex logic
-- Use meaningful variable names
+-   Use consistent indentation (2 spaces)
+-   Follow existing code patterns
+-   Add comments for complex logic
+-   Use meaningful variable names
 
 ## Testing
 
@@ -47,16 +51,19 @@ Before submitting a PR:
 5. Check console for errors
 
 Run tests:
+
 ```bash
 npm test
 ```
 
 Check code formatting:
+
 ```bash
 npm run check-prettier
 ```
 
 Auto-format code:
+
 ```bash
 npm run prettier
 ```
@@ -71,41 +78,40 @@ npm run prettier
 
 ### Pull Request Guidelines
 
-- Provide a clear description of the changes
-- Reference any related issues
-- Include screenshots for UI changes
-- Ensure tests pass
-- Update documentation if needed
+-   Provide a clear description of the changes
+-   Reference any related issues
+-   Include screenshots for UI changes
+-   Ensure tests pass
+-   Update documentation if needed
 
 ## Reporting Issues
 
 When reporting issues, please include:
 
-- Home Assistant version
-- Browser and version
-- Card configuration (sanitized)
-- Console errors (if any)
-- Steps to reproduce
+-   Home Assistant version
+-   Browser and version
+-   Card configuration (sanitized)
+-   Console errors (if any)
+-   Steps to reproduce
 
 ## Feature Requests
 
 Feature requests are welcome! Please:
 
-- Check if the feature already exists
-- Describe the use case clearly
-- Explain how it benefits users
-- Consider implementation complexity
+-   Check if the feature already exists
+-   Describe the use case clearly
+-   Explain how it benefits users
+-   Consider implementation complexity
 
 ## Code of Conduct
 
-- Be respectful and inclusive
-- Provide constructive feedback
-- Help others learn and grow
-- Focus on what's best for the community
+-   Be respectful and inclusive
+-   Provide constructive feedback
+-   Help others learn and grow
+-   Focus on what's best for the community
 
 ## Questions?
 
 Feel free to open an issue for questions or join the discussion in existing issues.
 
 Thank you for contributing! 🎨
-
