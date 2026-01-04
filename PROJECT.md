@@ -40,8 +40,8 @@ hoass_nanoleaf-effect-card/
 
 ### Core Implementation
 
--   **card.js** - Main custom element implementing the Nanoleaf effect card
--   **card-editor.js** - Visual configuration editor for the card
+-   **card.js** - Main custom element implementing the Nanoleaf effect card (includes visual editor)
+-   **card-editor.js** - Standalone editor source (for reference; editor is bundled in card.js)
 -   **hacs.json** - HACS integration configuration
 
 ### Documentation

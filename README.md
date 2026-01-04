@@ -7,12 +7,13 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 
 ## Features
 
--   🎨 **Visual Effect Selection**: Choose from your configured Nanoleaf effects
--   🔘 **Two Display Modes**: Dropdown or button grid layout
--   🌈 **Color Animation**: Effects can cycle through multiple colors
--   🎭 **Custom Icons**: Assign unique icons to each effect
--   ⚡ **Quick Access**: Turn lights on/off with effect selection
--   📱 **Responsive Design**: Works in Entities cards and Tile card features
+- 🎨 **Visual Effect Selection**: Choose from your configured Nanoleaf effects
+- 🔘 **Two Display Modes**: Dropdown or button grid layout
+- 🌈 **Color Animation**: Effects can cycle through multiple colors
+- 🎭 **Custom Icons**: Assign unique icons to each effect
+- ⚡ **Quick Access**: Turn lights on/off with effect selection
+- 📱 **Responsive Design**: Works in Entities cards and Tile card features
+- 🖊️ **Visual Editor**: Built-in UI editor
 
 ## Installation
 
