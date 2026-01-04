@@ -377,6 +377,14 @@ class NanoleafEffectCardEditor extends HTMLElement {
             .join('');
     }
 
+    /**
+     * Renders color inputs for an effect.
+     * Creates color picker inputs and an "add color" button.
+     *
+     * @param {Object} effect - Effect configuration object
+     * @param {number} effectIndex - Index of the effect in the effects array
+     * @returns {string} HTML string for color inputs
+     */
     renderColorInputs(effect, effectIndex) {
         const colors = effect.colors || (effect.color ? [effect.color] : ['#CCCCCC']);
         const colorInputs = colors
@@ -404,6 +412,11 @@ class NanoleafEffectCardEditor extends HTMLElement {
         );
     }
 
+    /**
+     * Attaches event listeners to all interactive elements.
+     * Sets up handlers for entity picker, radios, switches, buttons, and ha-sortable.
+     * Called after render() completes.
+     */
     attachEventListeners() {
         // Entity picker
         const entityPicker = this.shadowRoot.querySelector('#entity-picker');
