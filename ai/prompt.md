@@ -97,3 +97,8 @@ Also update the documentation for now having both `card.js` and `card-editor.js`
 The Markdown files.
 And importantly, everything related to deployment and build pipelines, in docs, scripts and other files which just used `card.js` before.
 Make sure `card-editor.js` can be served by the webserver after installing. Check that it is in the release, build steps, hacs defintion, web server config or whatever needed. The previous `card.js` works fine.
+
+
+—————
+
+Somewhere in the file split to `card-editor.js`, the `card.js` element broke, it is no longer displaying anything.
