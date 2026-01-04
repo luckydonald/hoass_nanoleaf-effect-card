@@ -77,6 +77,11 @@ Just embed those dynamically - for that one the url would be:
 
 Please put all summaries and such you wanna write for me into the `ai/` subfolder.
 
+Overwrite/update `ai/TODO.md` with the `# IN PROGRESS` headline and then a description of your current task, your planning, and any needed next steps.
+That way continuation in case of interruptions is possible.
+Change that first line to `# DONE` once finished.
+For a new task, if the old task is marked done, you shall replace the `ai/TODO.md` with the new task following that template.
+
 ————————
 
 Can you use the normal native entity picker? Probably `<ha-entity-picker id="input" allow-custom-entity add-button></ha-entity-picker>`
