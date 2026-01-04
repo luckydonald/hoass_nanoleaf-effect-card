@@ -1,7 +1,6 @@
 {
     "name": "Nanoleaf Effects Card",
     "content_in_root": true,
-    "filename": "card.js",
     "render_readme": true,
     "domains": ["light"]
 }

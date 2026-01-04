@@ -116,6 +116,15 @@ This folder contains AI-generated documentation, development notes, and summarie
 -   Code reduction details
 -   Implementation guide
 
+### 🔧 [HACS-FIX.md](HACS-FIX.md) ⭐ DEPLOYMENT FIX
+
+**HACS deployment fix for card-editor.js**
+
+-   Problem: card-editor.js not deployed by HACS
+-   Solution: Removed filename field from hacs.json
+-   Impact: Both files now deployed automatically
+-   Verification steps included
+
 ---
 
 ## 🗂️ Document Organization

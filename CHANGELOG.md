@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+-   **HACS deployment now includes card-editor.js** - Removed `filename` field from hacs.json to deploy all JS files
 -   HACS installation instructions now use correct "Dashboard" category instead of "Lovelace"
 
 ### Changed
