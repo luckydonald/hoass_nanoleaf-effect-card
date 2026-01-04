@@ -1,6 +1,6 @@
 {
-    "name": "rgb-light-card",
-    "description": "A Home Assistant card for setting effets of Nanoleaf Panels",
+    "name": "nanoleaf-effect-card",
+    "description": "A Home Assistant card for setting effects of Nanoleaf Panels",
     "version": "0.0.0",
     "author": "luckydonald",
     "bugs": "https://github.com/luckydonald/hoass_nanoleaf-effect-card/issues",
