@@ -18,13 +18,14 @@ Get your Nanoleaf Effect Card up and running in minutes!
 ### Manual Installation
 
 1. Download `card.js` and `card-editor.js` from the [latest release](https://github.com/luckydonald/hoass_nanoleaf-effect-card/releases)
-2. Copy to `config/www/nanoleaf-effect-card/card`(`-editor`)`.js`
+2. Copy both files to `config/www/nanoleaf-effect-card.js` and `config/www/nanoleaf-effect-card-editor.js`
 3. Add to Lovelace resources:
     ```yaml
     resources:
         - url: /local/nanoleaf-effect-card.js
           type: module
     ```
+    Note: Only add `card.js` to resources. The editor is loaded automatically.
 4. Restart Home Assistant
 
 ## Basic Setup
@@ -129,8 +130,10 @@ entities:
 
 1. Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)
 2. Check browser console for errors (F12)
-3. Verify the resource was added correctly
-4. Make sure you restarted Home Assistant
+3. Verify both `card.js` and `card-editor.js` were copied correctly
+4. Verify the resource was added correctly (only `card.js` in resources)
+5. Make sure you restarted Home Assistant
+6. Check that card.js contains both the card code and the dynamic import
 
 ### Effects don't activate
 

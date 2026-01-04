@@ -29,6 +29,12 @@ effects:
 -   **Buttons**: Visual grid of effect buttons with icons and colors
 -   **Dropdown**: Compact dropdown menu for space-saving
 
+### 🖊️ Visual Editor
+
+-   **GUI Configuration**: Full visual editor using native HA components
+-   **No YAML Required**: Configure everything through the UI
+-   **On-Demand Loading**: Editor loaded automatically when needed (from card-editor.js)
+
 ### 🌈 Rich Visual Feedback
 
 -   Single or multi-color gradients per effect

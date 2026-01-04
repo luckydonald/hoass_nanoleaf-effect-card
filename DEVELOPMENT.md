@@ -29,18 +29,20 @@ resources:
       type: module
 ```
 
+The editor (`card-editor.js`) will be loaded automatically via dynamic import when you click "Edit Card".
+
 #### Option 2: Direct File
 
-1. Copy `card.js` and `card-editor.js` to `config/www/`
-2. Add resource:
+1. Copy both `card.js` and `card-editor.js` to `config/www/`
+2. Add only `card.js` to resources:
 
 ```yaml
 resources:
     - url: /local/card.js
       type: module
-    - url: /local/card-editor.js
-      type: module
 ```
+
+The editor is loaded automatically via `await import('./card-editor.js')` when needed.
 
 #### Option 3: Ngrok (Remote Testing)
 

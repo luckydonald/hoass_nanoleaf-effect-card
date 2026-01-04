@@ -31,14 +31,15 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 
 ### Manual Installation
 
-1. Download the `card.js` file from this repository
-2. Copy it to your `config/www/` directory
+1. Download the `card.js` and `card-editor.js` files from this repository
+2. Copy both files to your `config/www/` directory
 3. Add the following to your Lovelace resources:
     ```yaml
     resources:
         - url: /local/card.js
           type: module
     ```
+    Note: Only `card.js` needs to be added to resources. The editor (`card-editor.js`) is loaded automatically when needed.
 4. Restart Home Assistant
 
 ## Configuration

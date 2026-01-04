@@ -32,6 +32,29 @@ Thank you for considering contributing to the Nanoleaf Effect Card! Here are som
         - url: http://localhost:3000/card.js
           type: module
     ```
+    The editor (`card-editor.js`) is loaded automatically when you click "Edit Card".
+
+## Project Structure
+
+### Main Files
+
+-   **card.js** (~330 lines) - Main card implementation
+
+    -   Renders button or dropdown display
+    -   Handles effect selection
+    -   Manages colors and animations
+    -   Uses `await import('./card-editor.js')` to load editor on demand
+
+-   **card-editor.js** (~500 lines) - Visual configuration editor
+    -   Uses native HA components (ha-entity-picker, ha-sortable, etc.)
+    -   Loaded dynamically when user opens editor
+    -   Allows GUI configuration of all options
+
+### When Editing
+
+-   **To modify card display**: Edit `card.js`
+-   **To modify visual editor**: Edit `card-editor.js`
+-   **Both files are independent** - Edit separately as needed
 
 ## Code Style
 
