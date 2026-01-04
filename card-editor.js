@@ -1,3 +1,13 @@
+/**
+ * Nanoleaf Effect Card Editor
+ *
+ * NOTE: This file is kept for development reference only.
+ * The actual editor code is bundled directly into card.js to avoid
+ * dynamic import issues in Home Assistant.
+ *
+ * If you make changes here, you must also update the editor code in card.js
+ */
+
 class NanoleafEffectCardEditor extends HTMLElement {
     constructor() {
         super();
