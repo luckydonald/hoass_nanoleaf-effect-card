@@ -65,7 +65,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <input
             type="text"
             id="entity"
-            .value="${this._config.entity || ''}"
+            value="${this._config.entity || ''}"
             placeholder="light.nanoleaf_shapes"
           />
           <div class="info">The Nanoleaf light entity to control</div>
