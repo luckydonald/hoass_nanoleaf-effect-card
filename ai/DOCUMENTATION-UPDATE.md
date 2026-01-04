@@ -382,7 +382,7 @@ HACS references card.js, which loads card-editor.js dynamically.
 -   [README.md](../README.md) - Main documentation
 -   [QUICKSTART.md](../QUICKSTART.md) - Quick start guide
 -   [info.md](../info.md) - HACS info page
--   [ARCHITECTURE.md](../ARCHITECTURE.md) - Technical architecture
+-   [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture
 
 ### Developer Documentation
 
