@@ -29,6 +29,8 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 8. Find "Nanoleaf Effect Card" and click "Install"
 9. Restart Home Assistant
 
+**Note**: HACS automatically deploys both `card.js` and `card-editor.js`. The visual editor is loaded on-demand when you click "Edit Card".
+
 ### Manual Installation
 
 1. Download the `card.js` and `card-editor.js` files from this repository
