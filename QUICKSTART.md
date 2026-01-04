@@ -48,7 +48,7 @@ entity: light.YOUR_NANOLEAF_ENTITY
 display: buttons
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
     - name: 'Sunrise'
       icon: 'mdi:weather-sunset-up'
@@ -86,7 +86,7 @@ entity: light.nanoleaf_shapes
 display: buttons
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
     - name: 'Party'
       icon: 'mdi:party-popper'
@@ -119,7 +119,7 @@ entities:
       display: buttons
       effects:
           - name: 'Rainbow'
-            icon: 'mdi:rainbow'
+            icon: 'mdi:looks'
             color: '#FF00FF'
 ```
 

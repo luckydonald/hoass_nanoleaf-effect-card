@@ -113,7 +113,7 @@ Your HACS component for Nanoleaf effects is **complete and ready to deploy**!
     display: buttons
     effects:
         - name: 'Rainbow'
-          icon: 'mdi:rainbow'
+          icon: 'mdi:looks'
           color: '#FF00FF'
     ```
 

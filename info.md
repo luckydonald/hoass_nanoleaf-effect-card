@@ -12,7 +12,7 @@ entity: light.nanoleaf_shapes
 display: buttons
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
     - name: 'Sunrise'
       icon: 'mdi:weather-sunset-up'
@@ -69,7 +69,7 @@ button_style:
     name: true
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       colors:
           - '#FF0000'
           - '#FF7F00'

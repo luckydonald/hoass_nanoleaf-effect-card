@@ -122,7 +122,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <pre style="background: var(--code-editor-background-color, #f5f5f5); padding: 8px; border-radius: 4px; overflow-x: auto;">
 effects:
   - name: 'Rainbow'
-    icon: 'mdi:rainbow'
+    icon: 'mdi:looks'
     color: '#FF00FF'
   - name: 'Sunrise'
     icon: 'mdi:weather-sunset-up'

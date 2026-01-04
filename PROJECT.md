@@ -156,7 +156,7 @@ button_style:
     name: true
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       colors:
           - '#FF0000'
           - '#FFFF00'

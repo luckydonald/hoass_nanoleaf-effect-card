@@ -53,7 +53,7 @@ entities:
       display: buttons
       effects:
           - name: 'Rainbow'
-            icon: 'mdi:rainbow'
+            icon: 'mdi:looks'
             color: '#FF00FF'
           - name: 'Sunrise'
             icon: 'mdi:weather-sunset-up'
@@ -77,7 +77,7 @@ entity: light.nanoleaf_shapes
 display: dropdown
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
     - name: 'Sunrise'
       icon: 'mdi:weather-sunset-up'
@@ -98,7 +98,7 @@ button_style:
     name: true # Show effect names (default: true)
 effects:
     - name: 'Rainbow'
-      icon: 'mdi:rainbow'
+      icon: 'mdi:looks'
       color: '#FF00FF'
       button_style: # Override button style for this effect
           inactive_color: '#AAAAAA'
@@ -147,7 +147,7 @@ Each effect in the `effects` array can have:
 | Option         | Type   | Required | Description                                                           |
 | -------------- | ------ | -------- | --------------------------------------------------------------------- |
 | `name`         | string | Yes      | The effect name (must match an effect from the light's `effect_list`) |
-| `icon`         | string | No       | MDI icon name (e.g., `mdi:rainbow`)                                   |
+| `icon`         | string | No       | MDI icon name (e.g., `mdi:looks`)                                   |
 | `color`        | string | No       | Single color for the effect (hex format)                              |
 | `colors`       | array  | No       | Multiple colors for gradient/animation (hex format)                   |
 | `button_style` | object | No       | Override global button style for this effect                          |

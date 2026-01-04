@@ -32,7 +32,7 @@ describe('NanoleafEffectCard', () => {
             const config = {
                 entity: 'light.test_nanoleaf',
                 display: 'buttons',
-                effects: [{ name: 'Rainbow', icon: 'mdi:rainbow', color: '#FF00FF' }],
+                effects: [{ name: 'Rainbow', icon: 'mdi:looks', color: '#FF00FF' }],
             };
 
             expect(() => {
