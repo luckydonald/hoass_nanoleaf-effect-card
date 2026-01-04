@@ -105,7 +105,9 @@ Somewhere in the file split to `card-editor.js`, the `card.js` element broke, it
 —————
 
 Fix the editor input not loading the existing config when editing an existing card.
+(Only the Effects are loaded, the entity, display mode, and button style are not.)
 Additionally, when typing in the effect-name-input it seems to reset the other fields, also it unfocuses the text input.
 Probably because of re-rendering the whole input section on every change.
 The icon also needs to be set twice to show up.
-When typing in the e
+
+The "Add Effect" is not showing any label.
