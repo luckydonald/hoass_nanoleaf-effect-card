@@ -11,7 +11,7 @@ Get your Nanoleaf Effect Card up and running in minutes!
 3. Click the menu (⋮) in the top right
 4. Select "Custom repositories"
 5. Add: `https://github.com/luckydonald/hoass_nanoleaf-effect-card`
-6. Category: "Lovelace"
+6. Category: "Dashboard"
 7. Click "Install"
 8. Restart Home Assistant
 

@@ -23,7 +23,7 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
 5. Add this repository URL: `https://github.com/luckydonald/hoass_nanoleaf-effect-card`
-6. Select category: "Lovelace"
+6. Select category: "Dashboard"
 7. Click "ADD"
 8. Find "Nanoleaf Effect Card" and click "Install"
 9. Restart Home Assistant
