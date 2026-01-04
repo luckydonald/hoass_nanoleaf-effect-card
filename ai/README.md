@@ -75,6 +75,47 @@ This folder contains AI-generated documentation, development notes, and summarie
 -   Design requirements
 -   Special notes
 
+### 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) ⭐ TECHNICAL ARCHITECTURE
+
+**Comprehensive architecture documentation**
+
+-   Two-file structure explanation
+-   Dynamic import mechanism
+-   Loading flow diagrams
+-   Build pipeline details
+-   Browser compatibility
+-   Performance metrics
+-   Deployment procedures
+
+### 📖 [DOCUMENTATION-UPDATE.md](DOCUMENTATION-UPDATE.md)
+
+**Documentation update summary**
+
+-   All files updated for two-file architecture
+-   JSDoc additions
+-   Markdown updates
+-   Build pipeline verification
+-   Complete change log
+
+### 🔧 [EDITOR-EXTRACTION.md](EDITOR-EXTRACTION.md)
+
+**Editor extraction details**
+
+-   Why editor was extracted
+-   How dynamic import works
+-   Benefits of separation
+-   File structure
+-   Performance improvements
+
+### 🎨 [HA-SORTABLE-INTEGRATION.md](HA-SORTABLE-INTEGRATION.md)
+
+**ha-sortable component integration**
+
+-   Replaced custom drag-and-drop
+-   Native component usage
+-   Code reduction details
+-   Implementation guide
+
 ---
 
 ## 🗂️ Document Organization

@@ -14,11 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     -   `ha-formfield` with `ha-radio` for display mode selection
     -   `ha-switch` for toggle options
     -   `ha-icon-picker` for effect icon selection
-    -   **`ha-sortable` for drag-and-drop effect reordering** (replaces custom implementation)
-    -   `ha-button` with SVG icon for adding effects
+    -   **`ha-sortable` for drag-and-drop effect reordering** ✨
+    -   `ha-button` with icon for adding effects
     -   Full GUI effects editor with add/remove/reorder functionality
-    -   Structured effect items with dedicated handle, content, and actions sections
-    -   Multiple colors per effect with add button
+    -   Structured effect items with handle, content, and actions sections
+    -   No YAML editing required for basic configuration
+-   **Comprehensive documentation**:
+    -   JSDoc comments added to all classes and methods
+    -   ARCHITECTURE.md documenting two-file structure
+    -   Updated all markdown files for two-file architecture
+    -   Build pipeline documentation verified
     -   No YAML editing required for basic configuration
 
 ### Fixed
