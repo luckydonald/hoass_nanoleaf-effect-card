@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     -   `ha-formfield` with `ha-radio` for display mode selection
     -   `ha-switch` for toggle options
     -   `ha-icon-picker` for effect icon selection
+    -   **`ha-sortable` for drag-and-drop effect reordering** (replaces custom implementation)
+    -   `ha-button` with SVG icon for adding effects
     -   Full GUI effects editor with add/remove/reorder functionality
-    -   Drag-and-drop to reorder effects
+    -   Structured effect items with dedicated handle, content, and actions sections
     -   Multiple colors per effect with add button
     -   No YAML editing required for basic configuration
 
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   **Replaced custom drag-and-drop with native `ha-sortable` component** (50% code reduction, improved reliability)
+-   Improved effect item layout with visual separation of handle, content, and actions
 -   Editor code is now bundled in card.js instead of dynamically imported from card-editor.js
 -   card-editor.js kept as reference file for development
 
