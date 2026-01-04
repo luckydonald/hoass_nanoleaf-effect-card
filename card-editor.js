@@ -2,8 +2,27 @@
  * Nanoleaf Effect Card Editor
  *
  * Visual configuration editor using native Home Assistant components.
+ * Dynamically imported by card.js when user opens the visual editor.
+ *
+ * @class NanoleafEffectCardEditor
+ * @extends HTMLElement
+ *
+ * Features:
+ * - Entity picker with autocomplete (ha-entity-picker)
+ * - Radio buttons for display mode selection (ha-formfield + ha-radio)
+ * - Toggle switches for options (ha-switch)
+ * - Icon picker for effect icons (ha-icon-picker)
+ * - Drag-and-drop effect list editor (ha-sortable)
+ * - Multi-color support per effect
+ * - Add/remove/reorder effects
+ *
+ * @fires config-changed - When configuration changes
  */
 
+/**
+ * Creates an instance of NanoleafEffectCardEditor.
+ * Initializes shadow DOM and default properties.
+ */
 class NanoleafEffectCardEditor extends HTMLElement {
     constructor() {
         super();
@@ -12,6 +31,12 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this._hass = null;
     }
 
+    /**
+     * Sets the Home Assistant object.
+     * Updates the entity picker when hass changes.
+     *
+     * @param {Object} hass - Home Assistant object containing states and services
+     */
     set hass(hass) {
         this._hass = hass;
         // Update entity picker if it exists
@@ -21,11 +46,24 @@ class NanoleafEffectCardEditor extends HTMLElement {
         }
     }
 
+    /**
+     * Sets the editor configuration.
+     * Called by Home Assistant when the editor is initialized.
+     *
+     * @param {Object} config - Card configuration object
+     */
     setConfig(config) {
         this._config = config || {};
         this.render();
     }
 
+    /**
+     * Fires a config-changed event.
+     * Notifies Home Assistant that the configuration has been modified.
+     *
+     * @param {Object} newConfig - Updated configuration object
+     * @fires config-changed
+     */
     configChanged(newConfig) {
         const event = new Event('config-changed', {
             bubbles: true,
@@ -35,6 +73,11 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.dispatchEvent(event);
     }
 
+    /**
+     * Renders the editor UI.
+     * Creates all form fields using native HA components and the effects list editor.
+     * Includes entity picker, display mode radios, button style options, and effects editor.
+     */
     render() {
         if (!this._config) {
             this._config = {};
