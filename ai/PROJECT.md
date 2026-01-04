@@ -179,7 +179,7 @@ effects:
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 
 -   Development setup
 -   Code style guidelines
@@ -188,7 +188,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) file
+MIT License - See [LICENSE](../LICENSE) file
 
 ## 🔗 Links
 
