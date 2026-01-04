@@ -94,7 +94,7 @@ entities:
 
 ———————
 
-Use yarn.
+Prefer `yarn` commands for local development and testing over `npm`.
 
 ———————
 
@@ -172,76 +172,3 @@ Probably that'd be a component on it's own, e.g. `<nanoleaf-effect-button-style>
 Styled similarly to a bootstrap button group, with the 2 options next to each other, and toggling them on/off by clicking.
 
 That way you can e.g. have the "Full Background" style only for the active effect, while inactive effects get the bar, and always the animated icon (add that to the example config yaml, too)
-
-Add a sample `button_style.color_display` to the example YAML:
-
-```yaml
-# ...existing YAML above ...
-      button_style:
-          inactive_color: '#CCCCCC'
-          icon: true
-          name: true
-          color_display:
-              full_background:
-                  active: true
-                  inactive: false
-              small_bar:
-                  active: false
-                  inactive: true
-              text:
-                  active: false
-                  inactive: false
-              border:
-                  active: false
-                  inactive: false
-              animated_icon:
-                  active: true
-                  inactive: false
-      effects:
-        - name: 'Rainbow'
-          icon: 'mdi:looks'
-          colors: ['#FF0000', '#FF7F00', '#FFFF00']
-          button_style:
-            color_display:
-              full_background:
-                active: true
-                inactive: false
-              small_bar:
-                active: false
-                inactive: true
-                text:
-                  active: false
-                  inactive: false
-                border:
-                  active: false
-                  inactive: false
-                animated_icon:
-                  active: true
-                  inactive: false
-          - name: 'Sunrise'
-            icon: 'mdi:weather-sunset-up'
-            colors:
-                - '#FFA500'
-                - '#FFFF00'
-                - '#FF4500'
-          - name: 'Party'
-            icon: 'mdi:party-popper'
-            colors:
-                - '#FF0000'
-                - '#00FF00'
-                - '#0000FF'
-          - name: 'Relax'
-            icon: 'mdi:spa'
-            colors:
-                - '#ADD8E6'
-                - '#90EE90'
-                - '#FFB6C1'
-          - name: 'Nightlight'
-            icon: 'mdi:weather-night'
-            colors:
-                - '#00008B'
-                - '#4B0082'
-                - '#2F4F4F'
-```
-
-And note: prefer `yarn` commands for local development and testing.
