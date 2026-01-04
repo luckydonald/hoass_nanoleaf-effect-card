@@ -321,6 +321,13 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.attachEventListeners();
     }
 
+    /**
+     * Renders the list of configured effects.
+     * Creates draggable effect items with name, icon, and color inputs.
+     * Each effect has a drag handle, content area, and delete button.
+     *
+     * @returns {string} HTML string for effects list, or empty string if no effects
+     */
     renderEffectsList() {
         const effects = this._config.effects || [];
         if (effects.length === 0) {
