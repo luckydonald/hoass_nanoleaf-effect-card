@@ -78,4 +78,8 @@ Please put all summaries and such you wanna write for me into the `ai/` subfolde
 Can you use the normal native entity picker? Probably `<ha-entity-picker id="input" allow-custom-entity add-button></ha-entity-picker>`
 And a normal toggle instead of the display mode dropdown? So, <ha-formfield> and then <ha-radio>?
 
-For effects there should be a sub editor to set those values natively, instead of with raw html. (or yaml), this tag list like thing where you can reorder, too.
+For effects there should be a sub editor to set those values natively, instead of with raw html (or yaml). Use this tag list like thing like the `hui-card-features-editor` does it where you can reorder, too.
+
+In other words, use the <ha-sortable>, followed by a button.
+
+Here's some code copied from a browser render of hui-card-features-editor, so similar to <ha-button-menu fixed=""> <ha-button slot="trigger" appearance="filled" size="small" variant="brand" aria-haspopup="menu"> <ha-svg-icon slot="start"></ha-svg-icon>Add effect </ha-button><ha-list-item mwc-list-item="" tabindex="0" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->Light brightness </ha-list-item> <!----><!----> <ha-list-item mwc-list-item="" tabindex="-1" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->Light color temperature </ha-list-item> <!----><!----> <ha-list-item mwc-list-item="" tabindex="-1" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->Toggle </ha-list-item> <!----> <!--?lit$878466506$--><li divider="" role="separator"></li> <!--?lit$878466506$--><!----> <ha-list-item mwc-list-item="" tabindex="-1" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->RGB Light Card (Tile feature) </ha-list-item> <!----> </ha-button-menu>
