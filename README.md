@@ -147,7 +147,7 @@ Each effect in the `effects` array can have:
 | Option         | Type   | Required | Description                                                           |
 | -------------- | ------ | -------- | --------------------------------------------------------------------- |
 | `name`         | string | Yes      | The effect name (must match an effect from the light's `effect_list`) |
-| `icon`         | string | No       | MDI icon name (e.g., `mdi:looks`)                                   |
+| `icon`         | string | No       | MDI icon name (e.g., `mdi:looks`)                                     |
 | `color`        | string | No       | Single color for the effect (hex format)                              |
 | `colors`       | array  | No       | Multiple colors for gradient/animation (hex format)                   |
 | `button_style` | object | No       | Override global button style for this effect                          |
