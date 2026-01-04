@@ -1,28 +1,28 @@
 class NanoleafEffectCardEditor extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    this._config = {};
-  }
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._config = {};
+    }
 
-  setConfig(config) {
-    this._config = config;
-    this.render();
-  }
+    setConfig(config) {
+        this._config = config;
+        this.render();
+    }
 
-  configChanged(newConfig) {
-    const event = new Event('config-changed', {
-      bubbles: true,
-      composed: true,
-    });
-    event.detail = { config: newConfig };
-    this.dispatchEvent(event);
-  }
+    configChanged(newConfig) {
+        const event = new Event('config-changed', {
+            bubbles: true,
+            composed: true,
+        });
+        event.detail = { config: newConfig };
+        this.dispatchEvent(event);
+    }
 
-  render() {
-    if (!this._config) return;
+    render() {
+        if (!this._config) return;
 
-    this.shadowRoot.innerHTML = `
+        this.shadowRoot.innerHTML = `
       <style>
         .editor-container {
           padding: 16px;
@@ -135,60 +135,59 @@ effects:
       </div>
     `;
 
-    this.attachEventListeners();
-  }
+        this.attachEventListeners();
+    }
 
-  attachEventListeners() {
-    const entityInput = this.shadowRoot.getElementById('entity');
-    const displaySelect = this.shadowRoot.getElementById('display');
-    const inactiveColorInput = this.shadowRoot.getElementById('inactive-color');
-    const showIconCheckbox = this.shadowRoot.getElementById('show-icon');
-    const showNameCheckbox = this.shadowRoot.getElementById('show-name');
+    attachEventListeners() {
+        const entityInput = this.shadowRoot.getElementById('entity');
+        const displaySelect = this.shadowRoot.getElementById('display');
+        const inactiveColorInput = this.shadowRoot.getElementById('inactive-color');
+        const showIconCheckbox = this.shadowRoot.getElementById('show-icon');
+        const showNameCheckbox = this.shadowRoot.getElementById('show-name');
 
-    entityInput?.addEventListener('input', (e) => {
-      this._config = { ...this._config, entity: e.target.value };
-      this.configChanged(this._config);
-    });
+        entityInput?.addEventListener('input', (e) => {
+            this._config = { ...this._config, entity: e.target.value };
+            this.configChanged(this._config);
+        });
 
-    displaySelect?.addEventListener('change', (e) => {
-      this._config = { ...this._config, display: e.target.value };
-      this.configChanged(this._config);
-    });
+        displaySelect?.addEventListener('change', (e) => {
+            this._config = { ...this._config, display: e.target.value };
+            this.configChanged(this._config);
+        });
 
-    inactiveColorInput?.addEventListener('input', (e) => {
-      this._config = {
-        ...this._config,
-        button_style: {
-          ...(this._config.button_style || {}),
-          inactive_color: e.target.value,
-        },
-      };
-      this.configChanged(this._config);
-    });
+        inactiveColorInput?.addEventListener('input', (e) => {
+            this._config = {
+                ...this._config,
+                button_style: {
+                    ...(this._config.button_style || {}),
+                    inactive_color: e.target.value,
+                },
+            };
+            this.configChanged(this._config);
+        });
 
-    showIconCheckbox?.addEventListener('change', (e) => {
-      this._config = {
-        ...this._config,
-        button_style: {
-          ...(this._config.button_style || {}),
-          icon: e.target.checked,
-        },
-      };
-      this.configChanged(this._config);
-    });
+        showIconCheckbox?.addEventListener('change', (e) => {
+            this._config = {
+                ...this._config,
+                button_style: {
+                    ...(this._config.button_style || {}),
+                    icon: e.target.checked,
+                },
+            };
+            this.configChanged(this._config);
+        });
 
-    showNameCheckbox?.addEventListener('change', (e) => {
-      this._config = {
-        ...this._config,
-        button_style: {
-          ...(this._config.button_style || {}),
-          name: e.target.checked,
-        },
-      };
-      this.configChanged(this._config);
-    });
-  }
+        showNameCheckbox?.addEventListener('change', (e) => {
+            this._config = {
+                ...this._config,
+                button_style: {
+                    ...(this._config.button_style || {}),
+                    name: e.target.checked,
+                },
+            };
+            this.configChanged(this._config);
+        });
+    }
 }
 
 customElements.define('nanoleaf-effect-card-editor', NanoleafEffectCardEditor);
-

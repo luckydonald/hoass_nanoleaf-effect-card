@@ -7,12 +7,12 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 
 ## Features
 
-- 🎨 **Visual Effect Selection**: Choose from your configured Nanoleaf effects
-- 🔘 **Two Display Modes**: Dropdown or button grid layout
-- 🌈 **Color Animation**: Effects can cycle through multiple colors
-- 🎭 **Custom Icons**: Assign unique icons to each effect
-- ⚡ **Quick Access**: Turn lights on/off with effect selection
-- 📱 **Responsive Design**: Works in Entities cards and Tile card features
+-   🎨 **Visual Effect Selection**: Choose from your configured Nanoleaf effects
+-   🔘 **Two Display Modes**: Dropdown or button grid layout
+-   🌈 **Color Animation**: Effects can cycle through multiple colors
+-   🎭 **Custom Icons**: Assign unique icons to each effect
+-   ⚡ **Quick Access**: Turn lights on/off with effect selection
+-   📱 **Responsive Design**: Works in Entities cards and Tile card features
 
 ## Installation
 
@@ -33,11 +33,11 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 1. Download the `card.js` file from this repository
 2. Copy it to your `config/www/` directory
 3. Add the following to your Lovelace resources:
-   ```yaml
-   resources:
-     - url: /local/card.js
-       type: module
-   ```
+    ```yaml
+    resources:
+        - url: /local/card.js
+          type: module
+    ```
 4. Restart Home Assistant
 
 ## Configuration
@@ -47,26 +47,26 @@ A custom Home Assistant card for controlling Nanoleaf light effects with style.
 ```yaml
 type: entities
 entities:
-  - entity: light.nanoleaf_shapes
-  - type: 'custom:nanoleaf-effect-card'
-    entity: light.nanoleaf_shapes
-    display: buttons
-    effects:
-      - name: 'Rainbow'
-        icon: 'mdi:rainbow'
-        color: '#FF00FF'
-      - name: 'Sunrise'
-        icon: 'mdi:weather-sunset-up'
-        colors:
-          - '#FFA500'
-          - '#FFFF00'
-          - '#FF4500'
-      - name: 'Party'
-        icon: 'mdi:party-popper'
-        colors:
-          - '#FF0000'
-          - '#00FF00'
-          - '#0000FF'
+    - entity: light.nanoleaf_shapes
+    - type: 'custom:nanoleaf-effect-card'
+      entity: light.nanoleaf_shapes
+      display: buttons
+      effects:
+          - name: 'Rainbow'
+            icon: 'mdi:rainbow'
+            color: '#FF00FF'
+          - name: 'Sunrise'
+            icon: 'mdi:weather-sunset-up'
+            colors:
+                - '#FFA500'
+                - '#FFFF00'
+                - '#FF4500'
+          - name: 'Party'
+            icon: 'mdi:party-popper'
+            colors:
+                - '#FF0000'
+                - '#00FF00'
+                - '#0000FF'
 ```
 
 ### Dropdown Display
@@ -76,14 +76,14 @@ type: 'custom:nanoleaf-effect-card'
 entity: light.nanoleaf_shapes
 display: dropdown
 effects:
-  - name: 'Rainbow'
-    icon: 'mdi:rainbow'
-    color: '#FF00FF'
-  - name: 'Sunrise'
-    icon: 'mdi:weather-sunset-up'
-    colors:
-      - '#FFA500'
-      - '#FFFF00'
+    - name: 'Rainbow'
+      icon: 'mdi:rainbow'
+      color: '#FF00FF'
+    - name: 'Sunrise'
+      icon: 'mdi:weather-sunset-up'
+      colors:
+          - '#FFA500'
+          - '#FFFF00'
 ```
 
 ### Advanced Configuration
@@ -93,64 +93,64 @@ type: 'custom:nanoleaf-effect-card'
 entity: light.nanoleaf_shapes
 display: buttons
 button_style:
-  inactive_color: '#CCCCCC'  # Default color for inactive buttons
-  icon: true                  # Show icons (default: true)
-  name: true                  # Show effect names (default: true)
+    inactive_color: '#CCCCCC' # Default color for inactive buttons
+    icon: true # Show icons (default: true)
+    name: true # Show effect names (default: true)
 effects:
-  - name: 'Rainbow'
-    icon: 'mdi:rainbow'
-    color: '#FF00FF'
-    button_style:              # Override button style for this effect
-      inactive_color: '#AAAAAA'
-  - name: 'Sunrise'
-    icon: 'mdi:weather-sunset-up'
-    colors:
-      - '#FFA500'
-      - '#FFFF00'
-      - '#FF4500'
-  - name: 'Party'
-    icon: 'mdi:party-popper'
-    colors:
-      - '#FF0000'
-      - '#00FF00'
-      - '#0000FF'
-  - name: 'Relax'
-    icon: 'mdi:spa'
-    colors:
-      - '#ADD8E6'
-      - '#90EE90'
-      - '#FFB6C1'
-  - name: 'Nightlight'
-    icon: 'mdi:weather-night'
-    colors:
-      - '#00008B'
-      - '#4B0082'
-      - '#2F4F4F'
+    - name: 'Rainbow'
+      icon: 'mdi:rainbow'
+      color: '#FF00FF'
+      button_style: # Override button style for this effect
+          inactive_color: '#AAAAAA'
+    - name: 'Sunrise'
+      icon: 'mdi:weather-sunset-up'
+      colors:
+          - '#FFA500'
+          - '#FFFF00'
+          - '#FF4500'
+    - name: 'Party'
+      icon: 'mdi:party-popper'
+      colors:
+          - '#FF0000'
+          - '#00FF00'
+          - '#0000FF'
+    - name: 'Relax'
+      icon: 'mdi:spa'
+      colors:
+          - '#ADD8E6'
+          - '#90EE90'
+          - '#FFB6C1'
+    - name: 'Nightlight'
+      icon: 'mdi:weather-night'
+      colors:
+          - '#00008B'
+          - '#4B0082'
+          - '#2F4F4F'
 ```
 
 ## Configuration Options
 
-| Option | Type | Required | Default | Description |
-|--------|------|----------|---------|-------------|
-| `entity` | string | Yes | - | The entity ID of your Nanoleaf light |
-| `display` | string | No | `buttons` | Display mode: `buttons` or `dropdown` |
-| `button_style` | object | No | - | Global button style configuration |
-| `button_style.inactive_color` | string | No | `#CCCCCC` | Color for inactive buttons |
-| `button_style.icon` | boolean | No | `true` | Show icons on buttons |
-| `button_style.name` | boolean | No | `true` | Show effect names on buttons |
-| `effects` | array | Yes | - | List of effects to display |
+| Option                        | Type    | Required | Default   | Description                           |
+| ----------------------------- | ------- | -------- | --------- | ------------------------------------- |
+| `entity`                      | string  | Yes      | -         | The entity ID of your Nanoleaf light  |
+| `display`                     | string  | No       | `buttons` | Display mode: `buttons` or `dropdown` |
+| `button_style`                | object  | No       | -         | Global button style configuration     |
+| `button_style.inactive_color` | string  | No       | `#CCCCCC` | Color for inactive buttons            |
+| `button_style.icon`           | boolean | No       | `true`    | Show icons on buttons                 |
+| `button_style.name`           | boolean | No       | `true`    | Show effect names on buttons          |
+| `effects`                     | array   | Yes      | -         | List of effects to display            |
 
 ### Effect Configuration
 
 Each effect in the `effects` array can have:
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `name` | string | Yes | The effect name (must match an effect from the light's `effect_list`) |
-| `icon` | string | No | MDI icon name (e.g., `mdi:rainbow`) |
-| `color` | string | No | Single color for the effect (hex format) |
-| `colors` | array | No | Multiple colors for gradient/animation (hex format) |
-| `button_style` | object | No | Override global button style for this effect |
+| Option         | Type   | Required | Description                                                           |
+| -------------- | ------ | -------- | --------------------------------------------------------------------- |
+| `name`         | string | Yes      | The effect name (must match an effect from the light's `effect_list`) |
+| `icon`         | string | No       | MDI icon name (e.g., `mdi:rainbow`)                                   |
+| `color`        | string | No       | Single color for the effect (hex format)                              |
+| `colors`       | array  | No       | Multiple colors for gradient/animation (hex format)                   |
+| `button_style` | object | No       | Override global button style for this effect                          |
 
 ## How It Works
 
@@ -161,9 +161,9 @@ Each effect in the `effects` array can have:
 
 ## Compatibility
 
-- Tested with Nanoleaf Shapes, Canvas, and Light Panels
-- Works with any Home Assistant light entity that has an `effect_list` attribute
-- Compatible with Home Assistant 2023.1 and later
+-   Tested with Nanoleaf Shapes, Canvas, and Light Panels
+-   Works with any Home Assistant light entity that has an `effect_list` attribute
+-   Compatible with Home Assistant 2023.1 and later
 
 ## Finding Effect Names
 
@@ -176,18 +176,21 @@ To find the available effects for your Nanoleaf device:
 ## Troubleshooting
 
 ### Card doesn't appear
-- Make sure the card is properly installed and the resource is added to Lovelace
-- Check the browser console for errors
-- Clear your browser cache
+
+-   Make sure the card is properly installed and the resource is added to Lovelace
+-   Check the browser console for errors
+-   Clear your browser cache
 
 ### Effects don't work
-- Verify the effect names match exactly with those in the `effect_list` attribute
-- Check that your Nanoleaf device is online and responding
-- Ensure your Home Assistant Nanoleaf integration is working properly
+
+-   Verify the effect names match exactly with those in the `effect_list` attribute
+-   Check that your Nanoleaf device is online and responding
+-   Ensure your Home Assistant Nanoleaf integration is working properly
 
 ### Colors don't display correctly
-- Use hex color format (e.g., `#FF0000` for red)
-- Ensure the hex values are valid
+
+-   Use hex color format (e.g., `#FF0000` for red)
+-   Ensure the hex values are valid
 
 ## Support
 
@@ -200,4 +203,3 @@ MIT License - see LICENSE file for details
 ## Credits
 
 Inspired by the excellent `rgb-light-card` and other Home Assistant custom cards.
-
