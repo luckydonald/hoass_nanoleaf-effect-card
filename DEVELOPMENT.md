@@ -31,12 +31,14 @@ resources:
 
 #### Option 2: Direct File
 
-1. Copy `card.js` to `config/www/`
+1. Copy `card.js` and `card-editor.js` to `config/www/`
 2. Add resource:
 
 ```yaml
 resources:
     - url: /local/card.js
+      type: module
+    - url: /local/card-editor.js
       type: module
 ```
 
@@ -52,6 +54,8 @@ Add to Lovelace:
 ```yaml
 resources:
     - url: https://YOUR-NGROK-URL/card.js
+      type: module
+    - url: https://YOUR-NGROK-URL/card-editor.js
       type: module
 ```
 
@@ -86,7 +90,7 @@ npm run dev
 
 ### Adding a New Feature
 
-1. **Modify card.js**
+1. **Modify `card.js` (or `card-editor.js`)**
 
     ```javascript
     // Add your feature code
@@ -119,7 +123,7 @@ npm run dev
 
 ### Modifying Styles
 
-Edit the `getStyles()` method in `card.js`:
+Edit the `getStyles()` method in `card.js` (or `card-editor.js`):
 
 ```javascript
 getStyles() {

@@ -17,8 +17,8 @@ Get your Nanoleaf Effect Card up and running in minutes!
 
 ### Manual Installation
 
-1. Download `card.js` from the [latest release](https://github.com/luckydonald/hoass_nanoleaf-effect-card/releases)
-2. Copy to `config/www/nanoleaf-effect-card.js`
+1. Download `card.js` and `card-editor.js` from the [latest release](https://github.com/luckydonald/hoass_nanoleaf-effect-card/releases)
+2. Copy to `config/www/nanoleaf-effect-card/card`(`-editor`)`.js`
 3. Add to Lovelace resources:
     ```yaml
     resources:
