@@ -402,82 +402,90 @@ class NanoleafEffectCardEditor extends HTMLElement {
           gap: 16px;
           margin-top: 8px;
         }
-        .effect-list {
-          border: 1px solid var(--divider-color);
-          border-radius: 4px;
-          padding: 8px;
+        ha-sortable {
+          display: block;
           margin-top: 8px;
         }
         .effect-item {
           display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px;
+          align-items: stretch;
           background: var(--card-background-color);
           border: 1px solid var(--divider-color);
-          border-radius: 4px;
+          border-radius: 8px;
           margin-bottom: 8px;
+          overflow: hidden;
         }
-        .effect-item:last-child {
-          margin-bottom: 0;
+        .handle {
+          display: flex;
+          align-items: center;
+          padding: 12px 8px;
+          cursor: move;
+          background: var(--secondary-background-color);
+          border-right: 1px solid var(--divider-color);
         }
-        .effect-handle {
-          cursor: grab;
+        .handle ha-icon {
+          --mdc-icon-size: 24px;
           color: var(--secondary-text-color);
         }
-        .effect-handle:active {
-          cursor: grabbing;
-        }
-        .effect-fields {
+        .effect-content {
           flex: 1;
-          display: grid;
-          grid-template-columns: 2fr 2fr 1fr;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .effect-header {
+          display: flex;
+          align-items: center;
           gap: 8px;
         }
-        .effect-fields input {
-          padding: 6px 8px;
+        .effect-name-input {
+          flex: 1;
+          padding: 8px;
           border: 1px solid var(--divider-color);
           border-radius: 4px;
           background: var(--card-background-color);
           color: var(--primary-text-color);
           font-size: 14px;
         }
-        .effect-delete {
-          color: var(--error-color);
-          cursor: pointer;
-          padding: 4px;
+        .effect-row {
+          display: flex;
+          gap: 8px;
+          align-items: center;
         }
-        .add-effect-button {
-          width: 100%;
-          padding: 8px;
-          margin-top: 8px;
-          background: var(--primary-color);
-          color: var(--text-primary-color);
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
+        .effect-row label {
+          min-width: 40px;
+          font-size: 12px;
+          color: var(--secondary-text-color);
         }
-        .add-effect-button:hover {
-          opacity: 0.9;
+        ha-icon-picker {
+          flex: 1;
         }
-        .color-list {
+        .colors-container {
           display: flex;
           gap: 4px;
           flex-wrap: wrap;
+          align-items: center;
         }
         .color-input {
           width: 40px;
-          height: 32px;
-          padding: 2px;
+          height: 40px;
+          padding: 4px;
           border: 1px solid var(--divider-color);
           border-radius: 4px;
           cursor: pointer;
         }
-        .add-color-button {
+        .color-input::-webkit-color-swatch-wrapper {
+          padding: 0;
+        }
+        .color-input::-webkit-color-swatch {
+          border: none;
+          border-radius: 2px;
+        }
+        .icon-button {
           width: 32px;
           height: 32px;
-          border: 1px dashed var(--divider-color);
+          border: none;
           border-radius: 4px;
           background: transparent;
           cursor: pointer;
@@ -485,6 +493,24 @@ class NanoleafEffectCardEditor extends HTMLElement {
           align-items: center;
           justify-content: center;
           color: var(--secondary-text-color);
+        }
+        .icon-button:hover {
+          background: var(--secondary-background-color);
+        }
+        .icon-button.add-color {
+          border: 1px dashed var(--divider-color);
+        }
+        .icon-button.delete {
+          color: var(--error-color);
+        }
+        .effect-actions {
+          display: flex;
+          align-items: center;
+          padding: 12px 8px;
+          border-left: 1px solid var(--divider-color);
+        }
+        ha-button {
+          margin-top: 8px;
         }
         ha-switch {
           padding: 16px 0;
@@ -558,14 +584,19 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         <div class="section-title">Effects</div>
         <div class="info" style="margin-bottom: 8px;">
-          Add effects that match your Nanoleaf's effect list. Drag to reorder.
+          Configure effects that match your Nanoleaf's effect list.
         </div>
-        <div class="effect-list" id="effect-list">
+        <ha-sortable handle-selector=".handle" .disabled="${
+            !this._config.effects || this._config.effects.length === 0
+        }">
           ${this.renderEffectsList()}
-        </div>
-        <button class="add-effect-button" id="add-effect">
-          <ha-icon icon="mdi:plus"></ha-icon> Add Effect
-        </button>
+        </ha-sortable>
+        <ha-button 
+          id="add-effect"
+          .label="${'Add Effect'}"
+        >
+          <ha-svg-icon slot="icon" .path="${'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z'}"></ha-svg-icon>
+        </ha-button>
       </div>
     `;
 
@@ -575,32 +606,46 @@ class NanoleafEffectCardEditor extends HTMLElement {
     renderEffectsList() {
         const effects = this._config.effects || [];
         if (effects.length === 0) {
-            return '<div class="info" style="padding: 16px; text-align: center;">No effects configured yet</div>';
+            return '';
         }
 
         return effects
             .map(
                 (effect, index) => `
       <div class="effect-item" data-index="${index}">
-        <ha-icon icon="mdi:drag" class="effect-handle"></ha-icon>
-        <div class="effect-fields">
-          <input
-            type="text"
-            class="effect-name"
-            placeholder="Effect name"
-            value="${effect.name || ''}"
-            data-index="${index}"
-          />
-          <ha-icon-picker
-            class="effect-icon"
-            .value="${effect.icon || 'mdi:lightbulb'}"
-            data-index="${index}"
-          ></ha-icon-picker>
-          <div class="color-list" data-index="${index}">
-            ${this.renderColorInputs(effect, index)}
+        <div class="handle">
+          <ha-icon icon="mdi:drag"></ha-icon>
+        </div>
+        <div class="effect-content">
+          <div class="effect-header">
+            <input
+              type="text"
+              class="effect-name-input"
+              placeholder="Effect name (e.g., Rainbow)"
+              value="${effect.name || ''}"
+              data-index="${index}"
+            />
+          </div>
+          <div class="effect-row">
+            <label>Icon</label>
+            <ha-icon-picker
+              class="effect-icon"
+              .value="${effect.icon || 'mdi:lightbulb'}"
+              data-index="${index}"
+            ></ha-icon-picker>
+          </div>
+          <div class="effect-row">
+            <label>Colors</label>
+            <div class="colors-container">
+              ${this.renderColorInputs(effect, index)}
+            </div>
           </div>
         </div>
-        <ha-icon icon="mdi:delete" class="effect-delete" data-index="${index}"></ha-icon>
+        <div class="effect-actions">
+          <button class="icon-button delete" data-index="${index}" title="Delete effect">
+            <ha-icon icon="mdi:delete"></ha-icon>
+          </button>
+        </div>
       </div>
     `
             )
@@ -618,6 +663,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         value="${color}"
         data-effect-index="${effectIndex}"
         data-color-index="${colorIndex}"
+        title="Click to change color"
       />
     `
             )
@@ -626,8 +672,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
         return (
             colorInputs +
             `
-      <button class="add-color-button" data-effect-index="${effectIndex}">
-        <ha-icon icon="mdi:plus" style="--mdc-icon-size: 16px;"></ha-icon>
+      <button class="icon-button add-color" data-effect-index="${effectIndex}" title="Add color">
+        <ha-icon icon="mdi:plus"></ha-icon>
       </button>
     `
         );
@@ -694,6 +740,16 @@ class NanoleafEffectCardEditor extends HTMLElement {
             this.configChanged(this._config);
         });
 
+        // ha-sortable for reordering effects
+        const sortable = this.shadowRoot.querySelector('ha-sortable');
+        sortable?.addEventListener('item-moved', (e) => {
+            const effects = [...(this._config.effects || [])];
+            const movedEffect = effects.splice(e.detail.oldIndex, 1)[0];
+            effects.splice(e.detail.newIndex, 0, movedEffect);
+            this._config = { ...this._config, effects };
+            this.configChanged(this._config);
+        });
+
         // Add effect button
         const addEffectButton = this.shadowRoot.querySelector('#add-effect');
         addEffectButton?.addEventListener('click', () => {
@@ -709,7 +765,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         });
 
         // Effect name inputs
-        this.shadowRoot.querySelectorAll('.effect-name').forEach((input) => {
+        this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
             input.addEventListener('input', (e) => {
                 const index = parseInt(e.target.dataset.index);
                 const effects = [...(this._config.effects || [])];
@@ -745,8 +801,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         });
 
         // Add color buttons
-        this.shadowRoot.querySelectorAll('.add-color-button').forEach((button) => {
+        this.shadowRoot.querySelectorAll('.add-color').forEach((button) => {
             button.addEventListener('click', (e) => {
+                e.preventDefault();
                 const effectIndex = parseInt(button.dataset.effectIndex);
                 const effects = [...(this._config.effects || [])];
                 const colors = [...(effects[effectIndex].colors || [effects[effectIndex].color] || ['#CCCCCC'])];
@@ -759,8 +816,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         });
 
         // Delete effect buttons
-        this.shadowRoot.querySelectorAll('.effect-delete').forEach((button) => {
+        this.shadowRoot.querySelectorAll('.delete').forEach((button) => {
             button.addEventListener('click', (e) => {
+                e.preventDefault();
                 const index = parseInt(button.dataset.index);
                 const effects = [...(this._config.effects || [])];
                 effects.splice(index, 1);
@@ -769,77 +827,6 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 this.render();
             });
         });
-
-        // Drag and drop for reordering
-        this.setupDragAndDrop();
-    }
-
-    setupDragAndDrop() {
-        const effectItems = this.shadowRoot.querySelectorAll('.effect-item');
-        let draggedItem = null;
-
-        effectItems.forEach((item) => {
-            const handle = item.querySelector('.effect-handle');
-
-            handle.addEventListener('mousedown', (e) => {
-                item.draggable = true;
-            });
-
-            item.addEventListener('dragstart', (e) => {
-                draggedItem = item;
-                e.dataTransfer.effectAllowed = 'move';
-                item.style.opacity = '0.5';
-            });
-
-            item.addEventListener('dragend', (e) => {
-                item.style.opacity = '1';
-                item.draggable = false;
-            });
-
-            item.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-
-                const afterElement = this.getDragAfterElement(item.parentElement, e.clientY);
-                if (afterElement == null) {
-                    item.parentElement.appendChild(draggedItem);
-                } else {
-                    item.parentElement.insertBefore(draggedItem, afterElement);
-                }
-            });
-
-            item.addEventListener('drop', (e) => {
-                e.preventDefault();
-                // Reorder effects array based on new DOM order
-                const effectList = this.shadowRoot.querySelector('#effect-list');
-                const items = Array.from(effectList.querySelectorAll('.effect-item'));
-                const effects = items.map((item) => {
-                    const index = parseInt(item.dataset.index);
-                    return this._config.effects[index];
-                });
-                this._config = { ...this._config, effects };
-                this.configChanged(this._config);
-                this.render();
-            });
-        });
-    }
-
-    getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.effect-item:not(.dragging)')];
-
-        return draggableElements.reduce(
-            (closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            },
-            { offset: Number.NEGATIVE_INFINITY }
-        ).element;
     }
 }
 
