@@ -23,15 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
--   Visual editor now works correctly - bundled editor code directly into card.js to fix "setConfig is not a function" error
 -   HACS installation instructions now use correct "Dashboard" category instead of "Lovelace"
 
 ### Changed
 
 -   **Replaced custom drag-and-drop with native `ha-sortable` component** (50% code reduction, improved reliability)
 -   Improved effect item layout with visual separation of handle, content, and actions
--   Editor code is now bundled in card.js instead of dynamically imported from card-editor.js
--   card-editor.js kept as reference file for development
+-   **Extracted editor to separate file** (card-editor.js) with async dynamic import
+-   Cleaner code organization with card and editor in separate files
 
 ### Added
 
