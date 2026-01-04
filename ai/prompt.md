@@ -167,8 +167,9 @@ There should be the following styles:
 -   "Border" (The button border is in the gradient colors)
 -   "Animated Icon" (have the icon cycles through colors instead of the whole button background)
 
-For each of those styles, you can set "Off", "Active", "Inactive", or "Both". (config: just a combination of those 2 booleans)
-Probably that'd be a component on it's own, e.g. `<nanoleaf-effect-button-style>` which generates those 4 options, by toggling "Active" and "Inactive" buttons.
-Styled similarly to a bootstrap button group, with the 2 options next to each other, and toggling them on/off by clicking.
+For each of those styles, you can toggle "Active", "Inactive" and "Hover" (config: 3 booleans).
+That'd be a component and file on it's own, i.e. `<nanoleaf-effect-button-style>` which toggles those booleans - having "Active", "Inactive" and "Hover" buttons,
+styled similarly to a bootstrap button group, with the options next to each other, and toggling them on/off by clicking.
 
-That way you can e.g. have the "Full Background" style only for the active effect, while inactive effects get the bar, and always the animated icon (add that to the example config yaml, too)
+That way you can e.g. have the "Full Background" style only for the active effect, while inactive effects get the bar, border on hover and always the animated icon.
+(add that to the example config yaml in `/README.md`, too)
