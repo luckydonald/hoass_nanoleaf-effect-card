@@ -82,4 +82,15 @@ For effects there should be a sub editor to set those values natively, instead o
 
 In other words, use the <ha-sortable>, followed by a button.
 
-Here's some code copied from a browser render of hui-card-features-editor, so similar to <ha-button-menu fixed=""> <ha-button slot="trigger" appearance="filled" size="small" variant="brand" aria-haspopup="menu"> <ha-svg-icon slot="start"></ha-svg-icon>Add effect </ha-button><ha-list-item mwc-list-item="" tabindex="0" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->Light brightness </ha-list-item> <!----><!----> <ha-list-item mwc-list-item="" tabindex="-1" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->Light color temperature </ha-list-item> <!----><!----> <ha-list-item mwc-list-item="" tabindex="-1" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->Toggle </ha-list-item> <!----> <!--?lit$878466506$--><li divider="" role="separator"></li> <!--?lit$878466506$--><!----> <ha-list-item mwc-list-item="" tabindex="-1" aria-disabled="false" role="menuitem"> <!--?lit$878466506$-->RGB Light Card (Tile feature) </ha-list-item> <!----> </ha-button-menu>
+—————
+
+Please try to extract the editor as it's own file again, using
+
+```
+static async getConfigElement() {
+   await import('./card-editor.js');
+   return document.createElement('nanoleaf-effect-card-editor');
+}
+```
+
+as before.
