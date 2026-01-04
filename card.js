@@ -1,4 +1,34 @@
+/**
+ * Nanoleaf Effect Card
+ *
+ * A custom Home Assistant Lovelace card for controlling Nanoleaf light effects.
+ *
+ * @class NanoleafEffectCard
+ * @extends HTMLElement
+ *
+ * Features:
+ * - Button grid or dropdown display modes
+ * - Custom icons and colors per effect
+ * - Multi-color gradient support with animations
+ * - Turn lights on/off
+ * - Visual editor support (loaded dynamically from card-editor.js)
+ *
+ * @example
+ * ```yaml
+ * type: 'custom:nanoleaf-effect-card'
+ * entity: light.nanoleaf_shapes
+ * display: buttons
+ * effects:
+ *   - name: 'Rainbow'
+ *     icon: 'mdi:rainbow'
+ *     colors: ['#FF0000', '#FFFF00', '#00FF00', '#0000FF']
+ * ```
+ */
 class NanoleafEffectCard extends HTMLElement {
+    /**
+     * Creates an instance of NanoleafEffectCard.
+     * Initializes shadow DOM and default properties.
+     */
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -6,6 +36,20 @@ class NanoleafEffectCard extends HTMLElement {
         this._hass = null;
     }
 
+    /**
+     * Sets the card configuration.
+     * Called by Home Assistant when the card is initialized or config changes.
+     *
+     * @param {Object} config - Card configuration object
+     * @param {string} config.entity - Entity ID of the Nanoleaf light
+     * @param {string} [config.display='buttons'] - Display mode: 'buttons' or 'dropdown'
+     * @param {Object} [config.button_style] - Global button style configuration
+     * @param {string} [config.button_style.inactive_color='#CCCCCC'] - Color for inactive buttons
+     * @param {boolean} [config.button_style.icon=true] - Show icons on buttons
+     * @param {boolean} [config.button_style.name=true] - Show effect names on buttons
+     * @param {Array} [config.effects=[]] - Array of effect configurations
+     * @throws {Error} When entity is not defined
+     */
     setConfig(config) {
         if (!config.entity) {
             throw new Error('You need to define an entity');
@@ -25,11 +69,23 @@ class NanoleafEffectCard extends HTMLElement {
         this.render();
     }
 
+    /**
+     * Sets the Home Assistant object.
+     * Called by Home Assistant when hass object updates.
+     *
+     * @param {Object} hass - Home Assistant object containing states and services
+     */
     set hass(hass) {
         this._hass = hass;
         this.render();
     }
 
+    /**
+     * Returns the card height in units.
+     * Used by Home Assistant for layout calculations.
+     *
+     * @returns {number} Card height (1 for dropdown, calculated for buttons based on effect count)
+     */
     getCardSize() {
         return this._config.display === 'dropdown' ? 1 : Math.ceil((this._config.effects.length + 1) / 3);
     }
@@ -163,6 +219,30 @@ class NanoleafEffectCard extends HTMLElement {
     `;
     }
 
+    /**
+     * Renders the card content.
+     * Creates the shadow DOM content based on current config and state.
+     */
+    render() {
+        // ...existing code...
+    }
+
+    /**
+     * Returns CSS styles for the card.
+     *
+     * @returns {string} CSS style rules as a string
+     */
+    getStyles() {
+        // ...existing code...
+    }
+
+    /**
+     * Renders the dropdown display mode.
+     *
+     * @param {string|null} currentEffect - Currently active effect name
+     * @param {boolean} isOn - Whether the light is on
+     * @returns {string} HTML string for dropdown display
+     */
     renderDropdown(currentEffect, isOn) {
         const effects = [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'] }, ...this._config.effects];
 
@@ -188,6 +268,13 @@ class NanoleafEffectCard extends HTMLElement {
     `;
     }
 
+    /**
+     * Renders the button grid display mode.
+     *
+     * @param {string|null} currentEffect - Currently active effect name
+     * @param {boolean} isOn - Whether the light is on
+     * @returns {string} HTML string for button grid display
+     */
     renderButtons(currentEffect, isOn) {
         const effects = [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'] }, ...this._config.effects];
 
@@ -238,6 +325,15 @@ class NanoleafEffectCard extends HTMLElement {
     `;
     }
 
+    /**
+     * Gets the color array for an effect.
+     * Extracts colors from effect.colors or effect.color, with fallback.
+     *
+     * @param {Object} effect - Effect configuration object
+     * @param {Array<string>} [effect.colors] - Array of hex color strings
+     * @param {string} [effect.color] - Single hex color string
+     * @returns {Array<string>} Array of hex color strings
+     */
     getEffectColors(effect) {
         if (effect.colors && Array.isArray(effect.colors)) {
             return effect.colors;
@@ -248,6 +344,13 @@ class NanoleafEffectCard extends HTMLElement {
         return ['#CCCCCC'];
     }
 
+    /**
+     * Calculates contrasting text color (black or white) for a given background color.
+     * Uses luminance formula to determine readability.
+     *
+     * @param {string} hexColor - Hex color string (with or without #)
+     * @returns {string} '#000000' for light backgrounds, '#FFFFFF' for dark backgrounds
+     */
     getContrastColor(hexColor) {
         // Remove # if present
         const hex = hexColor.replace('#', '');
