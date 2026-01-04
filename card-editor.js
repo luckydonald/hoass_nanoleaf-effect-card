@@ -87,7 +87,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <input
             type="color"
             id="inactive-color"
-            .value="${this._config.button_style?.inactive_color || '#CCCCCC'}"
+            value="${this._config.button_style?.inactive_color || '#CCCCCC'}"
           />
           <div class="info">Color for inactive effect buttons</div>
         </div>
