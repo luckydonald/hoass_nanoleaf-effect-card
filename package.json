@@ -27,6 +27,7 @@
         "yamljs": "^0.3.0"
     },
     "files": [
+        "card-editor.js",
         "card.js"
     ],
     "homepage": "https://github.com/luckydonald/hoass_nanoleaf-effect-card",
