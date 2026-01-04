@@ -78,7 +78,7 @@ Just embed those dynamically - for that one the url would be:
 Please put all summaries and such you wanna write for me into the `ai/` subfolder.
 
 Overwrite/update `ai/TODO.md` with the `# IN PROGRESS` headline.
-In line two of that, write a very short single line git-commit-ready summary of what you are doing.
+In line two of that, write a very short single line git-commit-ready summary of what you are doing, in a markdown quote beginning with the sparkle emoji (`> ✨ Updated something`).
 Below a propper description of your current task in details, your thoughts and planning, and any necessary next steps.
 That way continuation in case of interruptions is possible.
 Automatically edit that first line to `# DONE` once finished, without asking for further confirmation.
