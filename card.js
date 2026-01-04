@@ -63,10 +63,10 @@ class NanoleafEffectCard extends HTMLElement {
         ${this.getStyles()}
       </style>
       ${
-            this._config.display === 'dropdown'
-                ? this.renderDropdown(currentEffect, isOn)
-                : this.renderButtons(currentEffect, isOn)
-        }
+          this._config.display === 'dropdown'
+              ? this.renderDropdown(currentEffect, isOn)
+              : this.renderButtons(currentEffect, isOn)
+      }
     `;
 
         this.attachEventListeners();
@@ -133,7 +133,8 @@ class NanoleafEffectCard extends HTMLElement {
                   const showName = buttonStyle.name !== false;
 
                   const bgColor = isActive ? colors[0] : inactiveColor;
-                  const bgGradient = isActive && colors.length > 1 ? `linear-gradient(135deg, ${colors.join(', ')})` : bgColor;
+                  const bgGradient =
+                      isActive && colors.length > 1 ? `linear-gradient(135deg, ${colors.join(', ')})` : bgColor;
 
                   return `
               <button 
@@ -241,4 +242,8 @@ window.customCards.push({
     documentationURL: 'https://github.com/luckydonald/hoass_nanoleaf-effect-card',
 });
 
-console.info('%c NANOLEAF-EFFECT-CARD %c v0.0.0 ', 'color: white; background: #03a9f4; font-weight: 700;', 'color: #03a9f4; background: white; font-weight: 700;');
+console.info(
+    '%c NANOLEAF-EFFECT-CARD %c v0.0.0 ',
+    'color: white; background: #03a9f4; font-weight: 700;',
+    'color: #03a9f4; background: white; font-weight: 700;'
+);

@@ -40,7 +40,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     set hass(hass) {
         this._hass = hass;
         // Update entity picker if it exists
-        const entityPicker = this.shadowRoot?.querySelector('ha-entity-picker');
+        const entityPicker = this.shadowRoot?.querySelector('#entity-picker');
         if (entityPicker) {
             entityPicker.hass = hass;
         }
@@ -256,14 +256,14 @@ class NanoleafEffectCardEditor extends HTMLElement {
               <ha-radio
                 name="display"
                 value="buttons"
-                .checked="${this._config.display !== 'dropdown'}"
+                ${this._config.display !== 'dropdown' ? 'checked' : ''}
               ></ha-radio>
             </ha-formfield>
             <ha-formfield label="Dropdown">
               <ha-radio
                 name="display"
                 value="dropdown"
-                .checked="${this._config.display === 'dropdown'}"
+                ${this._config.display === 'dropdown' ? 'checked' : ''}
               ></ha-radio>
             </ha-formfield>
           </div>
@@ -286,7 +286,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <ha-formfield label="Show Icons">
             <ha-switch
               id="show-icon"
-              .checked="${this._config.button_style?.icon !== false}"
+              ${this._config.button_style?.icon !== false ? 'checked' : ''}
             ></ha-switch>
           </ha-formfield>
         </div>
@@ -295,7 +295,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <ha-formfield label="Show Effect Names">
             <ha-switch
               id="show-name"
-              .checked="${this._config.button_style?.name !== false}"
+              ${this._config.button_style?.name !== false ? 'checked' : ''}
             ></ha-switch>
           </ha-formfield>
         </div>
@@ -311,13 +311,14 @@ class NanoleafEffectCardEditor extends HTMLElement {
         </ha-sortable>
         <ha-button 
           id="add-effect"
-          .label="${'Add Effect'}"
+          .label="Add Effect"
         >
-          <ha-svg-icon slot="icon" .path="${'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z'}"></ha-svg-icon>
+          <ha-svg-icon slot="icon" .path="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"></ha-svg-icon>
         </ha-button>
       </div>
     `;
 
+        // After injecting HTML, attach listeners and set proper element properties
         this.attachEventListeners();
     }
 
@@ -422,8 +423,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
         const entityPicker = this.shadowRoot.querySelector('#entity-picker');
         if (entityPicker && this._hass) {
             entityPicker.hass = this._hass;
+            // Use change instead of value-changed to be more compatible
             entityPicker.addEventListener('value-changed', (e) => {
-                this._config = { ...this._config, entity: e.detail.value };
+                const value = e.detail?.value ?? e.target.value ?? entityPicker.value;
+                this._config = { ...this._config, entity: value };
                 this.configChanged(this._config);
             });
         }
@@ -444,10 +447,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         inactiveColorInput?.addEventListener('input', (e) => {
             this._config = {
                 ...this._config,
-                button_style: {
-                    ...(this._config.button_style || {}),
-                    inactive_color: e.target.value,
-                },
+                button_style: { ...(this._config.button_style || {}), inactive_color: e.target.value },
             };
             this.configChanged(this._config);
         });
@@ -457,10 +457,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         showIconSwitch?.addEventListener('change', (e) => {
             this._config = {
                 ...this._config,
-                button_style: {
-                    ...(this._config.button_style || {}),
-                    icon: e.target.checked,
-                },
+                button_style: { ...(this._config.button_style || {}), icon: e.target.checked },
             };
             this.configChanged(this._config);
         });
@@ -470,10 +467,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         showNameSwitch?.addEventListener('change', (e) => {
             this._config = {
                 ...this._config,
-                button_style: {
-                    ...(this._config.button_style || {}),
-                    name: e.target.checked,
-                },
+                button_style: { ...(this._config.button_style || {}), name: e.target.checked },
             };
             this.configChanged(this._config);
         });
@@ -486,17 +480,14 @@ class NanoleafEffectCardEditor extends HTMLElement {
             effects.splice(e.detail.newIndex, 0, movedEffect);
             this._config = { ...this._config, effects };
             this.configChanged(this._config);
+            this.render();
         });
 
         // Add effect button
         const addEffectButton = this.shadowRoot.querySelector('#add-effect');
         addEffectButton?.addEventListener('click', () => {
             const effects = [...(this._config.effects || [])];
-            effects.push({
-                name: '',
-                icon: 'mdi:lightbulb',
-                colors: ['#CCCCCC'],
-            });
+            effects.push({ name: '', icon: 'mdi:lightbulb', colors: ['#CCCCCC'] });
             this._config = { ...this._config, effects };
             this.configChanged(this._config);
             this.render();
@@ -510,6 +501,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 effects[index] = { ...effects[index], name: e.target.value };
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
+                // avoid re-rendering here to not disrupt typing/focus
             });
         });
 
