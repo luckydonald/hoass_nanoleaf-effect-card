@@ -305,6 +305,8 @@ class NanoleafEffectCard extends HTMLElement {
   }
 
   static getConfigElement() {
+    // Dynamically import the editor
+    import('./card-editor.js');
     return document.createElement('nanoleaf-effect-card-editor');
   }
 
