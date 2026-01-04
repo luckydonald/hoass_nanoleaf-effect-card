@@ -28,6 +28,7 @@
     },
     "files": [
         "card-editor.js",
+        "card-editor-button-style-chooser.js",
         "card.js"
     ],
     "homepage": "https://github.com/luckydonald/hoass_nanoleaf-effect-card",
