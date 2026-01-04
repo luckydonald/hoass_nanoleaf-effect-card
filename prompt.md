@@ -24,40 +24,40 @@ entities:
     # Card configuration starts here
     - type: 'custom:nanolead-effect-card'
       entity: light.example_hue_shapes
-      display: buttons  # Options: 'dropdown' or 'buttons' (default: 'buttons')
+      display: buttons # Options: 'dropdown' or 'buttons' (default: 'buttons')
       button_style:
-        inactive_color: '#CCCCCC' # = default if omitted
-        icon: true  # default: true
-        name: true  # default: true
+          inactive_color: '#CCCCCC' # = default if omitted
+          icon: true # default: true
+          name: true # default: true
       effects:
-        - name: 'Rainbow'
-          icon: 'mdi:rainbow'
-          color: '#FF00FF'
-          # you could overwrite the button_style for each button:
-          button_style:
-              inactive_color: '#AAAAAA'
-        - name: 'Sunrise'
-          icon: 'mdi:weather-sunset-up'
-          colors:
-            - '#FFA500'
-            - '#FFFF00'
-            - '#FF4500'
-        - name: 'Party'
-          icon: 'mdi:party-popper'
-          colors:
-            - '#FF0000'
-            - '#00FF00'
-            - '#0000FF'
-        - name: 'Relax'
-          icon: 'mdi:spa'
-          colors:
-            - '#ADD8E6'
-            - '#90EE90'
-            - '#FFB6C1'
-        - name: 'Nightlight'
-          icon: 'mdi:weather-night'
-          colors:
-            - '#00008B'
-            - '#4B0082'
-            - '#2F4F4F'
+          - name: 'Rainbow'
+            icon: 'mdi:rainbow'
+            color: '#FF00FF'
+            # you could overwrite the button_style for each button:
+            button_style:
+                inactive_color: '#AAAAAA'
+          - name: 'Sunrise'
+            icon: 'mdi:weather-sunset-up'
+            colors:
+                - '#FFA500'
+                - '#FFFF00'
+                - '#FF4500'
+          - name: 'Party'
+            icon: 'mdi:party-popper'
+            colors:
+                - '#FF0000'
+                - '#00FF00'
+                - '#0000FF'
+          - name: 'Relax'
+            icon: 'mdi:spa'
+            colors:
+                - '#ADD8E6'
+                - '#90EE90'
+                - '#FFB6C1'
+          - name: 'Nightlight'
+            icon: 'mdi:weather-night'
+            colors:
+                - '#00008B'
+                - '#4B0082'
+                - '#2F4F4F'
 ```
