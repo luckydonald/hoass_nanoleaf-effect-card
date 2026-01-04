@@ -8,9 +8,8 @@ global.window = dom.window;
 global.HTMLElement = dom.window.HTMLElement;
 global.customElements = dom.window.customElements;
 
-// Import the card after setting up the DOM
-// Note: This is a placeholder. You'll need to adjust based on your actual implementation
-// import '../card.js';
+// Import the card after setting up the DOM so customElements are registered
+import './card.js';
 
 describe('NanoleafEffectCard', () => {
     let card;
