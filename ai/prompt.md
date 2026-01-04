@@ -64,6 +64,10 @@ entities:
 
 ———————
 
+Use yarn.
+
+———————
+
 For the demo.html, generate a polyfill for `<ha-icon icon="mdi:weather-sunset-up"></ha-icon>` and similar.
 
 Just embed those dynamically - for that one the url would be:
