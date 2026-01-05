@@ -86,6 +86,27 @@ class NanoleafEffectCard extends HTMLElement {
     `;
 
         this.attachEventListeners();
+
+        // Ensure compact classes are applied in the DOM (helps tests and dynamic updates)
+        const containerEl = this.shadowRoot.querySelector('.buttons-container');
+        if (containerEl) {
+            if (this._config.button_style?.compact) {
+                containerEl.classList.add('compact-grid');
+            } else {
+                containerEl.classList.remove('compact-grid');
+            }
+            // Apply compact class to each button as needed (global fallback)
+            this.shadowRoot.querySelectorAll('.effect-button').forEach((btn) => {
+                const effectName = btn.getAttribute('data-effect');
+                const effect = (this._config.effects || []).find((e) => e.name === effectName) || null;
+                const perEffectCompact = effect?.button_style?.compact === true;
+                if (perEffectCompact || this._config.button_style?.compact) {
+                    btn.classList.add('compact');
+                } else {
+                    btn.classList.remove('compact');
+                }
+            });
+        }
     }
 
     getStyles() {
