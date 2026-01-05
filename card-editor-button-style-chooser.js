@@ -8,13 +8,20 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
     }
 
     set value(v) {
-        // Deep-clone incoming value to avoid shared references between chooser instances
-        try {
-            this._value = v ? JSON.parse(JSON.stringify(v)) : {};
-        } catch (e) {
-            // Fallback to shallow copy
-            this._value = v ? { ...v } : {};
-        }
+        // Merge incoming value with existing internal state to preserve transient flags
+        const incoming = v || {};
+        const keys = ['full_background', 'small_bar', 'text', 'border', 'animated_icon'];
+        const merged = { ...this._value };
+        keys.forEach((k) => {
+            const prev = this._value[k] || { active: false, inactive: false, hover: false };
+            const inc = incoming[k] || {};
+            merged[k] = {
+                active: typeof inc.active === 'boolean' ? inc.active : prev.active,
+                inactive: typeof inc.inactive === 'boolean' ? inc.inactive : prev.inactive,
+                hover: typeof inc.hover === 'boolean' ? inc.hover : prev.hover,
+            };
+        });
+        this._value = merged;
         this.render();
     }
 
