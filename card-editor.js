@@ -930,7 +930,6 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <nanoleaf-effect-card-card-editor-button-style-chooser
             class="button-style"
             .value="${effect.button_style || {}}"
-            compact
           />
         </div>
         <div class="effect-actions">
