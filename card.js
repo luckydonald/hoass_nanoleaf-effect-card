@@ -256,12 +256,16 @@ class NanoleafEffectCard extends HTMLElement {
 
                    // prepare inline styles
                    // Full background or flat background
-                   const fullBg = applyStyle('full_background') ? `background: ${bgGradient};` : `background: ${bgColor};`;
+                   const fullBg = applyStyle('full_background')
+                       ? `background: ${bgGradient};`
+                       : `background: ${bgColor};`;
 
                    // Determine text/icon gradient class and inline style when 'text' style applies
                    const textEnabled = applyStyle('text');
                    const textClass = textEnabled ? 'text-gradient' : '';
-                   const textStyleInline = textEnabled ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;` : '';
+                   const textStyleInline = textEnabled
+                       ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`
+                       : '';
                    const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
                    // compact class if globally compact or per-effect override
