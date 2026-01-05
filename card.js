@@ -449,10 +449,16 @@ class NanoleafEffectCard extends HTMLElement {
             .map((entity) => entity.entity_id);
     }
 
+    static getExampleEntityId() {
+        const supportedEntityIds = this.getSupportedEntityIds(ha);
+        return supportedEntityIds[0] ?? 'light.example_nanoleaf_shapes';
+    }
+
     static getStubConfig() {
+        const entity = this.getExampleEntityId();
         return {
             type: 'custom:nanoleaf-effect-card',
-            entity: '',
+            entity,
             display: 'buttons',
             effects: [],
             show_off: true,
@@ -464,7 +470,7 @@ class NanoleafEffectCard extends HTMLElement {
 class NanoleafEffectEntity extends NanoleafEffectCard {
     static getStubConfig(ha, stateObj) {
         const baseConfig = super.getStubConfig(ha, stateObj);
-        const entity = baseConfig.entity || 'light.example_nanoleaf_light';
+        const entity = baseConfig.entity;
         return {
             type: 'entities',
             show_header_toggle: false,
@@ -486,7 +492,6 @@ class NanoleafEffectEntity extends NanoleafEffectCard {
 class NanoleafEffectFeature extends NanoleafEffectCard {
     static getStubConfig(ha, stateObj) {
         const baseConfig = super.getStubConfig(ha, stateObj);
-        const entity = baseConfig.entity || 'light.example_nanoleaf_light';
         return {
             // make sure the type is up top:
             type: 'custom:nanoleaf-effect-feature',
