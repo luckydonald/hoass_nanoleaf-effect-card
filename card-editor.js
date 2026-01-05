@@ -1,4 +1,5 @@
 import './card-editor-button-style-chooser.js';
+import './card-editor-effect-picker.js';
 
 /**
  * Nanoleaf Effect Card Editor
@@ -247,6 +248,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 const value = e.detail?.value ?? e.target.value ?? entityPicker.value;
                 this._config = { ...this._config, entity: value };
                 this.updateEffectListSuggestions(value);
+                // Re-render effects area so per-effect pickers receive the new entity/hass
+                this.renderEffectsArea();
                 this.configChanged(this._config);
             });
         }
@@ -533,9 +536,6 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <div class="info">Select your Nanoleaf light entity</div>
         </div>
 
-        <!-- datalist used to provide autocomplete suggestions for effect names -->
-        <datalist id="effects-datalist"></datalist>
-
         <div class="setting">
           <label>Display Mode</label>
           <div class="radio-group">
@@ -648,9 +648,32 @@ class NanoleafEffectCardEditor extends HTMLElement {
         // Attach listeners for effects area (separate to avoid full re-renders)
         this.attachEffectsListeners();
 
-        // ensure each effect name input uses the datalist for autocomplete
-        this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
-            input.setAttribute('list', 'effects-datalist');
+        // Initialize per-effect `card-editor-effect-picker` elements and wire them to hass/entity/value
+        this.shadowRoot.querySelectorAll('.effect-picker').forEach((picker) => {
+            try {
+                // set hass, entity and initial value
+                picker.hass = this._hass;
+                picker.entity = this._config.entity;
+                const idx = parseInt(picker.dataset.index);
+                picker.value = this._config.effects?.[idx]?.name || '';
+            } catch (e) {}
+
+            if (picker._nanoleaf_bound) return;
+            picker._nanoleaf_bound = true;
+            picker.addEventListener('value-changed', (e) => {
+                const idx = parseInt(picker.dataset.index);
+                const effects = [...(this._config.effects || [])];
+                effects[idx] = { ...effects[idx], name: e.detail.value };
+                this._config = { ...this._config, effects };
+                this.configChanged(this._config);
+                // update the corresponding text input (if present) and validation
+                const input = this.shadowRoot.querySelector(`.effect-name-input[data-index="${idx}"]`);
+                if (input) {
+                    input.value = e.detail.value || '';
+                    const isValid = !e.detail.value || (this._effectList && this._effectList.includes(e.detail.value));
+                    input.classList.toggle('invalid', !isValid);
+                }
+            });
         });
 
         // If we already have an entity and hass, populate suggestions
@@ -898,12 +921,12 @@ class NanoleafEffectCardEditor extends HTMLElement {
         return effects
             .map(
                 (effect, index) => `
-      <div class="effect-item" data-index="${index}">
-        <div class="handle">
-          <ha-icon icon="mdi:drag"></ha-icon>
-        </div>
-        <div class="effect-content">
-          <div class="effect-header">
+       <div class="effect-item" data-index="${index}">
+         <div class="handle">
+           <ha-icon icon="mdi:drag"></ha-icon>
+         </div>
+         <div class="effect-content">
+           <div class="effect-header">
             <input
               type="text"
               id="effect-name-${index}"
@@ -912,32 +935,33 @@ class NanoleafEffectCardEditor extends HTMLElement {
               value="${effect.name || ''}"
               data-index="${index}"
             />
-          </div>
-          <div class="effect-row">
-            <label>Icon</label>
-            <ha-icon-picker
-              class="effect-icon"
-              .value="${effect.icon || 'mdi:lightbulb'}"
-              data-index="${index}"
-            ></ha-icon-picker>
-          </div>
-          <div class="effect-row">
-            <label>Colors</label>
-            <div class="colors-container">
+            <card-editor-effect-picker class="effect-picker" data-index="${index}"></card-editor-effect-picker>
+           </div>
+           <div class="effect-row">
+             <label>Icon</label>
+             <ha-icon-picker
+               class="effect-icon"
+               .value="${effect.icon || 'mdi:lightbulb'}"
+               data-index="${index}"
+             ></ha-icon-picker>
+           </div>
+           <div class="effect-row">
+             <label>Colors</label>
+             <div class="colors-container">
               ${this.renderColorInputs(effect, index)}
-            </div>
-          </div>
-          <nanoleaf-effect-card-card-editor-button-style-chooser
-            class="button-style"
-            .value="${effect.button_style || {}}"
-          />
-        </div>
-        <div class="effect-actions">
+             </div>
+           </div>
+           <nanoleaf-effect-card-card-editor-button-style-chooser
+             class="button-style"
+             .value="${effect.button_style || {}}"
+           />
+         </div>
+         <div class="effect-actions">
           <button id="delete-effect-${index}" class="icon-button delete" data-index="${index}" title="Delete effect">
             <ha-icon icon="mdi:delete"></ha-icon>
           </button>
-        </div>
-      </div>
+         </div>
+       </div>
     `
             )
             .join('');
