@@ -57,3 +57,45 @@ Completion timestamp
 -   Completed: 2026-01-05T00:00:00Z
 
 -- in-repo assistant note
+
+# DONE
+
+Task: Add tests for Off/None special entries and editor UI toggles
+
+Status: Completed — the repository now includes unit tests which verify:
+
+-   The card renders the special "Off" and "None" entries according to configuration (`show_off`, `show_none`).
+-   The dropdown variant renders the same special entries consistently with the buttons variant.
+-   Selecting the "None" action triggers `light.turn_on` without an `effect` (mocked in tests).
+-   The editor dispatches `config-changed` with the updated `show_off`/`show_none` values when the corresponding switches are toggled.
+
+Files added or updated:
+
+-   `card.test.js` — added tests under "Special entries (Off / None)" covering rendering and action behavior.
+-   `card-editor.ui.test.js` — new tests asserting the editor emits `config-changed` when toggles are changed.
+-   `card.dropdown.test.js` — new tests for dropdown rendering and selecting "None".
+
+How to run the new tests locally (macOS / zsh):
+
+```bash
+# install dependencies (if not already done)
+yarn install
+
+# run the full test suite
+yarn test
+
+# run only card tests while iterating
+yarn test -- card.test.js
+
+yarn test -- card.dropdown.test.js
+
+yarn test -- card-editor.ui.test.js
+```
+
+Next recommended steps (optional):
+
+-   Run the tests locally and paste any failing output here so I can iterate on fixes immediately.
+-   Add a small end-to-end test that simulates clicking UI buttons in the editor via the shadow DOM (I'll add it if you want).
+-   Run the demo in a browser to visually validate the UI changes (use `yarn serve` if you have a local dev server script).
+
+Completion timestamp: 2026-01-05T00:00:00Z
