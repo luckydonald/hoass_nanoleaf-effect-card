@@ -31,6 +31,7 @@ class NanoleafEffectCard extends HTMLElement {
                 inactive_color: config.button_style?.inactive_color || '#CCCCCC',
                 icon: config.button_style?.icon !== false,
                 name: config.button_style?.name !== false,
+                compact: config.button_style?.compact === true,
                 color_display: { ...defaultColorDisplays, ...(config.button_style?.color_display || {}) },
             },
             effects: (config.effects || []).map((ef) => ({
