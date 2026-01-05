@@ -449,13 +449,13 @@ class NanoleafEffectCard extends HTMLElement {
             .map((entity) => entity.entity_id);
     }
 
-    static getExampleEntityId() {
+    static getExampleEntityId(ha) {
         const supportedEntityIds = this.getSupportedEntityIds(ha);
         return supportedEntityIds[0] ?? 'light.example_nanoleaf_shapes';
     }
 
-    static getStubConfig() {
-        const entity = this.getExampleEntityId();
+    static getStubConfig(ha, stateObj) {
+        const entity = this.getExampleEntityId(ha);
         return {
             type: 'custom:nanoleaf-effect-card',
             entity,
