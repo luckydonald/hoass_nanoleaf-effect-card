@@ -152,6 +152,105 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.dispatchEvent(event);
     }
 
+    // Attach listeners for global controls (non-effects area)
+    attachEventListeners() {
+        // Entity picker
+        const entityPicker = this.shadowRoot.querySelector('#entity-picker');
+        if (entityPicker && !entityPicker._nanoleaf_bound) {
+            entityPicker._nanoleaf_bound = true;
+            try {
+                entityPicker.hass = this._hass;
+            } catch (e) {}
+            entityPicker.addEventListener('value-changed', (e) => {
+                const value = e.detail?.value ?? e.target.value ?? entityPicker.value;
+                this._config = { ...this._config, entity: value };
+                this.updateEffectListSuggestions(value);
+                this.configChanged(this._config);
+            });
+        }
+
+        // Display mode radios
+        this.shadowRoot.querySelectorAll('ha-radio').forEach((radio) => {
+            if (radio._nanoleaf_bound) return;
+            radio._nanoleaf_bound = true;
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this._config = { ...this._config, display: e.target.value };
+                    this.configChanged(this._config);
+                    // Full render may be required to switch dropdown/buttons UI
+                    this.render();
+                }
+            });
+        });
+
+        // Inactive color
+        const inactiveColorInput = this.shadowRoot.querySelector('#inactive-color');
+        if (inactiveColorInput && !inactiveColorInput._nanoleaf_bound) {
+            inactiveColorInput._nanoleaf_bound = true;
+            inactiveColorInput.addEventListener('input', (e) => {
+                this._config = {
+                    ...this._config,
+                    button_style: { ...(this._config.button_style || {}), inactive_color: e.target.value },
+                };
+                this.configChanged(this._config);
+                // partial update of effects area to reflect new inactive color
+                this.renderEffectsArea();
+            });
+        }
+
+        // Show icon/name/compact switches
+        const showIcon = this.shadowRoot.querySelector('#show-icon');
+        if (showIcon && !showIcon._nanoleaf_bound) {
+            showIcon._nanoleaf_bound = true;
+            showIcon.addEventListener('change', (e) => {
+                this._config = {
+                    ...this._config,
+                    button_style: { ...(this._config.button_style || {}), icon: e.target.checked },
+                };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
+        const showName = this.shadowRoot.querySelector('#show-name');
+        if (showName && !showName._nanoleaf_bound) {
+            showName._nanoleaf_bound = true;
+            showName.addEventListener('change', (e) => {
+                this._config = {
+                    ...this._config,
+                    button_style: { ...(this._config.button_style || {}), name: e.target.checked },
+                };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
+        const compactSwitch = this.shadowRoot.querySelector('#compact-style');
+        if (compactSwitch && !compactSwitch._nanoleaf_bound) {
+            compactSwitch._nanoleaf_bound = true;
+            compactSwitch.addEventListener('change', (e) => {
+                this._config = {
+                    ...this._config,
+                    button_style: { ...(this._config.button_style || {}), compact: e.target.checked },
+                };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
+
+        // Add effect button (partial render)
+        const addEffectButton = this.shadowRoot.querySelector('#add-effect');
+        if (addEffectButton && !addEffectButton._nanoleaf_bound) {
+            addEffectButton._nanoleaf_bound = true;
+            addEffectButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                const effects = [...(this._config.effects || [])];
+                effects.push({ name: '', icon: 'mdi:lightbulb', colors: ['#CCCCCC'] });
+                this._config = { ...this._config, effects };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
+    }
+
     /**
      * Renders the editor UI.
      * Creates all form fields using native HA components and the effects list editor.
@@ -420,7 +519,13 @@ class NanoleafEffectCardEditor extends HTMLElement {
     `;
 
         // After injecting HTML, attach listeners and set proper element properties
-        this.attachEventListeners();
+        if (typeof this.attachEventListeners === 'function') {
+            this.attachEventListeners();
+        } else {
+            // Defensive: some test envs might not have the method (avoid throwing)
+            // eslint-disable-next-line no-console
+            console.warn('attachEventListeners is not defined on editor instance');
+        }
         // Attach listeners for effects area (separate to avoid full re-renders)
         this.attachEffectsListeners();
 
@@ -521,7 +626,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
     attachEffectsListeners() {
         // ha-sortable for reordering effects
         const sortable = this.shadowRoot.querySelector('#effects-sortable');
-        if (sortable) {
+        if (sortable && !sortable._nanoleaf_bound) {
+            sortable._nanoleaf_bound = true;
             sortable.addEventListener('item-moved', (e) => {
                 const effects = [...(this._config.effects || [])];
                 const movedEffect = effects.splice(e.detail.oldIndex, 1)[0];
@@ -534,6 +640,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Effect name inputs
         this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
+            if (input._nanoleaf_bound) return;
+            input._nanoleaf_bound = true;
             input.addEventListener('input', (e) => {
                 const index = parseInt(e.target.dataset.index);
                 const effects = [...(this._config.effects || [])];
@@ -550,6 +658,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Effect icon pickers
         this.shadowRoot.querySelectorAll('.effect-icon').forEach((picker) => {
+            if (picker._nanoleaf_bound) return;
+            picker._nanoleaf_bound = true;
             picker.addEventListener('value-changed', (e) => {
                 const index = parseInt(picker.dataset.index);
                 const effects = [...(this._config.effects || [])];
@@ -561,6 +671,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Color inputs
         this.shadowRoot.querySelectorAll('.color-input').forEach((input) => {
+            if (input._nanoleaf_bound) return;
+            input._nanoleaf_bound = true;
             input.addEventListener('input', (e) => {
                 const effectIndex = parseInt(e.target.dataset.effectIndex);
                 const colorIndex = parseInt(e.target.dataset.colorIndex);
@@ -575,6 +687,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Add color buttons
         this.shadowRoot.querySelectorAll('.add-color').forEach((button) => {
+            if (button._nanoleaf_bound) return;
+            button._nanoleaf_bound = true;
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const effectIndex = parseInt(button.dataset.effectIndex);
@@ -590,6 +704,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Delete color buttons (trash) - remove a color from an effect
         this.shadowRoot.querySelectorAll('.delete-color').forEach((button) => {
+            if (button._nanoleaf_bound) return;
+            button._nanoleaf_bound = true;
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const effectIndex = parseInt(button.dataset.effectIndex);
@@ -611,6 +727,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Delete effect buttons
         this.shadowRoot.querySelectorAll('.delete').forEach((button) => {
+            if (button._nanoleaf_bound) return;
+            button._nanoleaf_bound = true;
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const index = parseInt(button.dataset.index);
@@ -624,6 +742,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // Button style value-changed events
         this.shadowRoot.querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser').forEach((comp) => {
+            if (comp._nanoleaf_bound) return;
+            comp._nanoleaf_bound = true;
             comp.addEventListener('value-changed', (e) => {
                 const index = parseInt(comp.closest('.effect-item').dataset.index);
                 const effects = [...(this._config.effects || [])];
