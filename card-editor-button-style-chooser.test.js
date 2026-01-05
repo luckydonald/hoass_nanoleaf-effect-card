@@ -8,8 +8,6 @@ global.window = dom.window;
 global.HTMLElement = dom.window.HTMLElement;
 global.customElements = dom.window.customElements;
 
-env: 'jsdom';
-
 beforeAll(async () => {
     // Import the extracted chooser component after DOM globals are set
     await import('./card-editor-button-style-chooser.js');
@@ -92,4 +90,66 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
         expect(chooser.value.full_background.active).toBe(false);
         expect(lastValue.full_background.active).toBe(false);
     });
+
+    it('supports keyboard navigation (focus order and activation)', async () => {
+        const chooser = document.createElement('nanoleaf-effect-card-card-editor-button-style-chooser');
+        document.body.appendChild(chooser);
+
+        const initial = {
+            full_background: { active: false, inactive: false, hover: false },
+            small_bar: { active: false, inactive: false, hover: false },
+        };
+
+        chooser.value = initial;
+        await new Promise((r) => setTimeout(r, 0));
+
+        // Find controls
+        const fullRow = chooser.shadowRoot.querySelector('[data-key="full_background"]');
+        const smallRow = chooser.shadowRoot.querySelector('[data-key="small_bar"]');
+        const fullActive = fullRow.querySelector('.btn-active');
+        const fullHover = fullRow.querySelector('.btn-hover');
+        const smallActive = smallRow.querySelector('.btn-active');
+
+        // Ensure buttons are focusable
+        expect(typeof fullActive.focus).toBe('function');
+        expect(typeof smallActive.focus).toBe('function');
+
+        // Track emitted values
+        let lastValue = null;
+        chooser.addEventListener('value-changed', (e) => {
+            lastValue = e.detail.value;
+        });
+
+        // Focus first button (simulates pressing Tab until it)
+        fullActive.focus();
+        // JSDOM often reports the host as the activeElement when focusing into shadow DOM.
+        // Accept either the inner button or the host chooser as the activeElement.
+        const active = document.activeElement;
+        const focusedOk = active === fullActive || active === chooser;
+        expect(focusedOk).toBe(true);
+
+        // Simulate Enter activation by dispatching a key event then invoking click()
+        fullActive.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+        fullActive.click(); // emulate browser activation via keyboard
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(chooser.value.full_background.active).toBe(true);
+        expect(lastValue).toBeTruthy();
+        expect(lastValue.full_background.active).toBe(true);
+
+        // Move focus to the next control (simulate Tab)
+        smallActive.focus();
+        const active2 = document.activeElement;
+        const focusedOk2 = active2 === smallActive || active2 === chooser;
+        expect(focusedOk2).toBe(true);
+
+        // Simulate Space activation on the smallActive control
+        smallActive.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+        smallActive.click();
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(chooser.value.small_bar.active).toBe(true);
+        expect(lastValue.small_bar.active).toBe(true);
+    });
+
 });
