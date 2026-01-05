@@ -101,6 +101,12 @@ class NanoleafEffectCard extends HTMLElement {
       .button-icon { font-size: 24px; margin-bottom: 4px; display:inline-flex; align-items:center; justify-content:center; }
       .button-name { font-size: 12px; text-align: center; word-wrap: break-word; }
 
+      /* Compact / inline button style */
+      .effect-button.compact { flex-direction: row; align-items: center; gap: 8px; padding: 6px 8px; min-height: 40px; }
+      .effect-button.compact .button-icon { font-size: 18px; margin-bottom: 0; margin-right: 6px; }
+      .effect-button.compact .button-name { font-size: 12px; text-align: left; }
+      .buttons-container.compact-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
       .color-bar { transition: all 0.3s ease; }
 
       .icon-animated ha-icon { animation: hueRotate 3s linear infinite; }
@@ -148,7 +154,7 @@ class NanoleafEffectCard extends HTMLElement {
 
         return `
       <div class="effect-card">
-        <div class="buttons-container">
+        <div class="buttons-container ${this._config.button_style?.compact ? 'compact-grid' : ''}">
           ${effects
               .map((effect) => {
                   const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
@@ -186,6 +192,12 @@ class NanoleafEffectCard extends HTMLElement {
                       : '';
                   const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
+                  // compact class if globally compact or per-effect override
+                  const compactClass =
+                      (effect.button_style && effect.button_style.compact) || this._config.button_style?.compact
+                          ? 'compact'
+                          : '';
+
                   // hover data attrs
                   const hoverAttrs = [];
                   if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
@@ -194,46 +206,46 @@ class NanoleafEffectCard extends HTMLElement {
                   if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
 
                   return `
-              <button 
-                class="effect-button ${isActive ? 'active' : 'inactive'}" 
-                data-effect="${effect.name}"
-                ${hoverAttrs.join(' ')}
-                style="${fullBg} ${borderStyle} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
+               <button 
+                class="effect-button ${isActive ? 'active' : 'inactive'} ${compactClass}" 
+                 data-effect="${effect.name}"
+                 ${hoverAttrs.join(' ')}
+                 style="${fullBg} ${borderStyle} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
                       colors[0] || inactiveColor
                   )};"
-              >
-                <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                ${
-                    showIcon
-                        ? `
-                  <div class="button-icon ${iconAnimatedClass}" style="${textGradientStyle}">
-                    <ha-icon icon="${effect.icon || 'mdi:lightbulb'}"></ha-icon>
-                  </div>
-                `
-                        : ''
-                }
-                ${
-                    showName
-                        ? `
-                  <div class="button-name" style="${textGradientStyle}">${effect.name}</div>
-                `
-                        : ''
-                }
-                ${
-                    applyStyle('small_bar')
-                        ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${
-                              applyHover('small_bar') ? 0.6 : 1
-                          };"></div>`
-                        : ''
-                }
-                </div>
-              </button>
-            `;
+               >
+                 <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                 ${
+                     showIcon
+                         ? `
+                   <div class="button-icon ${iconAnimatedClass}" style="${textGradientStyle}">
+                     <ha-icon icon="${effect.icon || 'mdi:lightbulb'}"></ha-icon>
+                   </div>
+                 `
+                         : ''
+                 }
+                 ${
+                     showName
+                         ? `
+                   <div class="button-name" style="${textGradientStyle}">${effect.name}</div>
+                 `
+                         : ''
+                 }
+                 ${
+                     applyStyle('small_bar')
+                         ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${
+                               applyHover('small_bar') ? 0.6 : 1
+                           };"></div>`
+                         : ''
+                 }
+                 </div>
+               </button>
+             `;
               })
               .join('')}
-        </div>
-      </div>
-    `;
+         </div>
+       </div>
+     `;
     }
 
     getEffectColors(effect) {
