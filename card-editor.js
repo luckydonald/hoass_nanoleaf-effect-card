@@ -567,7 +567,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         <div class="setting">
           <label>Color Display Styles</label>
-          <nanoleaf-effect-card-card-editor-button-style-chooser id="global-style-chooser" compact></nanoleaf-effect-card-card-editor-button-style-chooser>
+          <nanoleaf-effect-card-card-editor-button-style-chooser id="global-style-chooser" />
           <div class="info">Configure how colors are displayed for active/inactive/hover states</div>
         </div>
 
@@ -868,7 +868,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <nanoleaf-effect-card-card-editor-button-style-chooser
             class="button-style"
             .value="${effect.button_style || {}}"
-          ></nanoleaf-effect-card-card-editor-button-style-chooser>
+            compact
+          />
         </div>
         <div class="effect-actions">
           <button id="delete-effect-${index}" class="icon-button delete" data-index="${index}" title="Delete effect">
