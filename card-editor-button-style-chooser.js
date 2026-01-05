@@ -35,7 +35,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
         .group { display:flex; flex-direction:column; gap:6px; }
         .group.compact { flex-direction:row; flex-wrap:wrap; gap:12px; }
         .item { display:flex; align-items:center; gap:8px; }
-        .item.compact { flex-direction:column; align-items:flex-start; width:160px; }
+        .item.compact { flex-direction:column; align-items:flex-start; min-width:160px; }
         .label { width:140px; font-size:13px; color:var(--primary-text-color); }
         .toggles { display:flex; gap:8px; }
         .toggle-btn { padding:6px 8px; border:1px solid var(--divider-color); border-radius:6px; background:transparent; cursor:pointer; font-size:12px; }
