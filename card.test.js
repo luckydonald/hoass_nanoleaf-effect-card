@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 
 // Setup DOM environment
@@ -149,6 +149,44 @@ describe('NanoleafEffectCard', () => {
             expect(stub).toHaveProperty('entity');
             expect(stub).toHaveProperty('display');
             expect(stub).toHaveProperty('effects');
+        });
+    });
+
+    describe('Special entries (Off / None)', () => {
+        it('should render "None" and not "Off" when configured', async () => {
+            card.setConfig({ entity: 'light.test_nanoleaf', effects: [], show_off: false, show_none: true });
+            // setConfig defers render to a microtask
+            await Promise.resolve();
+
+            const html = card.shadowRoot?.innerHTML || '';
+            expect(html).toContain('data-effect="None"');
+            expect(html).not.toContain('data-effect="Off"');
+        });
+
+        it('should default to showing Off when not explicitly disabled', async () => {
+            card.setConfig({ entity: 'light.test_nanoleaf', effects: [] /* defaults */ });
+            await Promise.resolve();
+
+            const html = card.shadowRoot?.innerHTML || '';
+            // Off button should be present by default
+            expect(html).toContain('data-effect="Off"');
+        });
+
+        it('selecting "None" should call light.turn_on without an effect', () => {
+            const mockHass = {
+                states: {
+                    'light.test_nanoleaf': { state: 'on', attributes: { effect_list: ['Rainbow'] } },
+                },
+                callService: vi.fn(),
+            };
+
+            // configure card and inject hass
+            card.setConfig({ entity: 'light.test_nanoleaf', effects: [], show_none: true });
+            card._hass = mockHass;
+
+            card.handleEffectSelect('None');
+
+            expect(mockHass.callService).toHaveBeenCalledWith('light', 'turn_on', { entity_id: 'light.test_nanoleaf' });
         });
     });
 });
