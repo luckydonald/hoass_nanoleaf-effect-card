@@ -178,6 +178,23 @@ Once I have the entity selected, please get the available status names from the 
 
 ———————
 
+Add a small button style, where the icon is in front of the text, not above, and the overall button footprint is smaller. Add a UI toggle for the global version again.
+
+———————
+
+It must be possible to remove a color again, add a trash icon button group thing.
+If the colors array is empty, it should stay empty - instead the gradient style whatever function should fall back to the disabled color, if it is empty
+———————
+
+Allow to toggle if the "Off" effect should be visible, and add a "None" effect, which does turn off the effect (but not the light like "Off" does — instead it goes back to previous color mode)
+
+———————
+
+Can we somehow get rid of the re-render which messes up the inputs?
+Partial updates sounds way better then carret position hacks.
+
+———————
+
 Add a good unittest for the components, checking that the data flow works (init data is selected, clicking changes, data changes are reflected, etc.)
 Add keyboard navigation tests, too.
 
