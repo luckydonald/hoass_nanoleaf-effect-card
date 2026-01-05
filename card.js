@@ -351,6 +351,13 @@ class NanoleafEffectCard extends HTMLElement {
             el.setConfig = function (cfg) {
                 // Minimal fallback: store the config so callers that inspect the element don't crash
                 this._config = cfg;
+                // Log a warning so integrators can detect missing editor behavior in the frontend
+                try {
+                    // eslint-disable-next-line no-console
+                    console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
+                } catch (e) {
+                    // ignore in environments without console
+                }
             };
         }
         return el;
