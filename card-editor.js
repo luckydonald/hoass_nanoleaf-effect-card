@@ -715,14 +715,14 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 const effectIndex = parseInt(button.dataset.effectIndex);
                 const colorIndex = parseInt(button.dataset.colorIndex);
                 const effects = [...(this._config.effects || [])];
-                let colors = [...(effects[effectIndex].colors || [effects[effectIndex].color] || ['#CCCCCC'])];
+                // Keep the colors array accurate (allow empty array per user request)
+                let colors = [
+                    ...(effects[effectIndex].colors ||
+                        (effects[effectIndex].color ? [effects[effectIndex].color] : [])),
+                ];
                 // Remove the color at colorIndex
                 if (colorIndex >= 0 && colorIndex < colors.length) {
                     colors.splice(colorIndex, 1);
-                }
-                // If no colors left, fallback to default color to avoid empty arrays
-                if (!colors || colors.length === 0) {
-                    colors = ['#CCCCCC'];
                 }
                 effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
                 this._config = { ...this._config, effects };

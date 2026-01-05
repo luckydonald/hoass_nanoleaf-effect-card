@@ -180,6 +180,7 @@ class NanoleafEffectCard extends HTMLElement {
           ${effects
               .map((effect) => {
                   const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
+                  // getEffectColors may return an empty array if the user removed all colors
                   const colors = this.getEffectColors(effect);
                   const buttonStyle = { ...(this._config.button_style || {}), ...(effect.button_style || {}) };
                   const inactiveColor = buttonStyle.inactive_color || '#CCCCCC';
@@ -199,8 +200,10 @@ class NanoleafEffectCard extends HTMLElement {
                       return cfg.hover === true;
                   };
 
-                  const bgGradient = `linear-gradient(135deg, ${colors.join(', ')})`;
-                  const bgColor = isActive ? colors[0] : inactiveColor;
+                  // If colors array is empty, use inactiveColor as fallback for rendering styles
+                  const colorsForStyle = (colors && colors.length > 0) ? colors : [inactiveColor];
+                  const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
+                  const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
 
                   // prepare inline styles
                   const fullBg = applyStyle('full_background')
@@ -233,7 +236,7 @@ class NanoleafEffectCard extends HTMLElement {
                  data-effect="${effect.name}"
                  ${hoverAttrs.join(' ')}
                  style="${fullBg} ${borderStyle} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
-                      colors[0] || inactiveColor
+                      colorsForStyle[0]
                   )};"
                >
                  <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
@@ -255,9 +258,7 @@ class NanoleafEffectCard extends HTMLElement {
                  }
                  ${
                      applyStyle('small_bar')
-                         ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${
-                               applyHover('small_bar') ? 0.6 : 1
-                           };"></div>`
+                         ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${applyHover('small_bar') ? 0.6 : 1};"></div>`
                          : ''
                  }
                  </div>
@@ -271,9 +272,10 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     getEffectColors(effect) {
+        // Return the raw colors array if present (may be empty). If a single `color` is set, return it.
         if (effect.colors && Array.isArray(effect.colors)) return effect.colors;
         if (effect.color) return [effect.color];
-        return ['#CCCCCC'];
+        return [];
     }
 
     getContrastColor(hexColor) {
@@ -316,37 +318,25 @@ class NanoleafEffectCard extends HTMLElement {
                 this._hass.callService('light', 'turn_on', { entity_id: this._config.entity, effect: effectName });
             } else {
                 console.warn(`Effect "${effectName}" is not available for ${this._config.entity}`);
-                this._hass.callService('system_log', 'write', {
-                    message: `Nanoleaf Effect Card: Effect "${effectName}" is not in the effect_list for ${this._config.entity}`,
-                    level: 'warning',
-                });
+                try {
+                    this._hass.callService('system_log', 'write', {
+                        message: `Nanoleaf Effect Card: Effect "${effectName}" is not in the effect_list for ${this._config.entity}`,
+                        level: 'warning',
+                    });
+                } catch (e) {
+                    // system_log service may not exist in test env; ignore
+                }
             }
         }
     }
 
-    static async getConfigElement() {
-        await import('./card-editor.js');
+    static getConfigElement() {
         return document.createElement('nanoleaf-effect-card-editor');
     }
 
     static getStubConfig() {
-        return { entity: '', display: 'buttons', effects: [] };
+        return { entity: '', effects: [] };
     }
 }
 
-customElements.define('nanoleaf-effect-card', NanoleafEffectCard);
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-    type: 'nanoleaf-effect-card',
-    name: 'Nanoleaf Effect Card',
-    description: 'A card for controlling Nanoleaf light effects',
-    preview: true,
-    documentationURL: 'https://github.com/luckydonald/hoass_nanoleaf-effect-card',
-});
-
-console.info(
-    '%c NANOLEAF-EFFECT-CARD %c v0.0.0 ',
-    'color: white; background: #03a9f4; font-weight: 700;',
-    'color: #03a9f4; background: white; font-weight: 700;'
-);
+window.customElements.define('nanoleaf-effect-card', NanoleafEffectCard);

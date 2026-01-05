@@ -43,8 +43,7 @@ describe('Card Editor - color removal', () => {
         remainingTrash[0].click();
         await new Promise((r) => setTimeout(r, 0));
 
-        // After removing the last color it should fallback to default color
-        expect(editor._config.effects[0].colors.length).toBe(1);
-        expect(editor._config.effects[0].colors[0]).toBe('#CCCCCC');
+        // After removing the last color the colors array should be empty (no fallback in editor)
+        expect(editor._config.effects[0].colors.length).toBe(0);
     });
 });
