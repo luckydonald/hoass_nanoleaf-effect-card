@@ -173,3 +173,14 @@ styled similarly to a bootstrap button group, with the options next to each othe
 
 That way you can e.g. have the "Full Background" style only for the active effect, while inactive effects get the bar, border on hover and always the animated icon.
 (add that to the example config yaml in `/README.md`, too)
+
+Once I have the entity selected, please get the available status names from the light's state, where the `.effect_list` are the available choices (`string[]`). Autocomplete the effect names, but still allow "invalid" inputs. Mark those not in the list as invalid (yet you can save them - they can be edited in the nanoleaf app and change after all)
+
+———————
+
+Add a good unittest for the components, checking that the data flow works (init data is selected, clicking changes, data changes are reflected, etc.)
+Add keyboard navigation tests, too.
+
+————————
+
+Don't forget to update the changelog, readme or whatever needed documentations when doing changes.
