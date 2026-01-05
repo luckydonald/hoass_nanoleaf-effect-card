@@ -35,11 +35,15 @@ describe('Visual editor crash (getConfigElement)', () => {
         // Spy on console.warn to ensure fallback logs
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-        // Import the card module (which will dynamically import the mocked editor)
-        const mod = await import('./card.js');
+        // Import the card module (which will register the custom element and may dynamically import the mocked editor)
+        await import('./card.js');
+
+        // The card registers itself as a custom element; get the constructor from customElements
+        const Card = customElements.get('nanoleaf-effect-card');
+        expect(Card).toBeTruthy();
 
         // Call the async method to create editor
-        const el = await mod.NanoleafEffectCard.getConfigElement();
+        const el = await Card.getConfigElement();
         expect(el).toBeTruthy();
         // Fallback should have created a setConfig function
         expect(typeof el.setConfig).toBe('function');
