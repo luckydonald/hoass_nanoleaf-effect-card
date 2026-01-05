@@ -571,7 +571,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // If we already have an entity and hass, populate suggestions
         if (this._hass && this._config.entity) {
-            this.updateEffectListSuggestions(this._config.entity);
+            if (typeof this.updateEffectListSuggestions === 'function') {
+                this.updateEffectListSuggestions(this._config.entity);
+            }
         }
 
         // Initialize element properties that can't be set via innerHTML
