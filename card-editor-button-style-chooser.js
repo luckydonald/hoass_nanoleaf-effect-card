@@ -34,31 +34,6 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
         this.render();
         if (this._bound) return;
         this._bound = true;
-
-        // Delegated click handler for toggle buttons
-        this.shadowRoot.addEventListener('click', (e) => {
-            const btn = e.target.closest('.toggle-btn');
-            if (!btn) return;
-            // toggle active class
-            btn.classList.toggle('active');
-            const item = btn.closest('.item');
-            if (!item) return;
-            const key = item.dataset.key;
-            this._updateKey(key);
-        });
-
-        // Delegated keyboard handler for Enter/Space activation
-        this.shadowRoot.addEventListener('keydown', (e) => {
-            if (e.key !== 'Enter' && e.key !== ' ') return;
-            const btn = e.target.closest('.toggle-btn');
-            if (!btn) return;
-            e.preventDefault();
-            btn.classList.toggle('active');
-            const item = btn.closest('.item');
-            if (!item) return;
-            const key = item.dataset.key;
-            this._updateKey(key);
-        });
     }
 
     _updateKey(key) {
@@ -83,7 +58,9 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
         // also microtask dispatch
         try {
             Promise.resolve().then(() => {
-                this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
+                this.dispatchEvent(
+                    new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true })
+                );
             });
         } catch (e) {}
     }
@@ -117,9 +94,15 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             <div class="item ${this.hasAttribute('compact') ? 'compact' : ''}" data-key="${s.key}">
               <div class="label">${s.label}</div>
               <div class="toggles">
-                <button type="button" class="toggle-btn btn-active ${cfg.active ? 'active' : ''}" data-mode="active">Active</button>
-                <button type="button" class="toggle-btn btn-inactive ${cfg.inactive ? 'active' : ''}" data-mode="inactive">Inactive</button>
-                <button type="button" class="toggle-btn btn-hover ${cfg.hover ? 'active' : ''}" data-mode="hover">Hover</button>
+                <button type="button" class="toggle-btn btn-active ${
+                    cfg.active ? 'active' : ''
+                }" data-mode="active">Active</button>
+                <button type="button" class="toggle-btn btn-inactive ${
+                    cfg.inactive ? 'active' : ''
+                }" data-mode="inactive">Inactive</button>
+                <button type="button" class="toggle-btn btn-hover ${
+                    cfg.hover ? 'active' : ''
+                }" data-mode="hover">Hover</button>
                </div>
              </div>
            `;
@@ -127,7 +110,34 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             .join('')}
        </div>
      `;
+
+        // After injecting HTML, attach per-button listeners (guarded) to ensure reliable events
+        this.shadowRoot.querySelectorAll('.toggle-btn').forEach((btn) => {
+            if (btn._nanoleaf_bound) return;
+            btn._nanoleaf_bound = true;
+            btn.addEventListener('click', (e) => {
+                // Toggle active class (click doesn't change classes automatically)
+                btn.classList.toggle('active');
+                const item = btn.closest('.item');
+                if (!item) return;
+                const key = item.dataset.key;
+                this._updateKey(key);
+            });
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    btn.classList.toggle('active');
+                    const item = btn.closest('.item');
+                    if (!item) return;
+                    const key = item.dataset.key;
+                    this._updateKey(key);
+                }
+            });
+        });
     }
 }
 
-customElements.define('nanoleaf-effect-card-card-editor-button-style-chooser', NanoleafEffectCardCardEditorButtonStyleChooser);
+customElements.define(
+    'nanoleaf-effect-card-card-editor-button-style-chooser',
+    NanoleafEffectCardCardEditorButtonStyleChooser
+);

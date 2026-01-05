@@ -142,22 +142,42 @@ class NanoleafEffectCardEditor extends HTMLElement {
         // Merge button_style top-level
         merged.button_style = { ...(prev.button_style || {}), ...(incoming.button_style || {}) };
 
-        // Merge effects array carefully by index to preserve per-effect nested state
-        const prevEffects = Array.isArray(prev.effects) ? prev.effects : [];
-        const incomingEffects = Array.isArray(incoming.effects) ? incoming.effects : [];
-        const maxLen = Math.max(prevEffects.length, incomingEffects.length);
+        // Merge effects array name-based: prefer matching by name, else fall back to index
+        const prevEffects = Array.isArray(prev.effects) ? prev.effects.slice() : [];
+        const incomingEffects = Array.isArray(incoming.effects) ? incoming.effects.slice() : [];
         const mergedEffects = [];
-        for (let i = 0; i < maxLen; i++) {
-            const p = prevEffects[i] || {};
-            const inc = incomingEffects[i] || {};
-            // Merge button_style at per-effect level
+
+        // Build a map of previous effects by name for quick lookup
+        const prevByName = {};
+        prevEffects.forEach((e, idx) => {
+            if (e && e.name) prevByName[e.name] = { e, idx };
+        });
+
+        // Iterate over incoming effects and merge with prev by name if possible
+        incomingEffects.forEach((inc, i) => {
+            let p = undefined;
+            if (inc && inc.name && prevByName[inc.name]) {
+                p = prevByName[inc.name].e;
+            } else if (prevEffects[i]) {
+                p = prevEffects[i];
+            } else {
+                p = {};
+            }
+
             const btnStyle = { ...(p.button_style || {}), ...(inc.button_style || {}) };
-            // If the chooser value was only in p.button_style.color_display and inc doesn't provide it, keep p's
             if (!btnStyle.color_display && p.button_style && p.button_style.color_display) {
                 btnStyle.color_display = p.button_style.color_display;
             }
             mergedEffects.push({ ...p, ...inc, button_style: btnStyle });
-        }
+        });
+
+        // Include any prev effects that were not matched and not present in incoming (appended)
+        prevEffects.forEach((p) => {
+            if (p && p.name && !incomingEffects.find((ie) => ie && ie.name === p.name)) {
+                mergedEffects.push(p);
+            }
+        });
+
         merged.effects = mergedEffects;
 
         this._config = merged;
@@ -850,9 +870,17 @@ class NanoleafEffectCardEditor extends HTMLElement {
             const index = parseInt(item.dataset.index);
             comp.addEventListener('value-changed', (e) => {
                 const effects = [...(this._config.effects || [])];
-                const prevBtnStyle = effects[index]?.button_style || {};
-                effects[index] = {
-                    ...effects[index],
+                // Try to resolve the correct effect by its name (more robust when reordered)
+                const nameInput = item.querySelector('.effect-name-input');
+                const effectName = nameInput?.value?.trim();
+                let targetIndex = index;
+                if (effectName) {
+                    const found = effects.findIndex((ef) => ef && ef.name === effectName);
+                    if (found !== -1) targetIndex = found;
+                }
+                const prevBtnStyle = effects[targetIndex]?.button_style || {};
+                effects[targetIndex] = {
+                    ...effects[targetIndex],
                     button_style: { ...prevBtnStyle, color_display: e.detail.value },
                 };
                 this._config = { ...this._config, effects };
