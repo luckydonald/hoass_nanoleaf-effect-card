@@ -261,10 +261,27 @@ class NanoleafEffectCardEditor extends HTMLElement {
         if (compactSwitch && !compactSwitch._nanoleaf_bound) {
             compactSwitch._nanoleaf_bound = true;
             compactSwitch.addEventListener('change', (e) => {
-                this._config = {
-                    ...this._config,
-                    button_style: { ...(this._config.button_style || {}), compact: e.target.checked },
-                };
+                this._config = { ...this._config, button_style: { ...(this._config.button_style || {}), compact: e.target.checked } };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
+
+        // Show Off / None toggles
+        const showOff = this.shadowRoot.querySelector('#show-off');
+        if (showOff && !showOff._nanoleaf_bound) {
+            showOff._nanoleaf_bound = true;
+            showOff.addEventListener('change', (e) => {
+                this._config = { ...this._config, show_off: e.target.checked };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
+        const showNone = this.shadowRoot.querySelector('#show-none');
+        if (showNone && !showNone._nanoleaf_bound) {
+            showNone._nanoleaf_bound = true;
+            showNone.addEventListener('change', (e) => {
+                this._config = { ...this._config, show_none: e.target.checked };
                 this.configChanged(this._config);
                 this.renderEffectsArea();
             });
@@ -527,6 +544,22 @@ class NanoleafEffectCardEditor extends HTMLElement {
             ></ha-switch>
           </ha-formfield>
           <div class="info">If enabled, buttons are rendered compact with icon left of the text.</div>
+        </div>
+
+        <div class="setting">
+          <ha-formfield label="Show 'Off' button">
+            <ha-switch
+              id="show-off"
+              ${this._config.show_off !== false ? 'checked' : ''}
+            ></ha-switch>
+          </ha-formfield>
+          <ha-formfield label="Show 'None' action">
+            <ha-switch
+              id="show-none"
+              ${this._config.show_none ? 'checked' : ''}
+            ></ha-switch>
+          </ha-formfield>
+          <div class="info">Toggle visibility of special entries in the effect list</div>
         </div>
 
         <div class="setting">
