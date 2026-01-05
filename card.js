@@ -364,39 +364,76 @@ class NanoleafEffectCard extends HTMLElement {
         } catch (e) {
             // If import fails, still return an element so callers can handle it; setConfig may be undefined
         }
-        const el = document.createElement('nanoleaf-effect-card-editor');
-        // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op fallback
-        if (typeof el.setConfig !== 'function') {
+        // If the custom element was registered by the import, create it. Otherwise return a safe fallback
+        let el;
+        if (
+            window.customElements &&
+            window.customElements.get &&
+            window.customElements.get('nanoleaf-effect-card-editor')
+        ) {
+            // The editor is registered; creating it may run its constructor which can throw in some environments (jsdom).
+            // Wrap creation in try/catch and fall back to a safe div if construction throws.
+            try {
+                el = document.createElement('nanoleaf-effect-card-editor');
+                // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op fallback implementation
+                if (typeof el.setConfig !== 'function') {
+                    el.setConfig = function (cfg) {
+                        this._config = cfg;
+                        try {
+                            // eslint-disable-next-line no-console
+                            console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
+                        } catch (e) {}
+                        try {
+                            const msg = `
+                                <div class="nanoleaf-editor-fallback" style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;">
+                                  <div style="font-weight:600;color:#d9534f;">Editor unavailable</div>
+                                  <div style="margin-top:6px;font-size:13px;">The visual editor failed to load. You can edit the configuration manually.</div>
+                                </div>
+                            `;
+                            if (this.attachShadow && this.shadowRoot) {
+                                this.shadowRoot.innerHTML = msg;
+                            } else if (this.attachShadow) {
+                                this.attachShadow({ mode: 'open' });
+                                this.shadowRoot.innerHTML = msg;
+                            } else {
+                                this.innerHTML = msg;
+                            }
+                        } catch (e) {}
+                    };
+                }
+            } catch (createErr) {
+                // Creating the custom element threw (e.g. jsdom NotSupportedError). Fallback to a safe div implementation.
+                el = document.createElement('div');
+                el.className = 'nanoleaf-effect-card-editor-fallback';
+                el.setConfig = function (cfg) {
+                    this._config = cfg;
+                    try {
+                        // eslint-disable-next-line no-console
+                        console.warn(
+                            'nanoleaf-effect-card-editor fallback (constructor threw): setConfig called with',
+                            cfg
+                        );
+                    } catch (e) {}
+                    try {
+                        this.innerHTML =
+                            '<div style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;"><div style="font-weight:600;color:#d9534f;">Editor unavailable</div><div style="margin-top:6px;font-size:13px;">The visual editor failed to load. You can edit the configuration manually.</div></div>';
+                    } catch (e) {}
+                };
+            }
+        } else {
+            // Editor wasn't registered — return a lightweight fallback element that won't run custom constructors
+            el = document.createElement('div');
+            el.className = 'nanoleaf-effect-card-editor-fallback';
             el.setConfig = function (cfg) {
-                // Minimal fallback: store the config so callers that inspect the element don't crash
                 this._config = cfg;
-                // Log a warning so integrators can detect missing editor behavior in the frontend
                 try {
                     // eslint-disable-next-line no-console
-                    console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
-                } catch (e) {
-                    // ignore in environments without console
-                }
-                // Render a minimal visible UI informing the user the visual editor is unavailable
+                    console.warn('nanoleaf-effect-card-editor fallback: setConfig called with', cfg);
+                } catch (e) {}
                 try {
-                    const msg = `
-                        <div class="nanoleaf-editor-fallback" style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;">
-                          <div style="font-weight:600;color:#d9534f;">Editor unavailable</div>
-                          <div style="margin-top:6px;font-size:13px;">The visual editor failed to load. You can edit the configuration manually.</div>
-                        </div>
-                    `;
-                    // Prefer shadow DOM if available, but fall back to light DOM
-                    if (this.attachShadow && this.shadowRoot) {
-                        this.shadowRoot.innerHTML = msg;
-                    } else if (this.attachShadow) {
-                        this.attachShadow({ mode: 'open' });
-                        this.shadowRoot.innerHTML = msg;
-                    } else {
-                        this.innerHTML = msg;
-                    }
-                } catch (e) {
-                    // swallow any rendering errors in fallback
-                }
+                    this.innerHTML =
+                        '<div style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;"><div style="font-weight:600;color:#d9534f;">Editor unavailable</div><div style="margin-top:6px;font-size:13px;">The visual editor failed to load. You can edit the configuration manually.</div></div>';
+                } catch (e) {}
             };
         }
         return el;
