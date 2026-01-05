@@ -20,7 +20,8 @@ describe('Visual editor crash (getConfigElement)', () => {
             class BrokenEditor extends HTMLElement {
                 constructor() {
                     super();
-                    this.innerHTML = '<div>Broken editor</div>';
+                    // Do NOT manipulate DOM in the constructor. jsdom may throw if child nodes are unexpected.
+                    // Keep this constructor minimal and safe; the module intentionally does not provide setConfig.
                 }
             }
             // define the element in the mocked module context as well
