@@ -338,8 +338,22 @@ class NanoleafEffectCard extends HTMLElement {
         }
     }
 
-    static getConfigElement() {
-        return document.createElement('nanoleaf-effect-card-editor');
+    static async getConfigElement() {
+        // Dynamically import the editor module so the custom element is defined
+        try {
+            await import('./card-editor.js');
+        } catch (e) {
+            // If import fails, still return an element so callers can handle it; setConfig may be undefined
+        }
+        const el = document.createElement('nanoleaf-effect-card-editor');
+        // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op-ish fallback
+        if (typeof el.setConfig !== 'function') {
+            el.setConfig = function (cfg) {
+                // Minimal fallback: store the config so callers that inspect the element don't crash
+                this._config = cfg;
+            };
+        }
+        return el;
     }
 
     static getStubConfig() {
