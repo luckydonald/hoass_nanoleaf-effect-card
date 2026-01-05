@@ -633,6 +633,93 @@ class NanoleafEffectCardEditor extends HTMLElement {
             });
         });
     }
+
+    renderEffectsList() {
+        const effects = this._config.effects || [];
+        if (effects.length === 0) {
+            return '';
+        }
+
+        return effects
+            .map(
+                (effect, index) => `
+      <div class="effect-item" data-index="${index}">
+        <div class="handle">
+          <ha-icon icon="mdi:drag"></ha-icon>
+        </div>
+        <div class="effect-content">
+          <div class="effect-header">
+            <input
+              type="text"
+              id="effect-name-${index}"
+              class="effect-name-input"
+              placeholder="Effect name (e.g., Rainbow)"
+              value="${effect.name || ''}"
+              data-index="${index}"
+            />
+          </div>
+          <div class="effect-row">
+            <label>Icon</label>
+            <ha-icon-picker
+              class="effect-icon"
+              .value="${effect.icon || 'mdi:lightbulb'}"
+              data-index="${index}"
+            ></ha-icon-picker>
+          </div>
+          <div class="effect-row">
+            <label>Colors</label>
+            <div class="colors-container">
+              ${this.renderColorInputs(effect, index)}
+            </div>
+          </div>
+          <nanoleaf-effect-card-card-editor-button-style-chooser
+            class="button-style"
+            .value="${effect.button_style || {}}"
+          ></nanoleaf-effect-card-card-editor-button-style-chooser>
+        </div>
+        <div class="effect-actions">
+          <button id="delete-effect-${index}" class="icon-button delete" data-index="${index}" title="Delete effect">
+            <ha-icon icon="mdi:delete"></ha-icon>
+          </button>
+        </div>
+      </div>
+    `
+            )
+            .join('');
+    }
+
+    renderColorInputs(effect, effectIndex) {
+        const colors = effect.colors || (effect.color ? [effect.color] : ['#CCCCCC']);
+        const colorInputs = colors
+            .map(
+                (color, colorIndex) => `
+       <div style="display:flex; align-items:center; gap:6px;">
+        <input
+          type="color"
+          id="effect-${effectIndex}-color-${colorIndex}"
+          class="color-input"
+          value="${color}"
+          data-effect-index="${effectIndex}"
+          data-color-index="${colorIndex}"
+          title="Click to change color"
+        />
+        <button id="effect-${effectIndex}-delete-color-${colorIndex}" class="icon-button delete-color" data-effect-index="${effectIndex}" data-color-index="${colorIndex}" title="Remove color">
+          <ha-icon icon="mdi:trash-can"></ha-icon>
+        </button>
+       </div>
+     `
+            )
+            .join('');
+
+        return (
+            colorInputs +
+            `
+      <button id="effect-${effectIndex}-add-color" class="icon-button add-color" data-effect-index="${effectIndex}" title="Add color">
+        <ha-icon icon="mdi:plus"></ha-icon>
+      </button>
+    `
+        );
+    }
 }
 
 customElements.define('nanoleaf-effect-card-editor', NanoleafEffectCardEditor);
