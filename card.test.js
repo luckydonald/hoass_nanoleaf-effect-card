@@ -90,7 +90,8 @@ describe('NanoleafEffectCard', () => {
             const effect = { name: 'Test' };
             const colors = card.getEffectColors(effect);
 
-            expect(colors).toEqual(['#CCCCCC']);
+            // New behavior: editor allows an empty colors array; card renderer falls back visually.
+            expect(colors).toEqual([]);
         });
     });
 

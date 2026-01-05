@@ -201,7 +201,7 @@ class NanoleafEffectCard extends HTMLElement {
                   };
 
                   // If colors array is empty, use inactiveColor as fallback for rendering styles
-                  const colorsForStyle = (colors && colors.length > 0) ? colors : [inactiveColor];
+                  const colorsForStyle = colors && colors.length > 0 ? colors : [inactiveColor];
                   const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
                   const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
 
@@ -258,7 +258,9 @@ class NanoleafEffectCard extends HTMLElement {
                  }
                  ${
                      applyStyle('small_bar')
-                         ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${applyHover('small_bar') ? 0.6 : 1};"></div>`
+                         ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${
+                               applyHover('small_bar') ? 0.6 : 1
+                           };"></div>`
                          : ''
                  }
                  </div>
@@ -272,8 +274,9 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     getEffectColors(effect) {
-        // Return the raw colors array if present (may be empty). If a single `color` is set, return it.
-        if (effect.colors && Array.isArray(effect.colors)) return effect.colors;
+        // Return the raw colors array if present and non-empty. If a single `color` is set, return it.
+        // If no color is provided, return an empty array — the renderer will visually fall back to the inactive color.
+        if (effect.colors && Array.isArray(effect.colors) && effect.colors.length > 0) return effect.colors;
         if (effect.color) return [effect.color];
         return [];
     }
@@ -335,7 +338,7 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     static getStubConfig() {
-        return { entity: '', effects: [] };
+        return { entity: '', display: 'buttons', effects: [] };
     }
 }
 
