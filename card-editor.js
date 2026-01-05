@@ -218,22 +218,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
      * @param {string} entityId
      */
     updateEffectListSuggestions(entityId) {
-        const datalist = this.shadowRoot?.querySelector('#effects-datalist');
-
         const list = this._hass?.states?.[entityId]?.attributes?.effect_list || [];
         this._effectList = Array.isArray(list) ? list.slice() : [];
 
-        // If a legacy datalist exists, populate it for backwards compatibility
-        if (datalist) {
-            datalist.innerHTML = '';
-            this._effectList.forEach((name) => {
-                const opt = document.createElement('option');
-                opt.value = name;
-                datalist.appendChild(opt);
-            });
-        }
-
-        // validate existing inputs even when datalist is not present
+        // validate existing inputs
         this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
             const val = input.value?.trim();
             if (!val) {
