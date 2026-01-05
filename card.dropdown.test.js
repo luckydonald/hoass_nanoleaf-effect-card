@@ -23,7 +23,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
 
         const select = card.shadowRoot.querySelector('.effect-dropdown');
         expect(select).toBeTruthy();
-        const optionValues = Array.from(select.querySelectorAll('option')).map(o => o.value);
+        const optionValues = Array.from(select.querySelectorAll('option')).map((o) => o.value);
         expect(optionValues).toContain('None');
         expect(optionValues).not.toContain('Off');
     });
@@ -37,7 +37,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
 
         const select = card.shadowRoot.querySelector('.effect-dropdown');
         expect(select).toBeTruthy();
-        const optionValues = Array.from(select.querySelectorAll('option')).map(o => o.value);
+        const optionValues = Array.from(select.querySelectorAll('option')).map((o) => o.value);
         expect(optionValues).toContain('Off');
     });
 
@@ -62,7 +62,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
         expect(select).toBeTruthy();
 
         // Ensure the 'None' option exists and select it
-        const noneOption = Array.from(select.options).find(o => o.value === 'None');
+        const noneOption = Array.from(select.options).find((o) => o.value === 'None');
         expect(noneOption).toBeTruthy();
         select.value = 'None';
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -70,4 +70,3 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
         expect(mockHass.callService).toHaveBeenCalledWith('light', 'turn_on', { entity_id: 'light.test' });
     });
 });
-

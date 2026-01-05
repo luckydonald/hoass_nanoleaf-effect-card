@@ -18,7 +18,7 @@ beforeAll(async () => {
 });
 
 describe('Nanoleaf Effect Card Editor - UI toggles', () => {
-    it("dispatches config-changed with show_off toggled", async () => {
+    it('dispatches config-changed with show_off toggled', async () => {
         const editor = document.createElement('nanoleaf-effect-card-editor');
         document.body.appendChild(editor);
 
@@ -46,7 +46,7 @@ describe('Nanoleaf Effect Card Editor - UI toggles', () => {
         expect(received.show_off).toBe(false);
     });
 
-    it("dispatches config-changed with show_none toggled", async () => {
+    it('dispatches config-changed with show_none toggled', async () => {
         const editor = document.createElement('nanoleaf-effect-card-editor');
         document.body.appendChild(editor);
 
@@ -72,4 +72,3 @@ describe('Nanoleaf Effect Card Editor - UI toggles', () => {
         expect(received.show_none).toBe(true);
     });
 });
-
