@@ -182,6 +182,34 @@ effects:
                   hover: false
 ```
 
+### Compact (inline) button style
+
+You can render buttons in a compact inline form where the icon is placed to the left of the text and the overall footprint is smaller. This is controlled with `button_style.compact` (global) or per-effect via `effects[].button_style.compact`.
+
+Example:
+
+```yaml
+type: 'custom:nanoleaf-effect-card'
+entity: light.nanoleaf_shapes
+button_style:
+    compact: true
+    inactive_color: '#CCCCCC'
+    icon: true
+    name: true
+    color_display:
+        full_background:
+            active: true
+            inactive: false
+            hover: false
+effects:
+    - name: 'Rainbow'
+      icon: 'mdi:looks'
+      colors: ['#FF0000', '#FF7F00', '#FFFF00']
+    - name: 'Sunrise'
+      icon: 'mdi:weather-sunset-up'
+      colors: ['#FFA500', '#FFFF00']
+```
+
 Editor component
 
 The visual editor includes a new style chooser component exposed as `<nanoleaf-effect-card-card-editor-button-style-chooser>` which is used in the global Button Style area and per-effect within the editor. It allows toggling Active/Inactive/Hover for each style.

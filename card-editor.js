@@ -315,6 +315,16 @@ class NanoleafEffectCardEditor extends HTMLElement {
         </div>
 
         <div class="setting">
+          <ha-formfield label="Compact (inline) buttons">
+            <ha-switch
+              id="compact-style"
+              ${this._config.button_style?.compact ? 'checked' : ''}
+            ></ha-switch>
+          </ha-formfield>
+          <div class="info">If enabled, buttons are rendered compact with icon left of the text.</div>
+        </div>
+
+        <div class="setting">
           <label>Color Display Styles</label>
           <nanoleaf-effect-card-card-editor-button-style-chooser id="global-style-chooser" compact></nanoleaf-effect-card-card-editor-button-style-chooser>
           <div class="info">Configure how colors are displayed for active/inactive/hover states</div>
@@ -602,6 +612,16 @@ class NanoleafEffectCardEditor extends HTMLElement {
             this._config = {
                 ...this._config,
                 button_style: { ...(this._config.button_style || {}), name: e.target.checked },
+            };
+            this.configChanged(this._config);
+        });
+
+        // Compact style switch
+        const compactSwitch = this.shadowRoot.querySelector('#compact-style');
+        compactSwitch?.addEventListener('change', (e) => {
+            this._config = {
+                ...this._config,
+                button_style: { ...(this._config.button_style || {}), compact: e.target.checked },
             };
             this.configChanged(this._config);
         });
