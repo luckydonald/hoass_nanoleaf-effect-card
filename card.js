@@ -340,13 +340,14 @@ class NanoleafEffectCard extends HTMLElement {
                 this._hass.callService('light', 'turn_on', { entity_id: this._config.entity, effect: effectName });
             } else {
                 console.warn(`Effect "${effectName}" is not available for ${this._config.entity}`);
+                const message = `Effect "${effectName}" is not available for ${this._config.entity}`;
                 try {
                     this._hass.callService('system_log', 'write', {
-                        message: `Nanoleaf Effect Card: Effect "${effectName}" is not in the effect_list for ${this._config.entity}`,
+                        message,
                         level: 'warning',
                     });
                 } catch (e) {
-                    // system_log service may not exist in test env; ignore
+                    console.warn(message, e);
                 }
             }
         }
