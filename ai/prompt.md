@@ -114,7 +114,7 @@ Below, a propper description of your current task in details, your thoughts and 
 That way continuation of the current objective in case of interruptions is possible.
 Automatically edit that first line to `# DONE` once finished with the task, without asking for further confirmation.
 
-For a new task, if the old task is marked done, you shall replace the `ai/TODO.md` with the new task following that template.
+For a new task, if the old task is marked done, you shall replace/clean the `ai/TODO.md` with the new task following that template.
 
 ————————
 
