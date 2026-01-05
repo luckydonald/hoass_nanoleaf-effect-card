@@ -319,8 +319,9 @@ class NanoleafEffectCard extends HTMLElement {
             this._hass.callService('light', 'turn_off', { entity_id: this._config.entity });
         } else if (effectName === 'None') {
             // 'None' clears the active effect while leaving the light on (revert to previous color mode)
-            // Reading color_mode and the state fitting that,, we can turn on the light without specifying an effect, by setting previous colors.
-            const colorMode = entity.attributes.color_mode;
+            // Reading color_mode and the state fitting that, we can turn on the light without specifying an effect, by setting previous colors.
+            const colorMode = entity.attributes.color_mode ?? 'unknown';
+            const serviceData = { entity_id: this._config.entity };
 
             if (colorMode === 'hs') {
                 serviceData.hs_color = entity.attributes.hs_color;
@@ -333,7 +334,7 @@ class NanoleafEffectCard extends HTMLElement {
             } else if (colorMode === 'brightness') {
                 serviceData.brightness = entity.attributes.brightness;
             }
-            this._hass.callService('light', 'turn_on', { entity_id: this._config.entity,  });
+            this._hass.callService('light', 'turn_on', serviceData);
         } else {
             const effectList = entity.attributes.effect_list || [];
             if (effectList.includes(effectName)) {
