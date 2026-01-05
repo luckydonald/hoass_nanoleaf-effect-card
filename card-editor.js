@@ -132,7 +132,35 @@ class NanoleafEffectCardEditor extends HTMLElement {
      * @param {Object} config - Card configuration object
      */
     setConfig(config) {
-        this._config = config || {};
+        // Merge incoming config with existing one to preserve transient UI state
+        const incoming = config || {};
+        const prev = this._config || {};
+
+        // Merge top-level simple props
+        const merged = { ...prev, ...incoming };
+
+        // Merge button_style top-level
+        merged.button_style = { ...(prev.button_style || {}), ...(incoming.button_style || {}) };
+
+        // Merge effects array carefully by index to preserve per-effect nested state
+        const prevEffects = Array.isArray(prev.effects) ? prev.effects : [];
+        const incomingEffects = Array.isArray(incoming.effects) ? incoming.effects : [];
+        const maxLen = Math.max(prevEffects.length, incomingEffects.length);
+        const mergedEffects = [];
+        for (let i = 0; i < maxLen; i++) {
+            const p = prevEffects[i] || {};
+            const inc = incomingEffects[i] || {};
+            // Merge button_style at per-effect level
+            const btnStyle = { ...(p.button_style || {}), ...(inc.button_style || {}) };
+            // If the chooser value was only in p.button_style.color_display and inc doesn't provide it, keep p's
+            if (!btnStyle.color_display && p.button_style && p.button_style.color_display) {
+                btnStyle.color_display = p.button_style.color_display;
+            }
+            mergedEffects.push({ ...p, ...inc, button_style: btnStyle });
+        }
+        merged.effects = mergedEffects;
+
+        this._config = merged;
         // Defer render to next microtask to avoid prototype/import-order races in test environments
         Promise.resolve().then(() => this.render());
     }
