@@ -151,5 +151,4 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
         expect(chooser.value.small_bar.active).toBe(true);
         expect(lastValue.small_bar.active).toBe(true);
     });
-
 });
