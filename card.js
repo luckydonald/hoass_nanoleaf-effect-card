@@ -41,6 +41,8 @@ class NanoleafEffectCard extends HTMLElement {
                     color_display: { ...defaultColorDisplays, ...((ef.button_style || {}).color_display || {}) },
                 },
             })),
+            show_off: config.show_off !== false, // new config option, default true
+            show_none: config.show_none === true, // new config option, default false
         };
 
         this.render();
@@ -146,7 +148,11 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     renderDropdown(currentEffect, isOn) {
-        const effects = [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'] }, ...this._config.effects];
+        const effects = [
+            ...(this._config.show_off === false ? [] : [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'] }]),
+            ...(this._config.show_none ? [{ name: 'None', icon: 'mdi:cancel', colors: ['#888888'] }] : []),
+            ...this._config.effects,
+        ];
 
         return `
       <div class="effect-card">
@@ -170,7 +176,13 @@ class NanoleafEffectCard extends HTMLElement {
 
     renderButtons(currentEffect, isOn) {
         const effects = [
-            { name: 'Off', icon: 'mdi:power', colors: ['#666666'], button_style: { color_display: {} } },
+            // Conditionally include Off / None special items
+            ...(this._config.show_off === false
+                ? []
+                : [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'], button_style: { color_display: {} } }]),
+            ...(this._config.show_none
+                ? [{ name: 'None', icon: 'mdi:cancel', colors: ['#888888'], button_style: { color_display: {} } }]
+                : []),
             ...this._config.effects,
         ];
 
@@ -315,6 +327,9 @@ class NanoleafEffectCard extends HTMLElement {
 
         if (effectName === 'Off') {
             this._hass.callService('light', 'turn_off', { entity_id: this._config.entity });
+        } else if (effectName === 'None') {
+            // 'None' clears the active effect while leaving the light on (revert to previous color mode)
+            this._hass.callService('light', 'turn_on', { entity_id: this._config.entity });
         } else {
             const effectList = entity.attributes.effect_list || [];
             if (effectList.includes(effectName)) {
@@ -338,7 +353,7 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     static getStubConfig() {
-        return { entity: '', display: 'buttons', effects: [] };
+        return { entity: '', display: 'buttons', effects: [], show_off: true, show_none: false };
     }
 }
 
