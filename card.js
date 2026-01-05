@@ -429,9 +429,7 @@ class NanoleafEffectCard extends HTMLElement {
                     }
                     if (typeof attrs.color_temp !== 'number') return false;
                 } else if (mode === 'hs') {
-                    if (
-                        !Array.isArray(attrs.supported_color_modes) || !attrs.supported_color_modes.includes('hs')
-                    ) {
+                    if (!Array.isArray(attrs.supported_color_modes) || !attrs.supported_color_modes.includes('hs')) {
                         return false;
                     }
                     if (
@@ -452,7 +450,13 @@ class NanoleafEffectCard extends HTMLElement {
     }
 
     static getStubConfig() {
-        return { entity: '', display: 'buttons', effects: [], show_off: true, show_none: false };
+        return {
+            entity: '',
+            display: 'buttons',
+            effects: [],
+            show_off: true,
+            show_none: false,
+        };
     }
 }
 
