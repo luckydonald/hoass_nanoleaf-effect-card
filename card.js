@@ -451,6 +451,7 @@ class NanoleafEffectCard extends HTMLElement {
 
     static getStubConfig() {
         return {
+            type: 'custom:nanoleaf-effect-card',
             entity: '',
             display: 'buttons',
             effects: [],
@@ -460,4 +461,44 @@ class NanoleafEffectCard extends HTMLElement {
     }
 }
 
+class NanoleafEffectEntity extends NanoleafEffectCard {
+    static getStubConfig(ha, stateObj) {
+        const baseConfig = super.getStubConfig(ha, stateObj);
+        const entity = baseConfig.entity || 'light.example_nanoleaf_light';
+        return {
+            type: 'entities',
+            show_header_toggle: false,
+            entities: [
+                { entity: entity },
+                {
+                    // make sure the type is up top:
+                    type: 'custom:nanoleaf-effect-entity',
+                    // inherit the actual config stuff:
+                    ...baseConfig,
+                    // make sure `baseConfig` does not overwrite it:
+                    ...{ type: 'custom:nanoleaf-effect-entity' },
+                },
+            ],
+        };
+    }
+}
+
+class NanoleafEffectFeature extends NanoleafEffectCard {
+    static getStubConfig(ha, stateObj) {
+        const baseConfig = super.getStubConfig(ha, stateObj);
+        const entity = baseConfig.entity || 'light.example_nanoleaf_light';
+        return {
+            // make sure the type is up top:
+            type: 'custom:nanoleaf-effect-feature',
+            // inherit the actual config stuff:
+            ...baseConfig,
+            // make sure `baseConfig` does not overwrite it:
+            ...{ type: 'custom:nanoleaf-effect-feature' },
+        };
+    }
+}
+
 window.customElements.define('nanoleaf-effect-card', NanoleafEffectCard);
+window.customElements.define('nanoleaf-effect-entity', NanoleafEffectEntity);
+window.customElements.define('nanoleaf-effect-feature', NanoleafEffectFeature);
+
