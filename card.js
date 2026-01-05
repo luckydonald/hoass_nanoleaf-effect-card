@@ -519,7 +519,7 @@ window.customCards.push({
 window.customCardFeatures = window.customCardFeatures || [];
 window.customCardFeatures.push({
     type: 'nanoleaf-effect-feature',
-    name: '(Nanoleaf) Effect Chooser (as a tile\'s feature)',
+    name: "(Nanoleaf) Effect Chooser (as a tile's feature)",
     configurable: true,
 });
 
@@ -527,11 +527,11 @@ console.info(
     '\n %c (Nanoleaf) Effect Chooser %c v0.0.0 %c \n',
     // left label – deep violet background, white text
     'background-color:#4b0082;color:#fff;padding:3px 2px 3px 3px;border-radius:3px 0 0 3px;' +
-    'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
+        'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
     // main label – pink‑violet gradient, white text
     'background-color:#c71585;background-image:linear-gradient(90deg,#ff69b4,#8a2be2);color:#fff;' +
-    'padding:3px 3px 3px 2px;border-radius:0 3px 3px 0;' +
-    'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
+        'padding:3px 3px 3px 2px;border-radius:0 3px 3px 0;' +
+        'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
     // trailing space – transparent (no background)
     'background-color:transparent'
 );
