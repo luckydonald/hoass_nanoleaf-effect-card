@@ -133,7 +133,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
      */
     setConfig(config) {
         this._config = config || {};
-        this.render();
+        // Defer render to next microtask to avoid prototype/import-order races in test environments
+        Promise.resolve().then(() => this.render());
     }
 
     /**
@@ -150,6 +151,39 @@ class NanoleafEffectCardEditor extends HTMLElement {
         });
         event.detail = { config: newConfig };
         this.dispatchEvent(event);
+    }
+
+    /**
+     * Populate the datalist with effect names from the entity's effect_list
+     * and validate existing effect name inputs (mark invalid ones).
+     * Safe to call even if hass or entity aren't available yet.
+     * @param {string} entityId
+     */
+    updateEffectListSuggestions(entityId) {
+        const datalist = this.shadowRoot?.querySelector('#effects-datalist');
+        if (!datalist) return;
+
+        const list = this._hass?.states?.[entityId]?.attributes?.effect_list || [];
+        this._effectList = Array.isArray(list) ? list.slice() : [];
+
+        // clear existing options
+        datalist.innerHTML = '';
+        this._effectList.forEach((name) => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            datalist.appendChild(opt);
+        });
+
+        // validate existing inputs
+        this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
+            const val = input.value?.trim();
+            if (!val) {
+                input.classList.remove('invalid');
+                return;
+            }
+            const isValid = this._effectList.includes(val);
+            input.classList.toggle('invalid', !isValid);
+        });
     }
 
     // Attach listeners for global controls (non-effects area)
@@ -443,6 +477,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 value="buttons"
                 ${this._config.display !== 'dropdown' ? 'checked' : ''}
               ></ha-formfield>
+            </ha-formfield>
             <ha-formfield label="Dropdown">
               <ha-radio
                 name="display"
