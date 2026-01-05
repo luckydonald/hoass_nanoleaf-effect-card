@@ -62,18 +62,22 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             <div class="item ${this.hasAttribute('compact') ? 'compact' : ''}" data-key="${s.key}">
               <div class="label">${s.label}</div>
               <div class="toggles">
-                <button class="toggle-btn btn-active ${cfg.active ? 'active' : ''}" data-mode="active">Active</button>
-                <button class="toggle-btn btn-inactive ${
+                <button type="button" class="toggle-btn btn-active ${
+                    cfg.active ? 'active' : ''
+                }" data-mode="active">Active</button>
+                <button type="button" class="toggle-btn btn-inactive ${
                     cfg.inactive ? 'active' : ''
                 }" data-mode="inactive">Inactive</button>
-                <button class="toggle-btn btn-hover ${cfg.hover ? 'active' : ''}" data-mode="hover">Hover</button>
-              </div>
-            </div>
-          `;
+                <button type="button" class="toggle-btn btn-hover ${
+                    cfg.hover ? 'active' : ''
+                }" data-mode="hover">Hover</button>
+               </div>
+             </div>
+           `;
             })
             .join('')}
-      </div>
-    `;
+       </div>
+     `;
 
         // Attach handlers
         this.shadowRoot.querySelectorAll('.item').forEach((item) => {
@@ -82,38 +86,31 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             const btnInactive = item.querySelector('.btn-inactive');
             const btnHover = item.querySelector('.btn-hover');
 
-            const update = () => {
-                const current = this._value[key] || { active: false, inactive: false, hover: false };
-                current.active = btnActive.classList.contains('active');
-                current.inactive = btnInactive.classList.contains('active');
-                current.hover = btnHover ? btnHover.classList.contains('active') : false;
-                this._value = { ...this._value, [key]: current };
-                // Dispatch a deep-cloned copy to avoid external shared references
-                let out = null;
-                try {
-                    out = JSON.parse(JSON.stringify(this._value));
-                } catch (e) {
-                    out = { ...this._value };
-                }
-                this.dispatchEvent(
-                    new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true })
-                );
+            // Use pointerdown to handle immediate activation; guard click to avoid double toggle
+            const makeHandlers = (btn) => {
+                if (!btn) return;
+                const onPointerDown = (e) => {
+                    // Mark that pointerdown handled the activation for this interaction
+                    btn.dataset._handled = '1';
+                    btn.classList.toggle('active');
+                    update();
+                };
+                const onClick = (e) => {
+                    // If pointerdown already handled this interaction, ignore the click
+                    if (btn.dataset._handled) {
+                        delete btn.dataset._handled;
+                        return;
+                    }
+                    btn.classList.toggle('active');
+                    update();
+                };
+                btn.addEventListener('pointerdown', onPointerDown);
+                btn.addEventListener('click', onClick);
             };
 
-            btnActive?.addEventListener('click', () => {
-                btnActive.classList.toggle('active');
-                update();
-            });
-            btnInactive?.addEventListener('click', () => {
-                btnInactive.classList.toggle('active');
-                update();
-            });
-            if (btnHover) {
-                btnHover.addEventListener('click', () => {
-                    btnHover.classList.toggle('active');
-                    update();
-                });
-            }
+            makeHandlers(btnActive);
+            makeHandlers(btnInactive);
+            makeHandlers(btnHover);
         });
     }
 }
