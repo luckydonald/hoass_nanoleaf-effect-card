@@ -5,6 +5,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         this._value = {};
+        this._bound = false;
     }
 
     set value(v) {
@@ -31,6 +32,60 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        if (this._bound) return;
+        this._bound = true;
+
+        // Delegated click handler for toggle buttons
+        this.shadowRoot.addEventListener('click', (e) => {
+            const btn = e.target.closest('.toggle-btn');
+            if (!btn) return;
+            // toggle active class
+            btn.classList.toggle('active');
+            const item = btn.closest('.item');
+            if (!item) return;
+            const key = item.dataset.key;
+            this._updateKey(key);
+        });
+
+        // Delegated keyboard handler for Enter/Space activation
+        this.shadowRoot.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const btn = e.target.closest('.toggle-btn');
+            if (!btn) return;
+            e.preventDefault();
+            btn.classList.toggle('active');
+            const item = btn.closest('.item');
+            if (!item) return;
+            const key = item.dataset.key;
+            this._updateKey(key);
+        });
+    }
+
+    _updateKey(key) {
+        const root = this.shadowRoot;
+        const item = root.querySelector(`.item[data-key="${key}"]`);
+        if (!item) return;
+        const btnActive = item.querySelector('.btn-active');
+        const btnInactive = item.querySelector('.btn-inactive');
+        const btnHover = item.querySelector('.btn-hover');
+        const current = this._value[key] || { active: false, inactive: false, hover: false };
+        current.active = btnActive.classList.contains('active');
+        current.inactive = btnInactive.classList.contains('active');
+        current.hover = btnHover ? btnHover.classList.contains('active') : false;
+        this._value = { ...this._value, [key]: current };
+        let out;
+        try {
+            out = JSON.parse(JSON.stringify(this._value));
+        } catch (e) {
+            out = { ...this._value };
+        }
+        this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
+        // also microtask dispatch
+        try {
+            Promise.resolve().then(() => {
+                this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
+            });
+        } catch (e) {}
     }
 
     render() {
@@ -62,15 +117,9 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             <div class="item ${this.hasAttribute('compact') ? 'compact' : ''}" data-key="${s.key}">
               <div class="label">${s.label}</div>
               <div class="toggles">
-                <button type="button" class="toggle-btn btn-active ${
-                    cfg.active ? 'active' : ''
-                }" data-mode="active">Active</button>
-                <button type="button" class="toggle-btn btn-inactive ${
-                    cfg.inactive ? 'active' : ''
-                }" data-mode="inactive">Inactive</button>
-                <button type="button" class="toggle-btn btn-hover ${
-                    cfg.hover ? 'active' : ''
-                }" data-mode="hover">Hover</button>
+                <button type="button" class="toggle-btn btn-active ${cfg.active ? 'active' : ''}" data-mode="active">Active</button>
+                <button type="button" class="toggle-btn btn-inactive ${cfg.inactive ? 'active' : ''}" data-mode="inactive">Inactive</button>
+                <button type="button" class="toggle-btn btn-hover ${cfg.hover ? 'active' : ''}" data-mode="hover">Hover</button>
                </div>
              </div>
            `;
@@ -78,44 +127,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             .join('')}
        </div>
      `;
-
-        // Attach handlers
-        this.shadowRoot.querySelectorAll('.item').forEach((item) => {
-            const key = item.dataset.key;
-            const btnActive = item.querySelector('.btn-active');
-            const btnInactive = item.querySelector('.btn-inactive');
-            const btnHover = item.querySelector('.btn-hover');
-
-            // Use pointerdown to handle immediate activation; guard click to avoid double toggle
-            const makeHandlers = (btn) => {
-                if (!btn) return;
-                const onPointerDown = (e) => {
-                    // Mark that pointerdown handled the activation for this interaction
-                    btn.dataset._handled = '1';
-                    btn.classList.toggle('active');
-                    update();
-                };
-                const onClick = (e) => {
-                    // If pointerdown already handled this interaction, ignore the click
-                    if (btn.dataset._handled) {
-                        delete btn.dataset._handled;
-                        return;
-                    }
-                    btn.classList.toggle('active');
-                    update();
-                };
-                btn.addEventListener('pointerdown', onPointerDown);
-                btn.addEventListener('click', onClick);
-            };
-
-            makeHandlers(btnActive);
-            makeHandlers(btnInactive);
-            makeHandlers(btnHover);
-        });
     }
 }
 
-customElements.define(
-    'nanoleaf-effect-card-card-editor-button-style-chooser',
-    NanoleafEffectCardCardEditorButtonStyleChooser
-);
+customElements.define('nanoleaf-effect-card-card-editor-button-style-chooser', NanoleafEffectCardCardEditorButtonStyleChooser);
