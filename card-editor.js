@@ -301,7 +301,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
             <ha-switch
               id="show-icon"
               ${this._config.button_style?.icon !== false ? 'checked' : ''}
-            ></ha-switch>
+            ></ha-formfield>
           </ha-formfield>
         </div>
 
@@ -310,8 +310,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
             <ha-switch
               id="show-name"
               ${this._config.button_style?.name !== false ? 'checked' : ''}
-            ></ha-switch>
-          </ha-formfield>
+            ></ha-formfield>
+          </div>
         </div>
 
         <div class="setting">
@@ -501,14 +501,19 @@ class NanoleafEffectCardEditor extends HTMLElement {
         const colorInputs = colors
             .map(
                 (color, colorIndex) => `
-      <input
-        type="color"
-        class="color-input"
-        value="${color}"
-        data-effect-index="${effectIndex}"
-        data-color-index="${colorIndex}"
-        title="Click to change color"
-      />
+      <div style="display:flex; align-items:center; gap:6px;">
+        <input
+          type="color"
+          class="color-input"
+          value="${color}"
+          data-effect-index="${effectIndex}"
+          data-color-index="${colorIndex}"
+          title="Click to change color"
+        />
+        <button class="icon-button delete-color" data-effect-index="${effectIndex}" data-color-index="${colorIndex}" title="Remove color">
+          <ha-icon icon="mdi:trash-can"></ha-icon>
+        </button>
+      </div>
     `
             )
             .join('');
@@ -696,6 +701,29 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 const effects = [...(this._config.effects || [])];
                 const colors = [...(effects[effectIndex].colors || [effects[effectIndex].color] || ['#CCCCCC'])];
                 colors.push('#CCCCCC');
+                effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
+                this._config = { ...this._config, effects };
+                this.configChanged(this._config);
+                this.render();
+            });
+        });
+
+        // Delete color buttons (trash) - remove a color from an effect
+        this.shadowRoot.querySelectorAll('.delete-color').forEach((button) => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const effectIndex = parseInt(button.dataset.effectIndex);
+                const colorIndex = parseInt(button.dataset.colorIndex);
+                const effects = [...(this._config.effects || [])];
+                let colors = [...(effects[effectIndex].colors || [effects[effectIndex].color] || ['#CCCCCC'])];
+                // Remove the color at colorIndex
+                if (colorIndex >= 0 && colorIndex < colors.length) {
+                    colors.splice(colorIndex, 1);
+                }
+                // If no colors left, fallback to default color to avoid empty arrays
+                if (!colors || colors.length === 0) {
+                    colors = ['#CCCCCC'];
+                }
                 effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
