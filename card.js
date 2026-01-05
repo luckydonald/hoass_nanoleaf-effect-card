@@ -115,14 +115,36 @@ class NanoleafEffectCard extends HTMLElement {
       .button-icon { font-size: 24px; margin-bottom: 4px; display:inline-flex; align-items:center; justify-content:center; }
       .button-name { font-size: 12px; text-align: center; word-wrap: break-word; }
 
+      /* Text/icon gradient support: apply gradient background and clip to text; also support webkit text fill */
+      .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Ensure icon container can show gradient where possible and allow hue rotation animations */
+      .button-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* allow background gradients to be painted */
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+
+      /* Animated icon: apply hue rotation filter to the icon container so svg children are affected */
+      .icon-animated { filter: hue-rotate(0deg); animation: hueRotate 3s linear infinite; }
+
       /* Compact / inline button style */
       .effect-button.compact { flex-direction: row; align-items: center; gap: 8px; padding: 6px 8px; min-height: 40px; }
       .effect-button.compact .button-icon { font-size: 18px; margin-bottom: 0; margin-right: 6px; }
       .effect-button.compact .button-name { font-size: 12px; text-align: left; }
       .buttons-container.compact-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 
-      .color-bar { transition: all 0.3s ease; }
+      .color-bar { transition: all 0.3s ease; height:8px; }
 
+      /* legacy: ensure ha-icon inside animated container also inherits animation if needed */
       .icon-animated ha-icon { animation: hueRotate 3s linear infinite; }
 
       @keyframes hueRotate { 0% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(180deg); } 100% { filter: hue-rotate(360deg); } }
@@ -176,103 +198,157 @@ class NanoleafEffectCard extends HTMLElement {
             ...this._config.effects,
         ];
 
+        // Determine whether any configuration (global or per-effect) enables border or small_bar
+        const anyBorderConfigured = (() => {
+            try {
+                const globalCfg = this._config.button_style?.color_display?.border || {};
+                if (globalCfg.active || globalCfg.inactive) return true;
+                for (const ef of this._config.effects || []) {
+                    const cfg = ef?.button_style?.color_display?.border || {};
+                    if (cfg.active || cfg.inactive) return true;
+                }
+            } catch (e) {}
+            return false;
+        })();
+
+        const anySmallBarConfigured = (() => {
+            try {
+                const globalCfg = this._config.button_style?.color_display?.small_bar || {};
+                if (globalCfg.active || globalCfg.inactive) return true;
+                for (const ef of this._config.effects || []) {
+                    const cfg = ef?.button_style?.color_display?.small_bar || {};
+                    if (cfg.active || cfg.inactive) return true;
+                }
+            } catch (e) {}
+            return false;
+        })();
+
         return `
-      <div class="effect-card">
-        <div class="buttons-container ${this._config.button_style?.compact ? 'compact-grid' : ''}">
-          ${effects
-              .map((effect) => {
-                  const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
-                  // getEffectColors may return an empty array if the user removed all colors
-                  const colors = this.getEffectColors(effect);
-                  const buttonStyle = { ...(this._config.button_style || {}), ...(effect.button_style || {}) };
-                  const inactiveColor = buttonStyle.inactive_color || '#CCCCCC';
-                  const showIcon = buttonStyle.icon !== false;
-                  const showName = buttonStyle.name !== false;
+       <div class="effect-card">
+         <div class="buttons-container ${this._config.button_style?.compact ? 'compact-grid' : ''}">
+           ${effects
+               .map((effect) => {
+                   const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
+                   // getEffectColors may return an empty array if the user removed all colors
+                   const colors = this.getEffectColors(effect);
+                   const buttonStyle = { ...(this._config.button_style || {}), ...(effect.button_style || {}) };
+                   const inactiveColor = buttonStyle.inactive_color || '#CCCCCC';
+                   const showIcon = buttonStyle.icon !== false;
+                   const showName = buttonStyle.name !== false;
 
-                  // Decide which styles apply depending on active/inactive flags
-                  const colorDisplay = buttonStyle.color_display || {};
+                   // Decide which styles apply depending on active/inactive flags
+                   const colorDisplay = buttonStyle.color_display || {};
 
-                  const applyStyle = (styleKey) => {
-                      const cfg = colorDisplay[styleKey] || {};
-                      return (isActive && cfg.active) || (!isActive && cfg.inactive);
-                  };
+                   const applyStyle = (styleKey) => {
+                       const cfg = colorDisplay[styleKey] || {};
+                       return (isActive && cfg.active) || (!isActive && cfg.inactive);
+                   };
 
-                  const applyHover = (styleKey) => {
-                      const cfg = colorDisplay[styleKey] || {};
-                      return cfg.hover === true;
-                  };
+                   const applyHover = (styleKey) => {
+                       const cfg = colorDisplay[styleKey] || {};
+                       return cfg.hover === true;
+                   };
 
-                  // If colors array is empty, use inactiveColor as fallback for rendering styles
-                  const colorsForStyle = colors && colors.length > 0 ? colors : [inactiveColor];
-                  const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
-                  const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
+                   // If colors array is empty, use inactiveColor as fallback for rendering styles
+                   const colorsForStyle = colors && colors.length > 0 ? colors : [inactiveColor];
+                   const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
+                   const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
 
-                  // prepare inline styles
-                  const fullBg = applyStyle('full_background')
-                      ? `background: ${bgGradient};`
-                      : `background: ${bgColor};`;
-                  const borderStyle = applyStyle('border')
-                      ? `border: 2px solid transparent; border-image: linear-gradient(135deg, ${colors.join(', ')}) 1;`
-                      : '';
-                  const textGradientStyle = applyStyle('text')
-                      ? `background: ${bgGradient}; -webkit-background-clip: text; color: transparent;`
-                      : '';
-                  const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
+                   // prepare inline styles
+                   // Full background or flat background
+                   const fullBg = applyStyle('full_background')
+                       ? `background: ${bgGradient};`
+                       : `background: ${bgColor};`;
 
-                  // compact class if globally compact or per-effect override
-                  const compactClass =
-                      (effect.button_style && effect.button_style.compact) || this._config.button_style?.compact
-                          ? 'compact'
-                          : '';
+                   // Border: always reserve border width to avoid layout shifts; when active, apply border-image gradient
+                   let borderStyle = 'border: 2px solid transparent;';
+                   if (applyStyle('border')) {
+                       borderStyle += ` border-image: linear-gradient(135deg, ${colorsForStyle.join(', ')}) 1;`;
+                   }
 
-                  // hover data attrs
-                  const hoverAttrs = [];
-                  if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
-                  if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
-                  if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
-                  if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
+                   // Determine text/icon gradient class and inline style when 'text' style applies
+                   const textEnabled = applyStyle('text');
+                   const textClass = textEnabled ? 'text-gradient' : '';
+                   const textStyleInline = textEnabled
+                       ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`
+                       : '';
+                   const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
-                  return `
-               <button 
-                class="effect-button ${isActive ? 'active' : 'inactive'} ${compactClass}" 
-                 data-effect="${effect.name}"
-                 ${hoverAttrs.join(' ')}
-                 style="${fullBg} ${borderStyle} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
-                      colorsForStyle[0]
-                  )};"
-               >
-                 <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                 ${
-                     showIcon
-                         ? `
-                   <div class="button-icon ${iconAnimatedClass}" style="${textGradientStyle}">
-                     <ha-icon icon="${effect.icon || 'mdi:lightbulb'}"></ha-icon>
+                   // compact class if globally compact or per-effect override
+                   const compactClass =
+                       (effect.button_style && effect.button_style.compact) || this._config.button_style?.compact
+                           ? 'compact'
+                           : '';
+
+                   // hover data attrs
+                   const hoverAttrs = [];
+                   if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
+                   if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
+                   if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
+                   if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
+
+                   // Small bar rendering: if anySmallBarConfigured is true, reserve the bar space for all buttons
+                   const smallBarHtml = (() => {
+                       const barStyle = applyStyle('small_bar')
+                           ? `background: ${bgGradient};`
+                           : `background: transparent;`;
+                       // When not active, make it less visible but reserve space; if globally no small bar configured, omit entirely
+                       if (!anySmallBarConfigured) return '';
+                       return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${
+                           applyStyle('small_bar') ? (applyHover('small_bar') ? 0.6 : 1) : 0
+                       };"></div>`;
+                   })();
+
+                   // Border: reserve spacing only if anyBorderConfigured
+                   let borderStyleFinal = '';
+                   if (anyBorderConfigured) {
+                       borderStyleFinal = 'border: 2px solid transparent;';
+                       if (applyStyle('border')) {
+                           borderStyleFinal += ` border-image: linear-gradient(135deg, ${colorsForStyle.join(
+                               ', '
+                           )}) 1;`;
+                       }
+                   }
+
+                   return `
+                 <button 
+                  class="effect-button ${isActive ? 'active' : 'inactive'} ${compactClass}" 
+                   data-effect="${effect.name}"
+                   ${hoverAttrs.join(' ')}
+                   style="${fullBg} ${borderStyleFinal} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
+                       colorsForStyle[0]
+                   )};"
+                 >
+                   <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                   ${
+                       showIcon
+                           ? `
+                    <div class="button-icon ${iconAnimatedClass} ${textClass}" ${
+                                 textEnabled ? `style="${textStyleInline}"` : ''
+                             }>
+                      <ha-icon icon="${effect.icon || 'mdi:lightbulb'}"></ha-icon>
+                    </div>
+                   `
+                           : ''
+                   }
+                   ${
+                       showName
+                           ? `
+                    <div class="button-name ${textClass}" ${textEnabled ? `style="${textStyleInline}"` : ''}>${
+                                 effect.name
+                             }</div>
+                   `
+                           : ''
+                   }
+                   ${smallBarHtml}
                    </div>
-                 `
-                         : ''
-                 }
-                 ${
-                     showName
-                         ? `
-                   <div class="button-name" style="${textGradientStyle}">${effect.name}</div>
-                 `
-                         : ''
-                 }
-                 ${
-                     applyStyle('small_bar')
-                         ? `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; background: ${bgGradient}; opacity: ${
-                               applyHover('small_bar') ? 0.6 : 1
-                           };"></div>`
-                         : ''
-                 }
-                 </div>
-               </button>
-             `;
-              })
-              .join('')}
+                 </button>
+               `;
+               })
+               .join('')}
+           </div>
          </div>
-       </div>
-     `;
+       `;
     }
 
     getEffectColors(effect) {
