@@ -261,7 +261,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
         if (compactSwitch && !compactSwitch._nanoleaf_bound) {
             compactSwitch._nanoleaf_bound = true;
             compactSwitch.addEventListener('change', (e) => {
-                this._config = { ...this._config, button_style: { ...(this._config.button_style || {}), compact: e.target.checked } };
+                this._config = {
+                    ...this._config,
+                    button_style: { ...(this._config.button_style || {}), compact: e.target.checked },
+                };
                 this.configChanged(this._config);
                 this.renderEffectsArea();
             });
