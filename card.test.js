@@ -145,7 +145,21 @@ describe('NanoleafEffectCard', () => {
 
     describe('Static Methods', () => {
         it('should have getStubConfig', () => {
-            const stub = card.constructor.getStubConfig();
+            // Provide a minimal fake Home Assistant object so static helpers that inspect ha.states work
+            const fakeHa = {
+                states: {
+                    'light.example_nanoleaf_shapes': {
+                        entity_id: 'light.example_nanoleaf_shapes',
+                        attributes: {
+                            effect_list: [],
+                            supported_color_modes: ['hs'],
+                            color_mode: 'hs',
+                            hs_color: [0, 0],
+                        },
+                    },
+                },
+            };
+            const stub = card.constructor.getStubConfig(fakeHa);
             expect(stub).toHaveProperty('entity');
             expect(stub).toHaveProperty('display');
             expect(stub).toHaveProperty('effects');

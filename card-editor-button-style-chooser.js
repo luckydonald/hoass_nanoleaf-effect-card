@@ -117,6 +117,11 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             btn._nanoleaf_bound = true;
             btn.addEventListener('click', (e) => {
                 // Toggle active class (click doesn't change classes automatically)
+                // If a prior keyboard event handled activation, ignore this click
+                if (btn.dataset._handled) {
+                    delete btn.dataset._handled;
+                    return;
+                }
                 btn.classList.toggle('active');
                 const item = btn.closest('.item');
                 if (!item) return;
@@ -126,6 +131,8 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             btn.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    // mark this interaction as handled so click won't toggle again
+                    btn.dataset._handled = '1';
                     btn.classList.toggle('active');
                     const item = btn.closest('.item');
                     if (!item) return;

@@ -124,6 +124,15 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 // ignore if called before render
             }
         }
+        // Forward hass to any per-effect pickers so they update their options
+        try {
+            this.shadowRoot?.querySelectorAll('.effect-picker').forEach((picker) => {
+                try {
+                    picker.hass = hass;
+                    if (this._config?.entity) picker.entity = this._config.entity;
+                } catch (e) {}
+            });
+        } catch (e) {}
     }
 
     /**
@@ -210,20 +219,21 @@ class NanoleafEffectCardEditor extends HTMLElement {
      */
     updateEffectListSuggestions(entityId) {
         const datalist = this.shadowRoot?.querySelector('#effects-datalist');
-        if (!datalist) return;
 
         const list = this._hass?.states?.[entityId]?.attributes?.effect_list || [];
         this._effectList = Array.isArray(list) ? list.slice() : [];
 
-        // clear existing options
-        datalist.innerHTML = '';
-        this._effectList.forEach((name) => {
-            const opt = document.createElement('option');
-            opt.value = name;
-            datalist.appendChild(opt);
-        });
+        // If a legacy datalist exists, populate it for backwards compatibility
+        if (datalist) {
+            datalist.innerHTML = '';
+            this._effectList.forEach((name) => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                datalist.appendChild(opt);
+            });
+        }
 
-        // validate existing inputs
+        // validate existing inputs even when datalist is not present
         this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
             const val = input.value?.trim();
             if (!val) {
@@ -584,7 +594,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
               id="show-name"
               ${this._config.button_style?.name !== false ? 'checked' : ''}
             ></ha-formfield>
-          </div>
+          </ha-formfield>
         </div>
 
         <div class="setting">
@@ -614,8 +624,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         </div>
 
         <div class="setting">
-          <label>Color Display Styles</label>
-          <nanoleaf-effect-card-card-editor-button-style-chooser id="global-style-chooser" />
+          <ha-formfield label="Color Display Styles" class="full-width">
+            <nanoleaf-effect-card-card-editor-button-style-chooser id="global-style-chooser" />
+          </ha-formfield>
           <div class="info">Configure how colors are displayed for active/inactive/hover states</div>
         </div>
 
