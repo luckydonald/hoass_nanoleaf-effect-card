@@ -7,7 +7,7 @@ beforeEach(() => {
 });
 
 // Setup a minimal DOM so document.createElement works and customElements is available
-const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+const dom = new JSDOM('<!DOCTYPE html><html lang="en"><body></body></html>');
 global.document = dom.window.document;
 global.window = dom.window;
 global.HTMLElement = dom.window.HTMLElement;
@@ -49,6 +49,11 @@ describe('Visual editor crash (getConfigElement)', () => {
         el.setConfig(cfg);
         expect(el._config).toEqual(cfg);
         expect(warnSpy).toHaveBeenCalled();
+
+        // The fallback should render a visible UI indicating the editor is unavailable
+        const fallbackInShadow = el.shadowRoot && el.shadowRoot.querySelector('.nanoleaf-editor-fallback');
+        const fallbackInLight = el.querySelector && el.querySelector('.nanoleaf-editor-fallback');
+        expect(fallbackInShadow || fallbackInLight).toBeTruthy();
 
         warnSpy.mockRestore();
     });

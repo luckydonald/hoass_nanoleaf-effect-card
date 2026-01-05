@@ -346,7 +346,7 @@ class NanoleafEffectCard extends HTMLElement {
             // If import fails, still return an element so callers can handle it; setConfig may be undefined
         }
         const el = document.createElement('nanoleaf-effect-card-editor');
-        // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op-ish fallback
+        // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op fallback
         if (typeof el.setConfig !== 'function') {
             el.setConfig = function (cfg) {
                 // Minimal fallback: store the config so callers that inspect the element don't crash
@@ -357,6 +357,26 @@ class NanoleafEffectCard extends HTMLElement {
                     console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
                 } catch (e) {
                     // ignore in environments without console
+                }
+                // Render a minimal visible UI informing the user the visual editor is unavailable
+                try {
+                    const msg = `
+                        <div class="nanoleaf-editor-fallback" style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;">
+                          <div style="font-weight:600;color:#d9534f;">Editor unavailable</div>
+                          <div style="margin-top:6px;font-size:13px;">The visual editor failed to load. You can edit the configuration manually.</div>
+                        </div>
+                    `;
+                    // Prefer shadow DOM if available, but fall back to light DOM
+                    if (this.attachShadow && this.shadowRoot) {
+                        this.shadowRoot.innerHTML = msg;
+                    } else if (this.attachShadow) {
+                        this.attachShadow({ mode: 'open' });
+                        this.shadowRoot.innerHTML = msg;
+                    } else {
+                        this.innerHTML = msg;
+                    }
+                } catch (e) {
+                    // swallow any rendering errors in fallback
                 }
             };
         }
