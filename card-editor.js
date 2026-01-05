@@ -813,14 +813,20 @@ class NanoleafEffectCardEditor extends HTMLElement {
             });
         });
 
-        // Button style value-changed events
-        this.shadowRoot.querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser').forEach((comp) => {
+        // Button style value-changed events for per-effect choosers only
+        this.shadowRoot.querySelectorAll('.effect-item').forEach((item) => {
+            const comp = item.querySelector('nanoleaf-effect-card-card-editor-button-style-chooser');
+            if (!comp) return;
             if (comp._nanoleaf_bound) return;
             comp._nanoleaf_bound = true;
+            const index = parseInt(item.dataset.index);
             comp.addEventListener('value-changed', (e) => {
-                const index = parseInt(comp.closest('.effect-item').dataset.index);
                 const effects = [...(this._config.effects || [])];
-                effects[index] = { ...effects[index], button_style: e.detail.value };
+                const prevBtnStyle = effects[index]?.button_style || {};
+                effects[index] = {
+                    ...effects[index],
+                    button_style: { ...prevBtnStyle, color_display: e.detail.value },
+                };
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
             });

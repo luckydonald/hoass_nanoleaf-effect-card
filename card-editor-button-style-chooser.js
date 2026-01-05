@@ -4,11 +4,17 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this._value = this._value || {};
+        this._value = {};
     }
 
     set value(v) {
-        this._value = v || {};
+        // Deep-clone incoming value to avoid shared references between chooser instances
+        try {
+            this._value = v ? JSON.parse(JSON.stringify(v)) : {};
+        } catch (e) {
+            // Fallback to shallow copy
+            this._value = v ? { ...v } : {};
+        }
         this.render();
     }
 
@@ -75,8 +81,15 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
                 current.inactive = btnInactive.classList.contains('active');
                 current.hover = btnHover ? btnHover.classList.contains('active') : false;
                 this._value = { ...this._value, [key]: current };
+                // Dispatch a deep-cloned copy to avoid external shared references
+                let out = null;
+                try {
+                    out = JSON.parse(JSON.stringify(this._value));
+                } catch (e) {
+                    out = { ...this._value };
+                }
                 this.dispatchEvent(
-                    new CustomEvent('value-changed', { detail: { value: this._value }, bubbles: true, composed: true })
+                    new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true })
                 );
             };
 
