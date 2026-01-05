@@ -402,6 +402,55 @@ class NanoleafEffectCard extends HTMLElement {
         return el;
     }
 
+    static getSupportedEntityIds(ha) {
+        return Object.values(ha.states)
+            .filter(
+                (entity) =>
+                    entity.entity_id.startsWith('light.') &&
+                    entity.attributes &&
+                    entity.attributes.supported_color_modes &&
+                    entity.attributes.supported_color_modes.find((mode) => ['hs', 'rgb', 'xy'].indexOf(mode) !== -1)
+            )
+            .filter((entity) => {
+                const attrs = entity.attributes ?? {};
+
+                // required effect fields
+                if (!Array.isArray(attrs.effect_list)) return false;
+                if (!('effect' in attrs)) return false; // may be null
+
+                // colour‑mode specific validation
+                const mode = attrs.color_mode;
+                if (mode === 'color_temp') {
+                    if (
+                        !Array.isArray(attrs.supported_color_modes) ||
+                        !attrs.supported_color_modes.includes('color_temp')
+                    ) {
+                        return false;
+                    }
+                    if (typeof attrs.color_temp !== 'number') return false;
+                } else if (mode === 'hs') {
+                    if (
+                        !Array.isArray(attrs.supported_color_modes) || !attrs.supported_color_modes.includes('hs')
+                    ) {
+                        return false;
+                    }
+                    if (
+                        !Array.isArray(attrs.hs_color) ||
+                        attrs.hs_color.length !== 2 ||
+                        typeof attrs.hs_color[0] !== 'number' ||
+                        typeof attrs.hs_color[1] !== 'number'
+                    ) {
+                        return false;
+                    }
+                } else {
+                    return false; // other modes are not relevant here
+                }
+
+                return true;
+            })
+            .map((entity) => entity.entity_id);
+    }
+
     static getStubConfig() {
         return { entity: '', display: 'buttons', effects: [], show_off: true, show_none: false };
     }
