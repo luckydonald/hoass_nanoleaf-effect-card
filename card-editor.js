@@ -31,6 +31,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this._config = {};
         this._hass = null;
+        this._effectList = [];
     }
 
     /**
@@ -45,6 +46,14 @@ class NanoleafEffectCardEditor extends HTMLElement {
         const entityPicker = this.shadowRoot?.querySelector('#entity-picker');
         if (entityPicker) {
             entityPicker.hass = hass;
+        }
+        // If we have an entity selected, refresh effect suggestions from hass
+        if (this._hass && this._config && this._config.entity) {
+            try {
+                this.updateEffectListSuggestions(this._config.entity);
+            } catch (e) {
+                // ignore if called before render
+            }
         }
     }
 
@@ -110,6 +119,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           border-bottom: 1px solid var(--divider-color);
           padding-bottom: 8px;
         }
+        .effect-name-input.invalid { border-color: var(--error-color); box-shadow: 0 0 0 3px rgba(255,0,0,0.06); }
         ha-entity-picker {
           width: 100%;
         }
@@ -251,6 +261,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
           <div class="info">Select your Nanoleaf light entity</div>
         </div>
 
+        <!-- datalist used to provide autocomplete suggestions for effect names -->
+        <datalist id="effects-datalist"></datalist>
+
         <div class="setting">
           <label>Display Mode</label>
           <div class="radio-group">
@@ -259,14 +272,13 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 name="display"
                 value="buttons"
                 ${this._config.display !== 'dropdown' ? 'checked' : ''}
-              ></ha-radio>
-            </ha-formfield>
+              ></ha-formfield>
             <ha-formfield label="Dropdown">
               <ha-radio
                 name="display"
                 value="dropdown"
                 ${this._config.display === 'dropdown' ? 'checked' : ''}
-              ></ha-radio>
+              ></ha-formfield>
             </ha-formfield>
           </div>
           <div class="info">Choose how to display effect selection</div>
@@ -328,6 +340,16 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // After injecting HTML, attach listeners and set proper element properties
         this.attachEventListeners();
+
+        // ensure each effect name input uses the datalist for autocomplete
+        this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
+            input.setAttribute('list', 'effects-datalist');
+        });
+
+        // If we already have an entity and hass, populate suggestions
+        if (this._hass && this._config.entity) {
+            this.updateEffectListSuggestions(this._config.entity);
+        }
 
         // Initialize element properties that can't be set via innerHTML
         const entityPicker = this.shadowRoot.querySelector('#entity-picker');
@@ -492,6 +514,38 @@ class NanoleafEffectCardEditor extends HTMLElement {
     }
 
     /**
+     * Populate the datalist with effect names from the entity's effect_list
+     * and validate existing effect name inputs (mark invalid ones).
+     * @param {string} entityId
+     */
+    updateEffectListSuggestions(entityId) {
+        const datalist = this.shadowRoot.querySelector('#effects-datalist');
+        if (!datalist) return;
+
+        const list = this._hass?.states?.[entityId]?.attributes?.effect_list || [];
+        this._effectList = Array.isArray(list) ? list.slice() : [];
+
+        // clear existing options
+        datalist.innerHTML = '';
+        this._effectList.forEach((name) => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            datalist.appendChild(opt);
+        });
+
+        // validate existing inputs
+        this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
+            const val = input.value?.trim();
+            if (!val) {
+                input.classList.remove('invalid');
+                return;
+            }
+            const isValid = this._effectList.includes(val);
+            input.classList.toggle('invalid', !isValid);
+        });
+    }
+
+    /**
      * Attaches event listeners to all interactive elements.
      * Sets up handlers for entity picker, radios, switches, buttons, and ha-sortable.
      * Called after render() completes.
@@ -505,6 +559,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
             entityPicker.addEventListener('value-changed', (e) => {
                 const value = e.detail?.value ?? e.target.value ?? entityPicker.value;
                 this._config = { ...this._config, entity: value };
+                // update suggestions based on the selected entity
+                this.updateEffectListSuggestions(value);
                 this.configChanged(this._config);
             });
         }
@@ -579,6 +635,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 effects[index] = { ...effects[index], name: e.target.value };
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
+                // validate against effect_list suggestions (if available)
+                const val = e.target.value?.trim();
+                const isValid = !val || (this._effectList && this._effectList.includes(val));
+                e.target.classList.toggle('invalid', !isValid);
                 // avoid re-rendering here to not disrupt typing/focus
             });
         });
