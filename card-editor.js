@@ -32,6 +32,74 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this._config = {};
         this._hass = null;
         this._effectList = [];
+        this._savedInputState = null;
+    }
+
+    // Save currently focused input state (selector hints, value, caret) to restore after re-render
+    saveInputState() {
+        try {
+            const root = this.shadowRoot;
+            if (!root) return;
+            const active = root.activeElement;
+            if (!active) return;
+            const state = {
+                id: active.id || null,
+                tagName: active.tagName || null,
+                className: active.className || null,
+                dataset: { ...active.dataset },
+                value: active.value ?? null,
+                selectionStart: active.selectionStart ?? null,
+                selectionEnd: active.selectionEnd ?? null,
+            };
+            this._savedInputState = state;
+        } catch (e) {
+            this._savedInputState = null;
+        }
+    }
+
+    // Restore previously saved input state if the corresponding element exists after re-render
+    restoreInputState() {
+        try {
+            if (!this._savedInputState) return;
+            const root = this.shadowRoot;
+            if (!root) return;
+            let el = null;
+            const s = this._savedInputState;
+            if (s.id) {
+                el = root.querySelector(`#${CSS.escape(s.id)}`);
+            }
+            if (!el && s.dataset && Object.keys(s.dataset).length > 0) {
+                // Try to match by data-index if available
+                if (s.dataset.index !== undefined) {
+                    el = root.querySelector(`[data-index="${s.dataset.index}"]`);
+                } else if (s.dataset.effectIndex !== undefined) {
+                    el = root.querySelector(`[data-effect-index="${s.dataset.effectIndex}"]`);
+                }
+            }
+            // Fallback: try to find by class name
+            if (!el && s.className) {
+                const className = s.className.split(' ')[0];
+                el = root.querySelector(`.${className}`);
+            }
+            if (el) {
+                if (s.value !== null && el.value !== undefined) el.value = s.value;
+                if (typeof s.selectionStart === 'number' && el.setSelectionRange) {
+                    try {
+                        el.focus();
+                        el.setSelectionRange(s.selectionStart, s.selectionEnd ?? s.selectionStart);
+                    } catch (e) {
+                        // ignore if element doesn't support selection
+                        el.focus();
+                    }
+                } else {
+                    el.focus();
+                }
+            }
+        } catch (e) {
+            // ignore
+        } finally {
+            this._savedInputState = null;
+        }
     }
 
     /**
@@ -93,6 +161,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         if (!this._config) {
             this._config = {};
         }
+
+        // Preserve focused input state so re-render doesn't interrupt typing
+        this.saveInputState();
 
         this.shadowRoot.innerHTML = `
       <style>
@@ -334,7 +405,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         <div class="info" style="margin-bottom: 8px;">
           Configure effects that match your Nanoleaf's effect list.
         </div>
-        <ha-sortable handle-selector=".handle" .disabled="${
+        <ha-sortable id="effects-sortable" handle-selector=".handle" .disabled="${
             !this._config.effects || this._config.effects.length === 0
         }">
           ${this.renderEffectsList()}
@@ -350,6 +421,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
         // After injecting HTML, attach listeners and set proper element properties
         this.attachEventListeners();
+        // Attach listeners for effects area (separate to avoid full re-renders)
+        this.attachEffectsListeners();
 
         // ensure each effect name input uses the datalist for autocomplete
         this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
@@ -426,231 +499,38 @@ class NanoleafEffectCardEditor extends HTMLElement {
                         {};
                 } catch (e) {}
             });
+
+        // Restore focused input after render
+        this.restoreInputState();
     }
 
-    /**
-     * Renders the list of configured effects.
-     * Creates draggable effect items with name, icon, and color inputs.
-     * Each effect has a drag handle, content area, and delete button.
-     *
-     * @returns {string} HTML string for effects list, or empty string if no effects
-     */
-    renderEffectsList() {
-        const effects = this._config.effects || [];
-        if (effects.length === 0) {
-            return '';
-        }
-
-        return effects
-            .map(
-                (effect, index) => `
-      <div class="effect-item" data-index="${index}">
-        <div class="handle">
-          <ha-icon icon="mdi:drag"></ha-icon>
-        </div>
-        <div class="effect-content">
-          <div class="effect-header">
-            <input
-              type="text"
-              class="effect-name-input"
-              placeholder="Effect name (e.g., Rainbow)"
-              value="${effect.name || ''}"
-              data-index="${index}"
-            />
-          </div>
-          <div class="effect-row">
-            <label>Icon</label>
-            <ha-icon-picker
-              class="effect-icon"
-              .value="${effect.icon || 'mdi:lightbulb'}"
-              data-index="${index}"
-            ></ha-icon-picker>
-          </div>
-          <div class="effect-row">
-            <label>Colors</label>
-            <div class="colors-container">
-              ${this.renderColorInputs(effect, index)}
-            </div>
-          </div>
-          <nanoleaf-effect-card-card-editor-button-style-chooser
-            class="button-style"
-            .value="${effect.button_style || {}}"
-          ></nanoleaf-effect-card-card-editor-button-style-chooser>
-        </div>
-        <div class="effect-actions">
-          <button class="icon-button delete" data-index="${index}" title="Delete effect">
-            <ha-icon icon="mdi:delete"></ha-icon>
-          </button>
-        </div>
-      </div>
-    `
-            )
-            .join('');
+    // Re-render only the effects list area and reattach its listeners
+    renderEffectsArea() {
+        const sortable = this.shadowRoot?.querySelector('#effects-sortable');
+        if (!sortable) return;
+        // preserve focused input state around the partial re-render
+        this.saveInputState();
+        sortable.innerHTML = this.renderEffectsList();
+        // reattach effect-specific listeners
+        this.attachEffectsListeners();
+        // restore focus/caret if needed
+        this.restoreInputState();
     }
 
-    /**
-     * Renders color inputs for an effect.
-     * Creates color picker inputs and an "add color" button.
-     *
-     * @param {Object} effect - Effect configuration object
-     * @param {number} effectIndex - Index of the effect in the effects array
-     * @returns {string} HTML string for color inputs
-     */
-    renderColorInputs(effect, effectIndex) {
-        const colors = effect.colors || (effect.color ? [effect.color] : ['#CCCCCC']);
-        const colorInputs = colors
-            .map(
-                (color, colorIndex) => `
-      <div style="display:flex; align-items:center; gap:6px;">
-        <input
-          type="color"
-          class="color-input"
-          value="${color}"
-          data-effect-index="${effectIndex}"
-          data-color-index="${colorIndex}"
-          title="Click to change color"
-        />
-        <button class="icon-button delete-color" data-effect-index="${effectIndex}" data-color-index="${colorIndex}" title="Remove color">
-          <ha-icon icon="mdi:trash-can"></ha-icon>
-        </button>
-      </div>
-    `
-            )
-            .join('');
-
-        return (
-            colorInputs +
-            `
-      <button class="icon-button add-color" data-effect-index="${effectIndex}" title="Add color">
-        <ha-icon icon="mdi:plus"></ha-icon>
-      </button>
-    `
-        );
-    }
-
-    /**
-     * Populate the datalist with effect names from the entity's effect_list
-     * and validate existing effect name inputs (mark invalid ones).
-     * @param {string} entityId
-     */
-    updateEffectListSuggestions(entityId) {
-        const datalist = this.shadowRoot.querySelector('#effects-datalist');
-        if (!datalist) return;
-
-        const list = this._hass?.states?.[entityId]?.attributes?.effect_list || [];
-        this._effectList = Array.isArray(list) ? list.slice() : [];
-
-        // clear existing options
-        datalist.innerHTML = '';
-        this._effectList.forEach((name) => {
-            const opt = document.createElement('option');
-            opt.value = name;
-            datalist.appendChild(opt);
-        });
-
-        // validate existing inputs
-        this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
-            const val = input.value?.trim();
-            if (!val) {
-                input.classList.remove('invalid');
-                return;
-            }
-            const isValid = this._effectList.includes(val);
-            input.classList.toggle('invalid', !isValid);
-        });
-    }
-
-    /**
-     * Attaches event listeners to all interactive elements.
-     * Sets up handlers for entity picker, radios, switches, buttons, and ha-sortable.
-     * Called after render() completes.
-     */
-    attachEventListeners() {
-        // Entity picker
-        const entityPicker = this.shadowRoot.querySelector('#entity-picker');
-        if (entityPicker && this._hass) {
-            entityPicker.hass = this._hass;
-            // Use change instead of value-changed to be more compatible
-            entityPicker.addEventListener('value-changed', (e) => {
-                const value = e.detail?.value ?? e.target.value ?? entityPicker.value;
-                this._config = { ...this._config, entity: value };
-                // update suggestions based on the selected entity
-                this.updateEffectListSuggestions(value);
-                this.configChanged(this._config);
-            });
-        }
-
-        // Display mode radios
-        const radios = this.shadowRoot.querySelectorAll('ha-radio');
-        radios.forEach((radio) => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    this._config = { ...this._config, display: e.target.value };
-                    this.configChanged(this._config);
-                }
-            });
-        });
-
-        // Inactive color
-        const inactiveColorInput = this.shadowRoot.querySelector('#inactive-color');
-        inactiveColorInput?.addEventListener('input', (e) => {
-            this._config = {
-                ...this._config,
-                button_style: { ...(this._config.button_style || {}), inactive_color: e.target.value },
-            };
-            this.configChanged(this._config);
-        });
-
-        // Show icon switch
-        const showIconSwitch = this.shadowRoot.querySelector('#show-icon');
-        showIconSwitch?.addEventListener('change', (e) => {
-            this._config = {
-                ...this._config,
-                button_style: { ...(this._config.button_style || {}), icon: e.target.checked },
-            };
-            this.configChanged(this._config);
-        });
-
-        // Show name switch
-        const showNameSwitch = this.shadowRoot.querySelector('#show-name');
-        showNameSwitch?.addEventListener('change', (e) => {
-            this._config = {
-                ...this._config,
-                button_style: { ...(this._config.button_style || {}), name: e.target.checked },
-            };
-            this.configChanged(this._config);
-        });
-
-        // Compact style switch
-        const compactSwitch = this.shadowRoot.querySelector('#compact-style');
-        compactSwitch?.addEventListener('change', (e) => {
-            this._config = {
-                ...this._config,
-                button_style: { ...(this._config.button_style || {}), compact: e.target.checked },
-            };
-            this.configChanged(this._config);
-        });
-
+    // Attach listeners that are specific to the effects area (name inputs, color inputs, add/delete color, reorder)
+    attachEffectsListeners() {
         // ha-sortable for reordering effects
-        const sortable = this.shadowRoot.querySelector('ha-sortable');
-        sortable?.addEventListener('item-moved', (e) => {
-            const effects = [...(this._config.effects || [])];
-            const movedEffect = effects.splice(e.detail.oldIndex, 1)[0];
-            effects.splice(e.detail.newIndex, 0, movedEffect);
-            this._config = { ...this._config, effects };
-            this.configChanged(this._config);
-            this.render();
-        });
-
-        // Add effect button
-        const addEffectButton = this.shadowRoot.querySelector('#add-effect');
-        addEffectButton?.addEventListener('click', () => {
-            const effects = [...(this._config.effects || [])];
-            effects.push({ name: '', icon: 'mdi:lightbulb', colors: ['#CCCCCC'] });
-            this._config = { ...this._config, effects };
-            this.configChanged(this._config);
-            this.render();
-        });
+        const sortable = this.shadowRoot.querySelector('#effects-sortable');
+        if (sortable) {
+            sortable.addEventListener('item-moved', (e) => {
+                const effects = [...(this._config.effects || [])];
+                const movedEffect = effects.splice(e.detail.oldIndex, 1)[0];
+                effects.splice(e.detail.newIndex, 0, movedEffect);
+                this._config = { ...this._config, effects };
+                this.configChanged(this._config);
+                this.renderEffectsArea();
+            });
+        }
 
         // Effect name inputs
         this.shadowRoot.querySelectorAll('.effect-name-input').forEach((input) => {
@@ -704,7 +584,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
-                this.render();
+                this.renderEffectsArea();
             });
         });
 
@@ -715,19 +595,17 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 const effectIndex = parseInt(button.dataset.effectIndex);
                 const colorIndex = parseInt(button.dataset.colorIndex);
                 const effects = [...(this._config.effects || [])];
-                // Keep the colors array accurate (allow empty array per user request)
                 let colors = [
                     ...(effects[effectIndex].colors ||
                         (effects[effectIndex].color ? [effects[effectIndex].color] : [])),
                 ];
-                // Remove the color at colorIndex
                 if (colorIndex >= 0 && colorIndex < colors.length) {
                     colors.splice(colorIndex, 1);
                 }
                 effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
-                this.render();
+                this.renderEffectsArea();
             });
         });
 
@@ -740,7 +618,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
                 effects.splice(index, 1);
                 this._config = { ...this._config, effects };
                 this.configChanged(this._config);
-                this.render();
+                this.renderEffectsArea();
             });
         });
 
