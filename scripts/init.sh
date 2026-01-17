@@ -51,6 +51,21 @@ to_pascal_case() {
 
 print_header "Home Assistant Plugin Template Initializer"
 
+# Get the repository root (parent of scripts/)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$REPO_ROOT"
+
+# Safety check: ensure this is the template repository
+if [ ! -d "custom_components/template" ] && [ ! -d "frontend_vue" ] && [ ! -d "frontend_plain" ]; then
+    print_error "This doesn't appear to be the template repository!"
+    print_error "Expected to find custom_components/template/ or frontend_vue/ or frontend_plain/"
+    exit 1
+fi
+
+print_info "Working directory: $REPO_ROOT"
+
 # Step 1: Get the display name (UI name)
 print_info "Step 1: Plugin Display Name"
 echo "This is the name that will be shown in the Home Assistant UI."
@@ -108,13 +123,42 @@ fi
 # Step 6: Ask about frontend choice
 print_info "\nStep 6: Frontend Framework"
 echo "Choose your frontend framework:"
-echo "  vue   - Vue.js framework (from frontend_vue/)"
-echo "  plain - Plain HTML/JS/CSS (from frontend_plain/)"
-echo ""
-read -p "Enter frontend choice (vue/plain) [vue]: " FRONTEND_CHOICE
-FRONTEND_CHOICE=${FRONTEND_CHOICE:-vue}
 
-if [[ "$FRONTEND_CHOICE" != "vue" && "$FRONTEND_CHOICE" != "plain" ]]; then
+# Check which frontend directories exist
+HAS_VUE=false
+HAS_PLAIN=false
+[ -d "frontend_vue" ] && HAS_VUE=true
+[ -d "frontend_plain" ] && HAS_PLAIN=true
+
+if [ "$HAS_VUE" = true ]; then
+    echo "  vue   - Vue.js framework (from frontend_vue/)"
+fi
+if [ "$HAS_PLAIN" = true ]; then
+    echo "  plain - Plain HTML/JS/CSS (from frontend_plain/)"
+fi
+
+# Determine default based on what exists
+if [ "$HAS_VUE" = true ]; then
+    DEFAULT_FRONTEND="vue"
+elif [ "$HAS_PLAIN" = true ]; then
+    DEFAULT_FRONTEND="plain"
+else
+    print_error "No frontend directories found (frontend_vue/ or frontend_plain/)"
+    exit 1
+fi
+
+echo ""
+read -p "Enter frontend choice ($([ "$HAS_VUE" = true ] && echo -n "vue")$([ "$HAS_VUE" = true ] && [ "$HAS_PLAIN" = true ] && echo -n "/")$([ "$HAS_PLAIN" = true ] && echo -n "plain")) [$DEFAULT_FRONTEND]: " FRONTEND_CHOICE
+FRONTEND_CHOICE=${FRONTEND_CHOICE:-$DEFAULT_FRONTEND}
+
+# Validate choice
+if [[ "$FRONTEND_CHOICE" == "vue" && "$HAS_VUE" = false ]]; then
+    print_error "frontend_vue/ directory does not exist"
+    exit 1
+elif [[ "$FRONTEND_CHOICE" == "plain" && "$HAS_PLAIN" = false ]]; then
+    print_error "frontend_plain/ directory does not exist"
+    exit 1
+elif [[ "$FRONTEND_CHOICE" != "vue" && "$FRONTEND_CHOICE" != "plain" ]]; then
     print_error "Invalid frontend choice. Must be 'vue' or 'plain'"
     exit 1
 fi
