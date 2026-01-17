@@ -146,4 +146,9 @@ Keep in mind, that the message is not always "running...", but will later be cha
 
 ——————
 
+Write me a `scripts/fix-commits.sh` (incl. `make fix-commits`), which will rebase the last set of `📄TEMPLATE | ✨ ai: [013] running… (2/X)` or `✨ ai: running… (2-X)`.
+In the case with the total, it should replace the X on that correct position with the total for that batch (here 013), and for both formats also ask what to change the message to, if it's still the default the script put down.
+
+——————
+
 Make sure `init.sh` cleans up template-specific stuff, like the `ai/plugin_template/` dir or unused `frontend_*` folders.
