@@ -340,6 +340,7 @@ replace_in_file() {
             -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
+            -e "s/from '\.\/AlarmClockCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
             -e "s/AlarmClockCard/${PASCAL_NAME}Card/g" \
             -e "s/Alarm Clock Card/${DISPLAY_NAME} Card/g" \
             -e "s/Calendar Alarm Clock/$DISPLAY_NAME/g" \
@@ -361,6 +362,7 @@ replace_in_file() {
             -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
+            -e "s/from '\.\/AlarmClockCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
             -e "s/AlarmClockCard/${PASCAL_NAME}Card/g" \
             -e "s/Alarm Clock Card/${DISPLAY_NAME} Card/g" \
             -e "s/Calendar Alarm Clock/$DISPLAY_NAME/g" \
