@@ -131,3 +131,7 @@ However, that seem to have broken something, as I got the commits
 ```
 
 They still are no longer in the commit message.
+
+—————
+
+The rebase drops other commits after/inbetween the changed ones!
