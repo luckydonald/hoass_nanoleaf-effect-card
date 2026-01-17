@@ -160,8 +160,21 @@ if [ -n "$(git status --porcelain)" ]; then
 
     # Read commit messages one by one
     while IFS= read -r commit_msg; do
-        # Check for "ai: running... (X-Y)" pattern
-        if echo "$commit_msg" | grep -q "ai: running\.\.\. ([0-9]*-[0-9]*)"; then
+        # Check for template format: "📄TEMPLATE | ✨ ai: [007] ... (2/X)"
+        if [ "$IS_TEMPLATE_REPO" = true ] && echo "$commit_msg" | grep -qE "TEMPLATE.*ai: \[[0-9]{3}\].*\([0-9]+/"; then
+            # Extract step and substep from template format
+            last_step=$(echo "$commit_msg" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
+            last_substep=$(echo "$commit_msg" | sed 's/.*(\([0-9]*\)\/.*/\1/')
+
+            if [ -n "$last_step" ] && [ -n "$last_substep" ]; then
+                # Found a running commit - increment substep
+                step=$last_step
+                substep=$((last_substep + 1))
+                found_running=true
+                break
+            fi
+        # Check for regular format: "ai: running... (X-Y)" pattern
+        elif [ "$IS_TEMPLATE_REPO" = false ] && echo "$commit_msg" | grep -q "ai: running\.\.\. ([0-9]*-[0-9]*)"; then
             # Extract step and substep
             last_step=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
             last_substep=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. ([0-9]*-\([0-9]*\)).*/\1/')
@@ -193,11 +206,23 @@ if [ -n "$(git status --porcelain)" ]; then
     # If we found a query/errors update before any running commit, increment step
     if [ "$found_running" = false ]; then
         # Look for the last running commit to get the base step number
-        last_running=$(git log --format=%s | grep "ai: running\.\.\. ([0-9]*-[0-9]*)" | head -1)
-        if [ -n "$last_running" ]; then
-            last_step=$(echo "$last_running" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
-            if [ -n "$last_step" ]; then
-                step=$((last_step + 1))
+        if [ "$IS_TEMPLATE_REPO" = true ]; then
+            # Template format
+            last_running=$(git log --format=%s | grep -E "TEMPLATE.*ai: \[[0-9]{3}\].*\([0-9]+/" | head -1)
+            if [ -n "$last_running" ]; then
+                last_step=$(echo "$last_running" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
+                if [ -n "$last_step" ]; then
+                    step=$((last_step + 1))
+                fi
+            fi
+        else
+            # Regular format
+            last_running=$(git log --format=%s | grep "ai: running\.\.\. ([0-9]*-[0-9]*)" | head -1)
+            if [ -n "$last_running" ]; then
+                last_step=$(echo "$last_running" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
+                if [ -n "$last_step" ]; then
+                    step=$((last_step + 1))
+                fi
             fi
         fi
         substep=1
@@ -208,7 +233,17 @@ if [ -n "$(git status --porcelain)" ]; then
     git add .  # Also add new files that aren't ignored
     # shellcheck disable=SC2034
 
-    git commit -m "$(step="$step" substep="$substep" tmpl "${COMMIT_MSG_STEP}")"
+    # Choose commit message format based on repository type
+    if [ "$IS_TEMPLATE_REPO" = true ]; then
+        # Template format: zero-padded step, substep/total
+        padded_step=$(printf "%03d" "$step")
+        total_substeps="X"  # Unknown at this point
+        msg="running..."
+        git commit -m "$(padded_step="$padded_step" substep="$substep" total_substeps="$total_substeps" msg="$msg" tmpl "${COMMIT_MSG_STEP_TEMPLATE}")"
+    else
+        # Regular format
+        git commit -m "$(step="$step" substep="$substep" tmpl "${COMMIT_MSG_STEP}")"
+    fi
     echo "  Done"
 else
     echo -e "${YELLOW}No other changes to commit${NC}"
