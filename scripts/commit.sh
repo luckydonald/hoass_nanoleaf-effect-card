@@ -106,8 +106,8 @@ elif [ -f "ai/plugin_template/query.md" ] && git ls-files --others --exclude-sta
     git add ai/plugin_template/query.md
     git commit -m "${COMMIT_MSG_QUERY}"
     echo "  Done"
-else
-    # echo -e "${YELLOW}No changes to ai/plugin_template/query.md${NC}"
+# else
+#     echo -e "${YELLOW}No changes to ai/plugin_template/query.md${NC}"
 fi
 
 # Commit ai/plugin_template/errors.md if it has changes
@@ -121,8 +121,8 @@ elif [ -f "ai/plugin_template/errors.md" ] && git ls-files --others --exclude-st
     git add ai/plugin_template/errors.md
     git commit -m "${COMMIT_MSG_ERRORS}"
     echo "  Done"
-else
-    # echo -e "${YELLOW}No changes to ai/plugin_template/errors.md${NC}"
+# else
+#     echo -e "${YELLOW}No changes to ai/plugin_template/errors.md${NC}"
 fi
 
 # Restore staged changes before the final commit
