@@ -36,7 +36,7 @@ The script performs the following operations:
 
 ```bash
 # Navigate to the template repository
-cd /path/to/hoass_template
+cd /path/to/hoass_<your-plugin-name>
 
 # Run the initialization script
 ./scripts/init.sh

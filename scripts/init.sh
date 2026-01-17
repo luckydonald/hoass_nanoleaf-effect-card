@@ -3,7 +3,7 @@
 # Home Assistant Plugin Template Initializer
 # ============================================================================
 #
-# This script initializes a new Home Assistant plugin from this template.
+# This script initializes a new Home Assistant plugin from this template repository.
 # It will:
 #   1. Ask for your plugin name (display name for UI)
 #   2. Calculate and confirm lowercase-dash version (for filenames)
@@ -11,11 +11,12 @@
 #   4. Generate GitHub repository URL
 #   5. Optionally remove Python backend files
 #   6. Choose frontend framework (vue or plain)
-#   7. Replace all template strings with your plugin names
+#   7. Replace all plugin template strings with your plugin names
 #   8. Rename directories appropriately
 #
 # Usage:
-#   cd /path/to/hoass_template
+#   git clone https://github.com/luckydonald/hoass_plugin-template hoass_<your-plugin-name>
+#   cd hoass_<your-plugin-name>/
 #   ./scripts/init.sh
 #
 # Example:
@@ -80,7 +81,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
-# Safety check: ensure this is the template repository
+# Safety check: ensure this is the plugin_template repository
 if [ ! -d "custom_components/template" ] && [ ! -d "frontend_vue" ] && [ ! -d "frontend_plain" ]; then
     print_error "This doesn't appear to be the template repository!"
     print_error "Expected to find custom_components/template/ or frontend_vue/ or frontend_plain/"
@@ -280,7 +281,7 @@ fi
 print_header "Performing File Replacements"
 
 # Define the list of files to process
-# Note: This is a hardcoded list to avoid replacing "template" in unintended places
+# Note: This is a hardcoded list to avoid replacing "plugin_template" in unintended places
 FILES_TO_PROCESS=()
 
 # Add root level files
@@ -289,12 +290,12 @@ FILES_TO_PROCESS=()
 [ -f "Makefile" ] && FILES_TO_PROCESS+=("Makefile")
 [ -f "README.md" ] && FILES_TO_PROCESS+=("README.md")
 
-# Add all files in custom_components/template/ (if backend is kept)
+# Add all files in custom_components/plugin_template/ (if backend is kept)
 if [ "$KEEP_BACKEND" = true ] && [ -d "custom_components/template" ]; then
     # Add Python files
     while IFS= read -r -d '' file; do
         FILES_TO_PROCESS+=("$file")
-    done < <(find custom_components/template -type f \( -name "*.py" -o -name "*.yaml" -o -name "*.json" \) -print0)
+    done < <(find custom_components/plugin_template -type f \( -name "*.py" -o -name "*.yaml" -o -name "*.json" \) -print0)
 fi
 
 # Add all relevant frontend files
@@ -380,7 +381,7 @@ for file in "${FILES_TO_PROCESS[@]}"; do
     replace_in_file "$file"
 done
 
-# Rename the custom_components/template directory
+# Rename the custom_components/plugin_template directory
 if [ -d "custom_components/template" ]; then
     print_info "Renaming custom_components/template/ to custom_components/$SNAKE_NAME/"
     mv "custom_components/template" "custom_components/$SNAKE_NAME"
