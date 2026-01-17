@@ -81,11 +81,33 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
-# Safety check: ensure this is the plugin_template repository
-if [ ! -d "custom_components/template" ] && [ ! -d "frontend_vue" ] && [ ! -d "frontend_plain" ]; then
-    print_error "This doesn't appear to be the template repository!"
-    print_error "Expected to find custom_components/template/ or frontend_vue/ or frontend_plain/"
+# Safety check: ensure this is the plugin_template repository OR already initialized
+ALREADY_INITIALIZED=false
+if [ -d "custom_components/plugin_template" ] || [ -d "frontend_vue" ] || [ -d "frontend_plain" ]; then
+    # This is the template - first time initialization
+    ALREADY_INITIALIZED=false
+elif [ -d "custom_components" ] && [ "$(ls -A custom_components)" ]; then
+    # Has custom_components with content - likely already initialized
+    ALREADY_INITIALIZED=true
+    print_warning "This appears to be an already initialized plugin"
+    print_info "Re-running will update files and add any new template files"
+else
+    print_error "This doesn't appear to be a valid template or initialized repository!"
     exit 1
+fi
+
+# Detect existing plugin name if already initialized
+if [ "$ALREADY_INITIALIZED" = true ]; then
+    # Try to detect existing plugin name from custom_components
+    EXISTING_SNAKE=$(ls -1 custom_components | head -n 1)
+    if [ -n "$EXISTING_SNAKE" ] && [ "$EXISTING_SNAKE" != "plugin_template" ]; then
+        print_info "Detected existing plugin: $EXISTING_SNAKE"
+        # Read from manifest.json if it exists
+        if [ -f "custom_components/$EXISTING_SNAKE/manifest.json" ]; then
+            EXISTING_DISPLAY=$(grep -oP '"name":\s*"\K[^"]+' "custom_components/$EXISTING_SNAKE/manifest.json" 2>/dev/null || echo "")
+            [ -n "$EXISTING_DISPLAY" ] && print_info "Existing display name: $EXISTING_DISPLAY"
+        fi
+    fi
 fi
 
 print_info "Working directory: $REPO_ROOT"
