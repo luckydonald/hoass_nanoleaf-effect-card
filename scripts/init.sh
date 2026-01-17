@@ -468,6 +468,18 @@ echo "  'plugin-template'        → '$DASH_NAME'"
 echo "  'plugin-template-card'   → '${DASH_NAME}-card'"
 echo "  'Plugin Template'        → '$DISPLAY_NAME'"
 echo "  'hoass_plugin-template'  → 'hoass_${DASH_NAME}'"
+echo "  GitHub URL               → '$GITHUB_URL'"
+
+# Show author replacements if GitHub user is different
+if [ "$GITHUB_USER" != "luckydonald" ] && [ "$GITHUB_USER" != "luckylucy" ]; then
+    echo ""
+    print_info "Author name replacements:"
+    echo "  'luckydonald'            → '$GITHUB_USER'"
+    echo "  'luckylucy'              → '$GITHUB_USER'"
+    echo "  '@luckydonald'           → '@$GITHUB_USER'"
+    echo "  'lucky lucy (aka. luckydonald)' → '$GITHUB_USER'"
+fi
+
 echo ""
 print_warning "Ready to perform replacements in all files."
 print_warning "This operation will modify files in place!"
