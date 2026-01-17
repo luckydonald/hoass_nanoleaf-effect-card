@@ -117,3 +117,15 @@ init.sh:
   'Plugin template' → 'State Cycler'
 ```
 Replacing just the word "template" is way to dangerous! It can appear in so many places unrelated to the plugin name, i.e. sensor templates. Where is that needed? Fix the original files to use "plugin_template" instead of "template" where needed, and only replace that.
+
+————
+
+I entered:
+```txt
+Have `init.sh` work with git…
+```
+
+However, that seem to have broken something, as I got the commits
+```txt
+📄TEMPLATE | ✨ ai: [017] Have  work with git… (2/2)
+```
