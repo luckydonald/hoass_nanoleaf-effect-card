@@ -157,19 +157,34 @@ if [ -n "$(git status --porcelain)" ]; then
     step=1
     substep=1
     found_running=false
+    found_query_or_error=false
 
     # Read commit messages one by one
     while IFS= read -r commit_msg; do
-        # Check for template format: "📄TEMPLATE | ✨ ai: [007] ... (2/X)"
-        if [ "$IS_TEMPLATE_REPO" = true ] && echo "$commit_msg" | grep -qE "TEMPLATE.*ai: \[[0-9]{3}\].*\([0-9]+/"; then
+        # Check for "ai: updated query" or "ai: updated errors" FIRST
+        if echo "$commit_msg" | grep -qE "(ai: updated query|ai: updated errors)"; then
+            # Found a query/errors update - this means next commit should increment step
+            found_query_or_error=true
+            # Don't break - we need to find the last running commit to get the step number
+            continue
+        fi
+
+        # Check for template format: "📄TEMPLATE | ✨ ai: [007] ... (2/X)" or "✨ ai: [007] ... (2/X)" (without prefix)
+        if [ "$IS_TEMPLATE_REPO" = true ] && echo "$commit_msg" | grep -qE "ai: \[[0-9]{3}\].*\([0-9]+/"; then
             # Extract step and substep from template format
             last_step=$(echo "$commit_msg" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
             last_substep=$(echo "$commit_msg" | sed 's/.*(\([0-9]*\)\/.*/\1/')
 
             if [ -n "$last_step" ] && [ -n "$last_substep" ]; then
-                # Found a running commit - increment substep
-                step=$last_step
-                substep=$((last_substep + 1))
+                if [ "$found_query_or_error" = true ]; then
+                    # Found query/error before this running commit - increment step, reset substep
+                    step=$((last_step + 1))
+                    substep=1
+                else
+                    # No query/error - just increment substep
+                    step=$last_step
+                    substep=$((last_substep + 1))
+                fi
                 found_running=true
                 break
             fi
@@ -180,51 +195,24 @@ if [ -n "$(git status --porcelain)" ]; then
             last_substep=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. ([0-9]*-\([0-9]*\)).*/\1/')
 
             if [ -n "$last_step" ] && [ -n "$last_substep" ]; then
-                # Found a running commit - increment substep
-                step=$last_step
-                substep=$((last_substep + 1))
+                if [ "$found_query_or_error" = true ]; then
+                    # Found query/error before this running commit - increment step, reset substep
+                    step=$((last_step + 1))
+                    substep=1
+                else
+                    # No query/error - just increment substep
+                    step=$last_step
+                    substep=$((last_substep + 1))
+                fi
                 found_running=true
                 break
             fi
         fi
-
-        # Check for "ai: updated query" or "ai: updated errors" (with or without emoji/prefix)
-        if echo "$commit_msg" | grep -qE "(ai: updated query|ai: updated errors)"; then
-            # Found a query/errors update - this means we should increment step and reset substep
-            # But first, check if there was a running commit before this
-            if [ "$found_running" = true ]; then
-                # We already found a running commit, so use that
-                break
-            else
-                # Extract the step from the most recent running commit before this query/errors update
-                # Continue looking...
-                continue
-            fi
-        fi
     done < <(git log --format=%s -20)  # Look at last 20 commits
 
-    # If we found a query/errors update before any running commit, increment step
+    # If we didn't find any running commit, start fresh
     if [ "$found_running" = false ]; then
-        # Look for the last running commit to get the base step number
-        if [ "$IS_TEMPLATE_REPO" = true ]; then
-            # Template format
-            last_running=$(git log --format=%s | grep -E "TEMPLATE.*ai: \[[0-9]{3}\].*\([0-9]+/" | head -1)
-            if [ -n "$last_running" ]; then
-                last_step=$(echo "$last_running" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
-                if [ -n "$last_step" ]; then
-                    step=$((last_step + 1))
-                fi
-            fi
-        else
-            # Regular format
-            last_running=$(git log --format=%s | grep "ai: running\.\.\. ([0-9]*-[0-9]*)" | head -1)
-            if [ -n "$last_running" ]; then
-                last_step=$(echo "$last_running" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
-                if [ -n "$last_step" ]; then
-                    step=$((last_step + 1))
-                fi
-            fi
-        fi
+        step=1
         substep=1
     fi
 
