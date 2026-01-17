@@ -14,3 +14,7 @@ It is missing the prefix, and also the detection of the query part (and hence th
 📄TEMPLATE | ✨ ai: [006] Add `make init`… (6/6)
 📄TEMPLATE | ✨ ai: [006] Add `make init`… (5/6)
 …
+
+——————
+
+./scripts/commit.sh: line 192: syntax error near unexpected token `elif' 
