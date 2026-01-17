@@ -311,9 +311,28 @@ if [ "$KEEP_BACKEND" = false ]; then
     print_info "Removing Python backend files..."
 
     # Remove Python component files
-    if [ -d "custom_components/template" ]; then
-        rm -rf "custom_components/template"
-        print_success "Removed custom_components/template/"
+    if [ -d "custom_components/plugin_template" ]; then
+        rm -rf "custom_components/plugin_template"
+        print_success "Removed custom_components/plugin_template/"
+    fi
+
+    # Also check for already renamed directory
+    if [ -d "custom_components/$SNAKE_NAME" ]; then
+        read -p "Remove custom_components/$SNAKE_NAME/? (y/n) [n]: " REMOVE_BACKEND
+        REMOVE_BACKEND=${REMOVE_BACKEND:-n}
+        if [[ "$REMOVE_BACKEND" =~ ^[Yy]$ ]]; then
+            rm -rf "custom_components/$SNAKE_NAME"
+            print_success "Removed custom_components/$SNAKE_NAME/"
+        else
+            print_warning "Keeping custom_components/$SNAKE_NAME/"
+            KEEP_BACKEND=true  # Don't remove if user says no
+        fi
+    fi
+
+    # Remove tests directory
+    if [ -d "tests" ]; then
+        rm -rf "tests"
+        print_success "Removed tests/"
     fi
 
     # Remove pyproject.toml if it exists
@@ -331,21 +350,28 @@ if [ "$FRONTEND_CHOICE" = "vue" ]; then
         # Remove frontend_plain if it exists
         [ -d "frontend_plain" ] && rm -rf "frontend_plain" && print_success "Removed frontend_plain/"
 
-        # Rename frontend_vue to frontend
-        mv "frontend_vue" "frontend"
-        print_success "Renamed frontend_vue/ to frontend/"
-    else
-        print_error "frontend_vue/ directory not found!"
+        # Safely move/merge frontend_vue to frontend
+        safe_move_directory "frontend_vue" "frontend" "Frontend"
+    elif [ ! -d "frontend" ]; then
+        print_error "frontend_vue/ directory not found and no frontend/ exists!"
         exit 1
+    else
+        print_info "frontend/ directory already exists, keeping it"
     fi
 elif [ "$FRONTEND_CHOICE" = "plain" ]; then
     if [ -d "frontend_plain" ]; then
         # Remove frontend_vue if it exists
         [ -d "frontend_vue" ] && rm -rf "frontend_vue" && print_success "Removed frontend_vue/"
 
-        # Rename frontend_plain to frontend
-        mv "frontend_plain" "frontend"
-        print_success "Renamed frontend_plain/ to frontend/"
+        # Safely move/merge frontend_plain to frontend
+        safe_move_directory "frontend_plain" "frontend" "Frontend"
+    elif [ ! -d "frontend" ]; then
+        print_error "frontend_plain/ directory not found and no frontend/ exists!"
+        exit 1
+    else
+        print_info "frontend/ directory already exists, keeping it"
+    fi
+fi
     else
         print_error "frontend_plain/ directory not found!"
         exit 1
