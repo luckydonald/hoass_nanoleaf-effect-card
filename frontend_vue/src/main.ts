@@ -51,7 +51,7 @@ class PluginTemplateCardElement extends HTMLElement {
       },
       render() {
         const data = this as unknown as AppData;
-        return h(AlarmClockCard, {
+        return h(PluginTemplateCard, {
           hass: data.hass,
           config: data.config,
         });
@@ -72,14 +72,14 @@ class PluginTemplateCardElement extends HTMLElement {
     return 4;
   }
 
-  public static getConfigElement(): AlarmClockCardEditor {
-    return document.createElement('calender-alarm-clock-card-editor') as AlarmClockCardEditor;
+  public static getConfigElement(): PluginTemplateCardEditor {
+    return document.createElement('plugin-template-card-editor') as PluginTemplateCardEditor;
   }
 
-  public static getStubConfig(): AlarmClockCardConfig {
+  public static getStubConfig(): PluginTemplateCardConfig {
     return {
-      type: 'custom:calender-alarm-clock-card',
-      title: 'Calendar Alarm Clock',
+      type: 'custom:plugin-template-card',
+      title: 'Plugin Template',
       clock_display: 'analog',
       alarm_list_mode: 'days',
       alarm_list_days: 7,
@@ -91,8 +91,8 @@ class PluginTemplateCardElement extends HTMLElement {
   }
 }
 
-class AlarmClockCardEditor extends HTMLElement {
-  private _config: AlarmClockCardConfig = {};
+class PluginTemplateCardEditor extends HTMLElement {
+  private _config: PluginTemplateCardConfig = {};
   private _hass: HomeAssistant | null = null;
 
   public set hass(hass: HomeAssistant) {
@@ -100,7 +100,7 @@ class AlarmClockCardEditor extends HTMLElement {
     this._render();
   }
 
-  public setConfig(config: AlarmClockCardConfig): void {
+  public setConfig(config: PluginTemplateCardConfig): void {
     this._config = config;
     this._render();
   }
@@ -123,7 +123,7 @@ class AlarmClockCardEditor extends HTMLElement {
     wrapper.appendChild(this._createTextInput(
       'title',
       'Card Title',
-      this._config.title ?? 'Calendar Alarm Clock',
+      this._config.title ?? 'Plugin Template',
     ));
 
     // Entity picker (for single alarm view)
