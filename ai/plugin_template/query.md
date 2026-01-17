@@ -119,3 +119,10 @@ Instead, if that folder already exists, ask for each non-existing file if it sho
 ———————
 
 Add `make init`.
+
+———————
+
+In the `scripts/init.sh`:
+- Try to deduct the name from the current folder name as default.
+  - obviously, strip common prefixes like `ha_`, `hacs_`, `hoass_`, `homeassistant_` if existing.
+- after asking for the plugin name etc., also ask for a github username (defaulting to "luckydonald"), and use that in the constructed github repo url.
