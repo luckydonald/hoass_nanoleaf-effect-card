@@ -80,13 +80,6 @@ class PluginTemplateCardElement extends HTMLElement {
     return {
       type: 'custom:plugin-template-card',
       title: 'Plugin Template',
-      clock_display: 'analog',
-      alarm_list_mode: 'days',
-      alarm_list_days: 7,
-      show_clock: true,
-      show_quick_alarm: true,
-      show_alarm_list: true,
-      show_add_section: 'auto',
     };
   }
 }
