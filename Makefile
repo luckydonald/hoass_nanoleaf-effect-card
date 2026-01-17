@@ -4,7 +4,7 @@
 FRONTEND ?= $(if $(wildcard frontend),1,0)
 BACKEND  ?= $(if $(wildcard custom_components),1,0)
 
-.PHONY: release lint format build setup help commit init fix-commits
+.PHONY: release lint format build setup help commit init fix-commits commit-fix
 
 help:
 	@echo "Plugin Template - Development Commands"
@@ -30,6 +30,7 @@ help:
 	@echo "  build-ts       - Build frontend"
 	@echo "  commit         - Commit changes with structured messages"
 	@echo "  fix-commits    - Fix AI commit messages (update totals and edit messages)"
+	@echo "  commit-fix     - Alias for `fix-commits` above"
 	@echo "  release        - Bump version, lint, build, and push release"
 	@echo "  help           - Show this help message"
 
@@ -40,6 +41,8 @@ init:
 fix-commits:
 	@chmod +x scripts/fix-commits.sh
 	@./scripts/fix-commits.sh
+
+commit-fix: fix-commits
 
 setup: setup-backend setup-frontend
 
