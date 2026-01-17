@@ -330,6 +330,8 @@ replace_in_file() {
         # macOS
         sed -i '' \
             -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
+            -e "s/hoass_template/hoass_${SNAKE_NAME}/g" \
+            -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
             -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
@@ -340,6 +342,8 @@ replace_in_file() {
         # Linux
         sed -i \
             -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
+            -e "s/hoass_template/hoass_${SNAKE_NAME}/g" \
+            -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
             -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
