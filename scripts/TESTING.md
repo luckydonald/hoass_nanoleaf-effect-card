@@ -101,12 +101,10 @@
 ### String Presence Checks
 Run grep to ensure no unwanted strings remain:
 ```bash
-# Should return no results in modified files:
-grep -r "template" custom_components/{name}/ 2>/dev/null
-grep -r "Template" custom_components/{name}/ 2>/dev/null
-grep -r "alarm-clock" frontend/ 2>/dev/null
-grep -r "AlarmClock" frontend/ 2>/dev/null
-grep -r "calendar_alarm_clock" . 2>/dev/null
+# Should return minimal results in modified files:
+grep -r "plugin_template" custom_components/{name}/ 2>/dev/null  # Should be replaced
+grep -r "PluginTemplate" custom_components/{name}/ 2>/dev/null  # Should be replaced
+grep -r "plugin-template" . 2>/dev/null  # Should be replaced
 ```
 
 ### Build Tests

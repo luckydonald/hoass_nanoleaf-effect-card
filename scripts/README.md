@@ -46,9 +46,9 @@ cd /path/to/hoass_<your-plugin-name>
 
 The script will prompt you for:
 
-1. **Plugin Display Name**: The human-readable name for your plugin (e.g., "Calendar Alarm Clock")
-2. **Lowercase-Dash Name**: Auto-calculated but can be overridden (e.g., "calendar-alarm-clock")
-3. **Snake_Case Name**: Auto-calculated but can be overridden (e.g., "calendar_alarm_clock")
+1. **Plugin Display Name**: The human-readable name for your plugin (e.g., "My Custom Widget")
+2. **Lowercase-Dash Name**: Auto-calculated but can be overridden (e.g., "my-custom-widget")
+3. **Snake_Case Name**: Auto-calculated but can be overridden (e.g., "my_custom_widget")
 4. **Python Backend**: Whether to keep the Python backend files (y/n)
 5. **Frontend Framework**: Choose between "vue" or "plain"
 6. **Confirmation**: Review the configuration and confirm before proceeding
@@ -90,15 +90,14 @@ The script performs the following replacements:
 
 | Original | Replaced With | Use Case |
 |----------|---------------|----------|
-| `template` | `{snake_name}` | Python modules, domain |
-| `Template` | `{PascalName}` | Class names |
-| `TEMPLATE` | `{UPPER_SNAKE}` | Constants |
+| `plugin_template` | `{snake_name}` | Python modules, domain |
+| `PluginTemplate` | `{PascalName}` | Class names |
+| `PLUGIN_TEMPLATE` | `{UPPER_SNAKE}` | Constants |
 | `plugin-template` | `{dash-name}` | Filenames, URLs |
-| `Plugin template` | `{Display Name}` | UI text |
-| `calendar_alarm_clock` | `{snake_name}` | Legacy references |
-| `alarm-clock-card` | `{dash-name}-card` | Card names |
-| `AlarmClockCard` | `{PascalName}Card` | Vue component |
-| `Calendar Alarm Clock` | `{Display Name}` | Legacy UI text |
+| `Plugin template` | `{Display Name}` | UI text (lowercase t) |
+| `Plugin Template` | `{Display Name}` | UI text (uppercase T) |
+| `plugin-template-card` | `{dash-name}-card` | Card names |
+| `PluginTemplateCard` | `{PascalName}Card` | Vue component |
 
 ### Safety Features
 
