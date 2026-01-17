@@ -4,7 +4,7 @@
 FRONTEND ?= $(if $(wildcard frontend),1,0)
 BACKEND  ?= $(if $(wildcard custom_components),1,0)
 
-.PHONY: release lint format build setup help commit
+.PHONY: release lint format build setup help commit init
 
 help:
 	@echo "Plugin Template - Development Commands"
@@ -12,6 +12,7 @@ help:
 	@echo "Usage: make <target> [FRONTEND=1] [BACKEND=1]"
 	@echo ""
 	@echo "Targets:"
+	@echo "  init           - Initialize/update plugin from template (runs scripts/init.sh)"
 	@echo "  setup          - Set up the full development environment (frontend + backend)"
 	@echo "  setup-ts       - Set up frontend development environment (TypeScript)"
 	@echo "  setup-py       - Set up backend  development environment (Python)"
@@ -30,6 +31,10 @@ help:
 	@echo "  commit         - Commit changes with structured messages"
 	@echo "  release        - Bump version, lint, build, and push release"
 	@echo "  help           - Show this help message"
+
+init:
+	@chmod +x scripts/init.sh
+	@./scripts/init.sh
 
 setup: setup-backend setup-frontend
 
