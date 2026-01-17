@@ -121,7 +121,14 @@ if [ "$IS_TEMPLATE_REPO" = true ]; then
         print_info "This batch was preceded by: $PARENT_MSG"
         echo ""
         print_info "Changes in that commit:"
-        git show --stat "$PARENT_COMMIT"
+        echo ""
+
+        # Try to use bat for colorized output, fall back to plain git show
+        if command -v bat &> /dev/null; then
+            git show "$PARENT_COMMIT" | bat --style=plain --color=always --language=diff
+        else
+            git show "$PARENT_COMMIT"
+        fi
         echo ""
     fi
 
@@ -170,7 +177,14 @@ else
         print_info "This batch was preceded by: $PARENT_MSG"
         echo ""
         print_info "Changes in that commit:"
-        git show --stat "$PARENT_COMMIT"
+        echo ""
+
+        # Try to use bat for colorized output, fall back to plain git show
+        if command -v bat &> /dev/null; then
+            git show "$PARENT_COMMIT" | bat --style=plain --color=always --language=diff
+        else
+            git show "$PARENT_COMMIT"
+        fi
         echo ""
     fi
 fi
