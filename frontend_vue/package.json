@@ -1,11 +1,11 @@
 {
-  "name": "calender-alarm-clock-card",
+  "name": "plugin-template-card",
   "version": "0.0.0-dev0",
-  "description": "Lovelace card for Calendar backed Alarm Clock for Home Assistant",
-  "main": "dist/alarm-clock-card.js",
+  "description": "Lovelace card for Plugin Template for Home Assistant",
+  "main": "dist/plugin-template-card.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/luckydonald/hoass_calendar-alarm-clock.git"
+    "url": "https://github.com/luckydonald/hoass_plugin-template.git"
   },
   "author": "luckydonald",
   "license": "MIT",

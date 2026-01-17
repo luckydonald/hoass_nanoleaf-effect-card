@@ -27,11 +27,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/main.ts'),
-      name: 'AlarmClockCard',
-      fileName: () => 'alarm-clock-card.js',
+      name: 'PluginTemplateCard',
+      fileName: () => 'plugin-template-card.js',
       formats: ['iife'],
     },
-    outDir: '../custom_components/calendar_alarm_clock/www',
+    outDir: '../custom_components/plugin_template/www',
     emptyOutDir: false,
     rollupOptions: {
       output: {

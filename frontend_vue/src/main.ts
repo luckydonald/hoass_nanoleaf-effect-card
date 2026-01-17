@@ -1,18 +1,18 @@
 import { type App, type ComponentPublicInstance, createApp, h } from 'vue';
-import AlarmClockCard from './AlarmClockCard.vue';
+import PluginTemplateCard from './PluginTemplateCard.vue';
 import type { CardConfig, HomeAssistant } from './types';
 
-interface AlarmClockCardConfig extends CardConfig {
+interface PluginTemplateCardConfig extends CardConfig {
   type?: string;
 }
 
 interface AppData {
   hass: HomeAssistant | null;
-  config: AlarmClockCardConfig;
+  config: PluginTemplateCardConfig;
 }
 
-class AlarmClockCardElement extends HTMLElement {
-  private _config: AlarmClockCardConfig = {};
+class PluginTemplateCardElement extends HTMLElement {
+  private _config: PluginTemplateCardConfig = {};
   private _hass: HomeAssistant | null = null;
   private _app: App | null = null;
   private _root: HTMLDivElement | null = null;
@@ -25,7 +25,7 @@ class AlarmClockCardElement extends HTMLElement {
     }
   }
 
-  public setConfig(config: AlarmClockCardConfig): void {
+  public setConfig(config: PluginTemplateCardConfig): void {
     this._config = config;
     if (this._app?._instance?.proxy) {
       const proxy = this._app._instance.proxy as ComponentPublicInstance & AppData;

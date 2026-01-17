@@ -398,7 +398,7 @@ async function createQuickAlarm(minutes: number): Promise<void> {
     ? `${minutes} min`
     : `${Math.floor(minutes / 60)}h${minutes % 60 ? ` ${minutes % 60}m` : ''}`;
 
-  await props.hass.callService('calendar_alarm_clock', 'create_alarm', {
+  await props.hass.callService('plugin_template', 'create_alarm', {
     name: `Quick Alarm (${label})`,
     time: timeStr,
     date: dateStr,
@@ -455,7 +455,7 @@ async function saveAlarm(): Promise<void> {
   if (!props.hass) return;
 
   if (isEditing.value && editingAlarmId.value) {
-    await props.hass.callService('calendar_alarm_clock', 'edit_alarm', {
+    await props.hass.callService('plugin_template', 'edit_alarm', {
       alarm_id: editingAlarmId.value,
       name: dialogData.value.name,
       time: dialogData.value.time,
@@ -463,7 +463,7 @@ async function saveAlarm(): Promise<void> {
       enabled: dialogData.value.enabled,
     });
   } else {
-    await props.hass.callService('calendar_alarm_clock', 'create_alarm', {
+    await props.hass.callService('plugin_template', 'create_alarm', {
       name: dialogData.value.name,
       time: dialogData.value.time,
       date: dialogData.value.date,
