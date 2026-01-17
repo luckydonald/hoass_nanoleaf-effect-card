@@ -23,7 +23,7 @@ NC='\033[0m' # No Color
 
 COMMIT_MSG_ERRORS="🐞 ai: updated errors"
 COMMIT_MSG_QUERY="🤌 ai: updated query"
-COMMIT_MSG_STEP="✨ ai: running... ({step}-{substep})"
+COMMIT_MSG_STEP="✨ ai: running… ({step}-{substep})"
 COMMIT_MSG_STEP_TEMPLATE="${COMMIT_PREFIX_TEMPLATE}✨ ai: [{padded_step}] {msg} ({substep}/{total_substeps})"
 COMMIT_MSG_FIX="🫥 own: {msg}"
 COMMIT_MSG_OWN="👩‍💻 own: {msg}"
@@ -170,7 +170,6 @@ if [ -n "$(git status --porcelain)" ]; then
         fi
 
         # Check for template format: "📄TEMPLATE | ✨ ai: [007] ... (2/X)" or "✨ ai: [007] ... (2/X)" (without prefix)
-        if [ "$IS_TEMPLATE_REPO" = true ] && echo "$commit_msg" | grep -qE "ai: \[[0-9]{3}\].*\([0-9]+/"; then
             # Extract step and substep from template format
             last_step=$(echo "$commit_msg" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
             last_substep=$(echo "$commit_msg" | sed 's/.*(\([0-9]*\)\/.*/\1/')
@@ -188,11 +187,12 @@ if [ -n "$(git status --porcelain)" ]; then
                 found_running=true
                 break
             fi
-        # Check for regular format: "ai: running... (X-Y)" pattern
-        elif [ "$IS_TEMPLATE_REPO" = false ] && echo "$commit_msg" | grep -q "ai: running\.\.\. ([0-9]*-[0-9]*)"; then
-            # Extract step and substep
-            last_step=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
-            last_substep=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. ([0-9]*-\([0-9]*\)).*/\1/')
+        # Check for regular format: "ai: running… (X-Y)" or "ai: any message… (X-Y)"
+        # Message can use either ... or …
+        elif [ "$IS_TEMPLATE_REPO" = false ] && echo "$commit_msg" | grep -qE "ai: .+[.…]+ \([0-9]+-[0-9]+\)"; then
+            # Extract step and substep - pattern matches any message ending with ... or … before (X-Y)
+            last_step=$(echo "$commit_msg" | sed -E 's/.*ai: .+[.…]+ \(([0-9]+)-[0-9]+\).*/\1/')
+            last_substep=$(echo "$commit_msg" | sed -E 's/.*ai: .+[.…]+ \([0-9]+-([0-9]+)\).*/\1/')
 
             if [ -n "$last_step" ] && [ -n "$last_substep" ]; then
                 if [ "$found_query_or_error" = true ]; then
@@ -226,10 +226,10 @@ if [ -n "$(git status --porcelain)" ]; then
         # Template format: zero-padded step, substep/total
         padded_step=$(printf "%03d" "$step")
         total_substeps="X"  # Unknown at this point
-        msg="running..."
+        msg="running…"  # Using … instead of ...
         git commit -m "$(padded_step="$padded_step" substep="$substep" total_substeps="$total_substeps" msg="$msg" tmpl "${COMMIT_MSG_STEP_TEMPLATE}")"
     else
-        # Regular format
+        # Regular format (using … for consistency)
         git commit -m "$(step="$step" substep="$substep" tmpl "${COMMIT_MSG_STEP}")"
     fi
     echo "  Done"
