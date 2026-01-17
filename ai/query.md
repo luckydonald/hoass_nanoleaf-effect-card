@@ -11,8 +11,9 @@
   - Do proper type hinting with full type annotations.
   - For type-hinting, import types from Homeassistant where possible for the backend as well.
   - Prefer async programming where possible.
+- Write tests for both frontend and backend parts of the plugin.
 
+Generate me a Homeassistant plugin based on the following description.
 
-Generate me a Homeassistant plugin based on the following description. 
 #### Plugin requirements:
 
