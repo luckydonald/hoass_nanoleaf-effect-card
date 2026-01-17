@@ -142,22 +142,64 @@ fi
 
 # Check if there are any other changes to commit
 if [ -n "$(git status --porcelain)" ]; then
-    # Find the last "ai: running..." commit and extract the step number
-    # macOS-compatible: use sed instead of grep -P
-    LAST_STEP=$(git log --oneline | grep "ai: running\.\.\. (" | head -1 | sed 's/.*ai: running\.\.\. (\([0-9]*\).*/\1/')
+    # Intelligently determine step and substep numbers from commit history
+    # Look through recent commits to find the last relevant AI commit
 
-    if [ -z "$LAST_STEP" ]; then
-        NEW_STEP=1
-    else
-        NEW_STEP=$((LAST_STEP + 1))
+    step=1
+    substep=1
+    found_running=false
+
+    # Read commit messages one by one
+    while IFS= read -r commit_msg; do
+        # Check for "ai: running... (X-Y)" pattern
+        if echo "$commit_msg" | grep -q "ai: running\.\.\. ([0-9]*-[0-9]*)"; then
+            # Extract step and substep
+            last_step=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
+            last_substep=$(echo "$commit_msg" | sed 's/.*ai: running\.\.\. ([0-9]*-\([0-9]*\)).*/\1/')
+
+            if [ -n "$last_step" ] && [ -n "$last_substep" ]; then
+                # Found a running commit - increment substep
+                step=$last_step
+                substep=$((last_substep + 1))
+                found_running=true
+                break
+            fi
+        fi
+
+        # Check for "ai: updated query" or "ai: updated errors" (with or without emoji/prefix)
+        if echo "$commit_msg" | grep -qE "(ai: updated query|ai: updated errors)"; then
+            # Found a query/errors update - this means we should increment step and reset substep
+            # But first, check if there was a running commit before this
+            if [ "$found_running" = true ]; then
+                # We already found a running commit, so use that
+                break
+            else
+                # Extract the step from the most recent running commit before this query/errors update
+                # Continue looking...
+                continue
+            fi
+        fi
+    done < <(git log --format=%s -20)  # Look at last 20 commits
+
+    # If we found a query/errors update before any running commit, increment step
+    if [ "$found_running" = false ]; then
+        # Look for the last running commit to get the base step number
+        last_running=$(git log --format=%s | grep "ai: running\.\.\. ([0-9]*-[0-9]*)" | head -1)
+        if [ -n "$last_running" ]; then
+            last_step=$(echo "$last_running" | sed 's/.*ai: running\.\.\. (\([0-9]*\)-.*/\1/')
+            if [ -n "$last_step" ]; then
+                step=$((last_step + 1))
+            fi
+        fi
+        substep=1
     fi
 
-    echo -e "${GREEN}Committing remaining changes as step ${NEW_STEP}...${NC}"
+    echo -e "${GREEN}Committing remaining changes as step ${step}-${substep}...${NC}"
     git add -u
     git add .  # Also add new files that aren't ignored
     # shellcheck disable=SC2034
 
-    git commit -m "$(step="$NEW_STEP" substep="1" tmpl "${COMMIT_MSG_STEP}")"
+    git commit -m "$(step="$step" substep="$substep" tmpl "${COMMIT_MSG_STEP}")"
     echo "  Done"
 else
     echo -e "${YELLOW}No other changes to commit${NC}"
