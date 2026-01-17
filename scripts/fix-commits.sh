@@ -264,7 +264,6 @@ fi
 PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
 
 print_info "Starting interactive rebase..."
-print_warning "You'll be prompted for each commit with a default message"
 echo ""
 
 # Set up environment for the rebase
