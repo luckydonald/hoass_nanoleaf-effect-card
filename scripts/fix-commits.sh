@@ -288,6 +288,9 @@ PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
 print_info "Starting interactive rebase..."
 echo ""
 
+# Export the batch message as an environment variable (preserves all special characters)
+export BATCH_MSG_ENV="$BATCH_MESSAGE"
+
 # Set up environment for the rebase
 export GIT_SEQUENCE_EDITOR="cat $REBASE_TODO >"
 
