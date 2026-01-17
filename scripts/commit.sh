@@ -99,12 +99,12 @@ fi
 if git diff --name-only | grep -q "^ai/plugin_template/query.md$"; then
     echo -e "${GREEN}Committing ai/plugin_template/query.md...${NC}"
     git add ai/plugin_template/query.md
-    git commit -m "${COMMIT_MSG_QUERY}"
+    git commit -m "${COMMIT_PREFIX_TEMPLATE}${COMMIT_MSG_QUERY}"
     echo "  Done"
 elif [ -f "ai/plugin_template/query.md" ] && git ls-files --others --exclude-standard | grep -q "^ai/plugin_template/query.md$"; then
     echo -e "${GREEN}Committing ai/plugin_template/query.md (new file)...${NC}"
     git add ai/plugin_template/query.md
-    git commit -m "${COMMIT_MSG_QUERY}"
+    git commit -m "${COMMIT_PREFIX_TEMPLATE}${COMMIT_MSG_QUERY}"
     echo "  Done"
 # else
 #     echo -e "${YELLOW}No changes to ai/plugin_template/query.md${NC}"
@@ -114,12 +114,12 @@ fi
 if git diff --name-only | grep -q "^ai/plugin_template/errors.md$"; then
     echo -e "${GREEN}Committing ai/plugin_template/errors.md...${NC}"
     git add ai/plugin_template/errors.md
-    git commit -m "${COMMIT_MSG_ERRORS}"
+    git commit -m "${COMMIT_PREFIX_TEMPLATE}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 elif [ -f "ai/plugin_template/errors.md" ] && git ls-files --others --exclude-standard | grep -q "^ai/plugin_template/errors.md$"; then
     echo -e "${GREEN}Committing ai/plugin_template/errors.md (new file)...${NC}"
     git add ai/plugin_template/errors.md
-    git commit -m "${COMMIT_MSG_ERRORS}"
+    git commit -m "${COMMIT_PREFIX_TEMPLATE}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 # else
 #     echo -e "${YELLOW}No changes to ai/plugin_template/errors.md${NC}"
