@@ -513,16 +513,56 @@ done
 
 # Rename the custom_components/plugin_template directory
 if [ -d "custom_components/plugin_template" ]; then
-    print_info "Renaming custom_components/plugin_template/ to custom_components/$SNAKE_NAME/"
-    mv "custom_components/plugin_template" "custom_components/$SNAKE_NAME"
-    print_success "Renamed directory"
+    if [ -d "custom_components/$SNAKE_NAME" ]; then
+        print_warning "custom_components/$SNAKE_NAME/ already exists"
+        print_info "Merging template files into existing directory..."
+
+        # Copy new files from plugin_template to existing directory
+        while IFS= read -r -d '' file; do
+            local rel_path="${file#custom_components/plugin_template/}"
+            local dest_file="custom_components/$SNAKE_NAME/$rel_path"
+
+            if [ ! -f "$dest_file" ]; then
+                read -p "Copy new file $rel_path? (y/n) [y]: " COPY_NEW
+                COPY_NEW=${COPY_NEW:-y}
+                if [[ "$COPY_NEW" =~ ^[Yy]$ ]]; then
+                    mkdir -p "$(dirname "$dest_file")"
+                    cp "$file" "$dest_file"
+                    print_success "Copied: $rel_path"
+                fi
+            fi
+        done < <(find "custom_components/plugin_template" -type f -print0)
+
+        rm -rf "custom_components/plugin_template"
+    else
+        print_info "Renaming custom_components/plugin_template/ to custom_components/$SNAKE_NAME/"
+        mv "custom_components/plugin_template" "custom_components/$SNAKE_NAME"
+        print_success "Renamed directory"
+    fi
+elif [ ! -d "custom_components/$SNAKE_NAME" ] && [ "$KEEP_BACKEND" = true ]; then
+    print_warning "Neither plugin_template nor $SNAKE_NAME directory found in custom_components/"
 fi
 
 # Rename the Vue component file if it exists
 if [ -f "frontend/src/PluginTemplateCard.vue" ]; then
-    print_info "Renaming PluginTemplateCard.vue to ${PASCAL_NAME}Card.vue"
-    mv "frontend/src/PluginTemplateCard.vue" "frontend/src/${PASCAL_NAME}Card.vue"
-    print_success "Renamed Vue component"
+    if [ -f "frontend/src/${PASCAL_NAME}Card.vue" ]; then
+        print_warning "frontend/src/${PASCAL_NAME}Card.vue already exists"
+        read -p "Overwrite with template version? (y/n) [n]: " OVERWRITE_VUE
+        OVERWRITE_VUE=${OVERWRITE_VUE:-n}
+        if [[ "$OVERWRITE_VUE" =~ ^[Yy]$ ]]; then
+            mv -f "frontend/src/PluginTemplateCard.vue" "frontend/src/${PASCAL_NAME}Card.vue"
+            print_success "Overwrote Vue component"
+        else
+            rm "frontend/src/PluginTemplateCard.vue"
+            print_info "Kept existing ${PASCAL_NAME}Card.vue"
+        fi
+    else
+        print_info "Renaming PluginTemplateCard.vue to ${PASCAL_NAME}Card.vue"
+        mv "frontend/src/PluginTemplateCard.vue" "frontend/src/${PASCAL_NAME}Card.vue"
+        print_success "Renamed Vue component"
+    fi
+elif [ -f "frontend/src/${PASCAL_NAME}Card.vue" ]; then
+    print_info "Component already renamed to ${PASCAL_NAME}Card.vue"
 fi
 
 # Clean up backup files
