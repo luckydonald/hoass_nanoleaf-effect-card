@@ -54,6 +54,16 @@ frontend/node_modules/
 frontend/dist/
 custom_components/calendar_alarm_clock/www/
 
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+frontend/coverage/
+frontend_vue/coverage/
+*.cover
+
 # TypeScript build info
 *.tsbuildinfo
 frontend/vite.config.js
