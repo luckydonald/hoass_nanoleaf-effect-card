@@ -310,12 +310,15 @@ while IFS= read -r line; do
             # This is an AI commit we want to fix
             commit_msg=$(git log --format=%s -1 "$commit_hash")
 
+            # Use a unique temp file based on commit hash (not $$)
+            temp_msg_file="/tmp/new_msg_${commit_hash}.txt"
+
             # Add exec to generate new message
-            echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $REBASE_SCRIPT_FILE '$commit_msg' > /tmp/new_msg_\$\$.txt" >> "$TEMP_FILE"
+            echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $REBASE_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
             # Keep the pick
             echo "$line" >> "$TEMP_FILE"
             # Add exec to amend with new message
-            echo "exec git commit --amend -m \"\$(cat /tmp/new_msg_\$\$.txt)\" && rm /tmp/new_msg_\$\$.txt" >> "$TEMP_FILE"
+            echo "exec git commit --amend -m \"\$(cat $temp_msg_file)\" && rm -f $temp_msg_file" >> "$TEMP_FILE"
         else
             # Not an AI commit, keep as-is
             echo "$line" >> "$TEMP_FILE"
