@@ -248,8 +248,10 @@ EOFSCRIPT
 fi
 
 # Replace placeholders
+# Properly escape the batch message for sed
+ESCAPED_BATCH_MESSAGE=$(echo "$BATCH_MESSAGE" | sed 's/[\/&]/\\&/g' | sed "s/'/\\\\'/g" | sed 's/`/\\`/g' | sed 's/\$/\\$/g')
 sed -i.bak "s/TOTAL_PLACEHOLDER/$COMMIT_COUNT/g" "$REBASE_SCRIPT"
-sed -i.bak "s/BATCH_MESSAGE_PLACEHOLDER/$BATCH_MESSAGE/g" "$REBASE_SCRIPT"
+sed -i.bak "s/BATCH_MESSAGE_PLACEHOLDER/$ESCAPED_BATCH_MESSAGE/g" "$REBASE_SCRIPT"
 rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
