@@ -12,6 +12,8 @@
   - For type-hinting, import types from Homeassistant where possible for the backend as well.
   - Prefer async programming where possible.
 - Write tests for both frontend and backend parts of the plugin.
+- Remember to update the `/CHANGELOG.md` and `/README.md` (or possibly additional pre-existing documentation).
+- Please put all summaries and such you wanna write for me into the `ai/` folder. However, you don't need to write Markdown summaries, it's kinda redundant with the `PROGRESS.md` file.
 
 Generate me a Homeassistant plugin based on the following description.
 
