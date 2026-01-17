@@ -106,3 +106,12 @@ Please additionally also remove code which might have been specific to the one I
 ———————
 
 Set up tests for the frontend and backend, with a few example tests.
+
+————————
+
+In `scripts/init.sh`, make sure everything is properly replaced, including in the test files.
+
+The script also should be save to re-run, even with a later version with updated files.
+It should not fail, but just adapt new files as needed.
+This is extra important for the folder copy/rename parts, we can't just overwrite existing folders.
+Instead, if that folder already exists, ask for each non-existing file if it should be copied over and adapted or skipped.
