@@ -33,6 +33,13 @@ The script will ask you for:
 - Whether you need Python backend
 - Frontend framework choice (Vue or Plain)
 
+**💡 The script is safe to re-run!** If you run it on an already initialized plugin, it will:
+- Only update files that still have template patterns
+- Offer to copy new files from template updates
+- Never overwrite your code without permission
+
+See [RERUN_GUIDE.md](RERUN_GUIDE.md) for details.
+
 ### 3. Start Developing
 
 ```bash
