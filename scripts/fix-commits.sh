@@ -112,6 +112,19 @@ if [ "$IS_TEMPLATE_REPO" = true ]; then
     git log --oneline --grep="ai: \[$PADDED_STEP\]" --reverse
     echo ""
 
+    # Check if this batch was preceded by a query/error update
+    FIRST_COMMIT=$(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse | head -1)
+    PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
+    PARENT_MSG=$(git log --format=%s -1 "$PARENT_COMMIT")
+
+    if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
+        print_info "This batch was preceded by: $PARENT_MSG"
+        echo ""
+        print_info "Changes in that commit:"
+        git show --stat "$PARENT_COMMIT"
+        echo ""
+    fi
+
 else
     # Regular format: look for commits with same step number (X-Y)
     # Get the most recent AI commit
@@ -147,23 +160,33 @@ else
     echo "Commits to fix:"
     git log --oneline --grep="ai: .*[.…].* ($STEP-" --reverse
     echo ""
+
+    # Check if this batch was preceded by a query/error update
+    FIRST_COMMIT=$(git log --format=%H --grep="ai: .*[.…].* ($STEP-" --reverse | head -1)
+    PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
+    PARENT_MSG=$(git log --format=%s -1 "$PARENT_COMMIT")
+
+    if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
+        print_info "This batch was preceded by: $PARENT_MSG"
+        echo ""
+        print_info "Changes in that commit:"
+        git show --stat "$PARENT_COMMIT"
+        echo ""
+    fi
 fi
 
 # Ask for the message once for all commits in this batch
 echo ""
 print_info "Enter a message for all commits in this batch"
 print_warning "Leave empty to keep individual 'running…' messages"
-read -p "Message for step [$PADDED_STEP] (or press Enter to skip): " BATCH_MESSAGE
+print_warning "Press Ctrl+C to cancel"
 echo ""
-
-# Ask for confirmation
-read -p "Proceed with fixing these commits? (y/n) [y]: " CONFIRM
-CONFIRM=${CONFIRM:-y}
-
-if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
-    print_warning "Operation cancelled"
-    exit 0
+if [ "$IS_TEMPLATE_REPO" = true ]; then
+    read -p "Message for step [$PADDED_STEP]: " BATCH_MESSAGE
+else
+    read -p "Message for step [$STEP]: " BATCH_MESSAGE
 fi
+echo ""
 
 # Create a temporary script for the rebase
 REBASE_SCRIPT=$(mktemp)
