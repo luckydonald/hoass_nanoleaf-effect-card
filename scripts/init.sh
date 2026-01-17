@@ -330,10 +330,19 @@ replace_in_file() {
         # macOS
         sed -i '' \
             -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
+            -e "s/hoass_calendar-alarm-clock/hoass_${DASH_NAME}/g" \
+            -e "s/hoass_calendar_alarm_clock/hoass_${SNAKE_NAME}/g" \
             -e "s/hoass_template/hoass_${SNAKE_NAME}/g" \
+            -e "s/calendar-alarm-clock-card/${DASH_NAME}-card/g" \
+            -e "s/alarm-clock-card/${DASH_NAME}-card/g" \
+            -e "s/calendar_alarm_clock/$SNAKE_NAME/g" \
+            -e "s/calender-alarm-clock-card/${DASH_NAME}-card/g" \
             -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
+            -e "s/AlarmClockCard/${PASCAL_NAME}Card/g" \
+            -e "s/Alarm Clock Card/${DISPLAY_NAME} Card/g" \
+            -e "s/Calendar Alarm Clock/$DISPLAY_NAME/g" \
             -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
             -e "s/Template/$PASCAL_NAME/g" \
             -e "s/\btemplate\b/$SNAKE_NAME/g" \
@@ -342,10 +351,19 @@ replace_in_file() {
         # Linux
         sed -i \
             -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
+            -e "s/hoass_calendar-alarm-clock/hoass_${DASH_NAME}/g" \
+            -e "s/hoass_calendar_alarm_clock/hoass_${SNAKE_NAME}/g" \
             -e "s/hoass_template/hoass_${SNAKE_NAME}/g" \
+            -e "s/calendar-alarm-clock-card/${DASH_NAME}-card/g" \
+            -e "s/alarm-clock-card/${DASH_NAME}-card/g" \
+            -e "s/calendar_alarm_clock/$SNAKE_NAME/g" \
+            -e "s/calender-alarm-clock-card/${DASH_NAME}-card/g" \
             -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
+            -e "s/AlarmClockCard/${PASCAL_NAME}Card/g" \
+            -e "s/Alarm Clock Card/${DISPLAY_NAME} Card/g" \
+            -e "s/Calendar Alarm Clock/$DISPLAY_NAME/g" \
             -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
             -e "s/Template/$PASCAL_NAME/g" \
             -e "s/\btemplate\b/$SNAKE_NAME/g" \
