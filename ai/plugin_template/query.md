@@ -132,3 +132,13 @@ In the `scripts/init.sh`:
 I want to make the `commit.sh` script intelligent for the commit message ai-run-number increase:
 - Go back the commit messages, and if you find one matching `ai: running... ($step-$substep)`, use that to determine the current $substep. If you however first find a ai: updated query or ai: updated errors, reset the substep counter to 1, and increase the step counter by one instead.
 - If no previous ai: running... commit is found, start with (1-1).
+
+Additionally, detect if the commit script is run in the template repository (root dir name is `hoass_{plugin-,plugin_,}template/`.
+If that is the case, the commit syntax is different:
+Instead of `$COMMIT_MSG_STEP`, resulting in `ai: running... (7-2)`, use "📄TEMPLATE | ✨ ai: [007] Message here… (2/X)", from the following:
+```shell
+COMMIT_MSG_STEP="✨ ai: running... ({step}-{substep})"
+COMMIT_MSG_STEP_TEMPLATE="${COMMIT_PREFIX_TEMPLATE}✨ ai: [{padded_step}] {msg} ({substep}-{total_substeps})"
+```
+Notice, the first part is `${COMMIT_PREFIX_TEMPLATE}`, the $step is now named $padded_step and zero-padded to three digits, and the substep is 2. The total_substeps will initially be "X", as it is currently unknown what the total number of substeps will be.
+If the template repo is detected, the search for the previous substep as above must be adapted to the new syntax as well.
