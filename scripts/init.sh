@@ -277,8 +277,8 @@ else
     KEEP_BACKEND=false
 fi
 
-# Step 6: Ask about frontend choice
-print_info "\nStep 6: Frontend Framework"
+# Step 7: Ask about frontend choice
+print_info "\nStep 7: Frontend Framework"
 echo "Choose your frontend framework:"
 
 # Check which frontend directories exist
