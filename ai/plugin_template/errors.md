@@ -103,3 +103,17 @@ dac07f4 Current commit: 📄TEMPLATE | ✨ ai: [014] running… (4/X)
 
 ✓ All done! Commits have been fixed.
 ```
+
+—————
+
+init.sh:
+
+```txt
+ℹ The following replacements will be made:
+  'template'        → 'state_cycler'
+  'Template'        → 'StateCycler'
+  'TEMPLATE'        → 'STATE_CYCLER'
+  'plugin-template' → 'state-cycler'
+  'Plugin template' → 'State Cycler'
+```
+Replacing just the word "template" is way to dangerous! It can appear in so many places unrelated to the plugin name, i.e. sensor templates. Where is that needed? Fix the original files to use "plugin_template" instead of "template" where needed, and only replace that.
