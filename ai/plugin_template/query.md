@@ -166,3 +166,11 @@ Template for the commit message header:
 {configuration details here}
 ```
 In that, include the configuration summary from the beginning once more, and any other relevant information (e.g. if a backend was included or not, frontend type, etc.)
+
+——————
+
+Have `fix-commits` display the diff for the detected query/error change, before asking for the message. Also, remove the "you wanna continue", as one can just `^C` the message field.
+
+——————
+
+
