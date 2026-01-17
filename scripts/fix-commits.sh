@@ -149,6 +149,13 @@ else
     echo ""
 fi
 
+# Ask for the message once for all commits in this batch
+echo ""
+print_info "Enter a message for all commits in this batch"
+print_warning "Leave empty to keep individual 'running…' messages"
+read -p "Message for step [$PADDED_STEP] (or press Enter to skip): " BATCH_MESSAGE
+echo ""
+
 # Ask for confirmation
 read -p "Proceed with fixing these commits? (y/n) [y]: " CONFIRM
 CONFIRM=${CONFIRM:-y}
@@ -175,15 +182,12 @@ TOTAL="TOTAL_PLACEHOLDER"
 # Extract current message (everything between ] and ()
 CURRENT_MSG=$(echo "$1" | sed 's/.*\] \(.*\) (.*/\1/')
 
-# Check if message is still default
-if echo "$CURRENT_MSG" | grep -qE "^running[.…]+$"; then
-    echo ""
-    echo "Current commit: $1"
-    echo ""
-    read -p "Enter new message (or press Enter to keep 'running…'): " NEW_MSG
-    if [ -z "$NEW_MSG" ]; then
-        NEW_MSG="running…"
-    fi
+# Use batch message if provided, otherwise check individual message
+if [ -n "BATCH_MESSAGE_PLACEHOLDER" ]; then
+    NEW_MSG="BATCH_MESSAGE_PLACEHOLDER"
+elif echo "$CURRENT_MSG" | grep -qE "^running[.…]+$"; then
+    # Still default, keep it
+    NEW_MSG="running…"
 else
     # Keep existing non-default message
     NEW_MSG="$CURRENT_MSG"
@@ -204,15 +208,12 @@ SUBSTEP=$(echo "$1" | sed -E 's/.*ai: .+[.…]+ \([0-9]+-([0-9]+)\).*/\1/')
 # Extract current message (everything between : and ()
 CURRENT_MSG=$(echo "$1" | sed -E 's/.*ai: (.+)[.…]+ \([0-9]+-[0-9]+\).*/\1/')
 
-# Check if message is still default
-if echo "$CURRENT_MSG" | grep -qE "^running[.…]*$"; then
-    echo ""
-    echo "Current commit: $1"
-    echo ""
-    read -p "Enter new message (or press Enter to keep 'running…'): " NEW_MSG
-    if [ -z "$NEW_MSG" ]; then
-        NEW_MSG="running…"
-    fi
+# Use batch message if provided, otherwise check individual message
+if [ -n "BATCH_MESSAGE_PLACEHOLDER" ]; then
+    NEW_MSG="BATCH_MESSAGE_PLACEHOLDER"
+elif echo "$CURRENT_MSG" | grep -qE "^running[.…]*$"; then
+    # Still default, keep it
+    NEW_MSG="running…"
 else
     # Keep existing non-default message
     NEW_MSG="$CURRENT_MSG"
@@ -223,8 +224,9 @@ echo "✨ ai: $NEW_MSG ($STEP-$SUBSTEP)"
 EOFSCRIPT
 fi
 
-# Replace TOTAL_PLACEHOLDER with actual count
+# Replace placeholders
 sed -i.bak "s/TOTAL_PLACEHOLDER/$COMMIT_COUNT/g" "$REBASE_SCRIPT"
+sed -i.bak "s/BATCH_MESSAGE_PLACEHOLDER/$BATCH_MESSAGE/g" "$REBASE_SCRIPT"
 rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
