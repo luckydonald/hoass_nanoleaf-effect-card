@@ -17,3 +17,7 @@ After that, ask for a frontend choice, either `vue` or `plain`, for which either
 Finally, (but do not add that yet!): 
 the script shall replace all `template`, `Template` etc. with the given strings.
 For that it shall go through a hardcoded list of files and replace the relevant parts. (this is because `template` might be a too common word in homeassistant.)
+
+—————
+
+please - in my local files - rename "template" to "plugin_template" (in all the cases needed. Also rename calendar_alarm_clock to plugin_template and all the other caseings similarly in the files directly, and adapt the script for that, so it's uniformly something which is easier to recognize.
