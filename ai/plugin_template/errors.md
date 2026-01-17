@@ -135,3 +135,18 @@ They still are no longer in the commit message.
 —————
 
 The rebase drops other commits after/inbetween the changed ones!
+
+—————
+
+The
+```txt
+ ℹ Changes in that commit:
+commit 93a763ea9f55c82483c6761a3c06c7475617f2ab
+Author: luckydonald <m1-mac-2024._.code@luckydonald.de>
+Date:   Sun Jan 18 00:32:15 2026 +0100
+
+    📄TEMPLATE | 🐞 ai: updated errors
+
+```
+Is very nice, but I still want a proper diff display!
+Attempt to use `bat` to have it colorised, but don't fail if it is not installed and show it uncolorized instead.
