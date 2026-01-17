@@ -12,13 +12,17 @@ help:
 	@echo "Usage: make <target> [FRONTEND=1] [BACKEND=1]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  setup          - Set up the full development environment (frontend + backend)"
+	@echo "  setup          - Set up the full development environment (frontend + backend)"
 	@echo "  setup-ts       - Set up frontend development environment (TypeScript)"
 	@echo "  setup-py       - Set up backend  development environment (Python)"
-	@echo "  lint           - Run all linters (frontend + backend)"
+	@echo "  test           - Run all tests (frontend + backend)"
+	@echo "  test-ts        - Run frontend tests"
+	@echo "  test-py        - Run backend tests"
+	@echo "  test-coverage  - Run tests with coverage report"
+	@echo "  lint           - Run all linters (frontend + backend)"
 	@echo "  lint-ts        - Lint/type‑check TypeScript only"
 	@echo "  lint-py        - Lint/format Python only"
-	@echo "  format         - Format all code (frontend + backend)"
+	@echo "  format         - Format all code (frontend + backend)"
 	@echo "  format-ts      - Format TypeScript only"
 	@echo "  format-py      - Format Python only"
 	@echo "  build          - Build what needs to be build"
@@ -41,6 +45,44 @@ setup-frontend:
 ifeq ($(FRONTEND),1)
 	@echo "Setting up frontend development environment..."
 	cd frontend && yarn install
+test: test-py test-ts
+
+test-py:
+ifeq ($(BACKEND),1)
+	@echo "Running Python tests..."
+	uv run pytest tests/
+else
+	@echo "No Python sources detected – skipping backend tests."
+endif
+
+test-ts:
+ifeq ($(FRONTEND),1)
+	@echo "Running frontend tests..."
+	cd frontend && yarn test
+else
+	@echo "No frontend sources detected – skipping frontend tests."
+endif
+
+test-coverage: test-coverage-py test-coverage-ts
+
+test-coverage-py:
+ifeq ($(BACKEND),1)
+	@echo "Running Python tests with coverage..."
+	uv run pytest tests/ --cov --cov-report=html --cov-report=term
+	@echo "Python coverage report generated in htmlcov/"
+else
+	@echo "No Python sources detected – skipping backend coverage."
+endif
+
+test-coverage-ts:
+ifeq ($(FRONTEND),1)
+	@echo "Running frontend tests with coverage..."
+	cd frontend && yarn test:coverage
+	@echo "Frontend coverage report generated in frontend/coverage/"
+else
+	@echo "No frontend sources detected – skipping frontend coverage."
+endif
+
 else
 	@echo "No frontend sources detected – skipping frontend setup."
 endif
