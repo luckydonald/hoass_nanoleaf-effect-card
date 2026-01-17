@@ -325,25 +325,26 @@ replace_in_file() {
 
     # Perform replacements using sed
     # macOS sed requires '' after -i, Linux doesn't
+    # IMPORTANT: Order matters! Replace more specific patterns first
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
         sed -i '' \
+            -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
             -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
             -e "s/Template/$PASCAL_NAME/g" \
-            -e "s/template/$SNAKE_NAME/g" \
-            -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
+            -e "s/\btemplate\b/$SNAKE_NAME/g" \
             "$file"
     else
         # Linux
         sed -i \
+            -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
             -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
             -e "s/Template/$PASCAL_NAME/g" \
-            -e "s/template/$SNAKE_NAME/g" \
-            -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
+            -e "s/\btemplate\b/$SNAKE_NAME/g" \
             "$file"
     fi
 
