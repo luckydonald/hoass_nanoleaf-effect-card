@@ -581,19 +581,40 @@ print_success "Backup files removed"
 
 print_header "Initialization Complete!"
 echo ""
-print_success "Your new Home Assistant plugin has been initialized!"
+if [ "$ALREADY_INITIALIZED" = true ]; then
+    print_success "Your Home Assistant plugin has been updated!"
+    echo ""
+    print_info "Re-run completed - template files updated and new files added"
+else
+    print_success "Your new Home Assistant plugin has been initialized!"
+fi
 echo ""
 echo "Summary:"
 echo "  • Display Name: $DISPLAY_NAME"
 echo "  • Domain: $SNAKE_NAME"
-echo "  • Component: custom_components/$SNAKE_NAME/"
-echo "  • Frontend: frontend/"
+if [ "$KEEP_BACKEND" = true ]; then
+    echo "  • Component: custom_components/$SNAKE_NAME/"
+fi
+if [ -d "frontend" ]; then
+    echo "  • Frontend: frontend/"
+fi
+if [ -d "tests" ]; then
+    echo "  • Tests: tests/"
+fi
 echo ""
 print_info "Next steps:"
-echo "  1. Review the changes made to the files"
-echo "  2. Update README.md with your plugin details"
-echo "  3. Update LICENSE if needed"
-echo "  4. Start developing your plugin!"
+if [ "$ALREADY_INITIALIZED" = false ]; then
+    echo "  1. Review the changes made to the files"
+    echo "  2. Update README.md with your plugin details"
+    echo "  3. Update LICENSE if needed"
+    echo "  4. Run 'make setup' to install dependencies"
+    echo "  5. Run 'make test' to verify everything works"
+    echo "  6. Start developing your plugin!"
+else
+    echo "  1. Review any new files that were copied"
+    echo "  2. Run 'make test' to verify everything still works"
+    echo "  3. Continue developing your plugin!"
+fi
 echo ""
 print_warning "Note: You may need to restart Home Assistant and clear browser cache"
 echo ""
