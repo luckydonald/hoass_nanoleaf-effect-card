@@ -354,7 +354,7 @@ async function toggleAlarm(alarm: Alarm): Promise<void> {
   if (!props.hass) return;
 
   const service = alarm.enabled ? 'disable_alarm' : 'enable_alarm';
-  await props.hass.callService('calendar_alarm_clock', service, {
+  await props.hass.callService('plugin_template', service, {
     alarm_id: alarm.alarm_id,
   });
 }
@@ -362,7 +362,7 @@ async function toggleAlarm(alarm: Alarm): Promise<void> {
 async function snoozeAlarm(alarm: Alarm): Promise<void> {
   if (!props.hass) return;
 
-  await props.hass.callService('calendar_alarm_clock', 'snooze_alarm', {
+  await props.hass.callService('plugin_template', 'snooze_alarm', {
     alarm_id: alarm.alarm_id,
   });
 }
@@ -370,7 +370,7 @@ async function snoozeAlarm(alarm: Alarm): Promise<void> {
 async function dismissAlarm(alarm: Alarm): Promise<void> {
   if (!props.hass) return;
 
-  await props.hass.callService('calendar_alarm_clock', 'dismiss_alarm', {
+  await props.hass.callService('plugin_template', 'dismiss_alarm', {
     alarm_id: alarm.alarm_id,
   });
 }
@@ -379,7 +379,7 @@ async function deleteAlarm(alarm: Alarm): Promise<void> {
   if (!props.hass) return;
 
   if (confirm(`Delete alarm "${alarm.name}"?`)) {
-    await props.hass.callService('calendar_alarm_clock', 'delete_alarm', {
+    await props.hass.callService('plugin_template', 'delete_alarm', {
       alarm_id: alarm.alarm_id,
     });
   }

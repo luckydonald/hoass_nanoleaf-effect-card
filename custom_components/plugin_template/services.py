@@ -1,4 +1,4 @@
-"""Services for Calendar Alarm Clock."""
+"""Services for Plugin Template."""
 
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ def _get_alarm_id_from_call(hass: HomeAssistant, call: ServiceCall) -> str | Non
 
 
 async def async_setup_services(hass: HomeAssistant) -> None:
-    """Set up services for Calendar Alarm Clock."""
+    """Set up services for Plugin Template."""
 
     async def handle_create_alarm(call: ServiceCall) -> dict[str, Any]:
         """Handle create_alarm service call."""
@@ -288,7 +288,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
 
 async def async_unload_services(hass: HomeAssistant) -> None:
-    """Unload services for Calendar Alarm Clock."""
+    """Unload services for Plugin Template."""
     services: list[str] = [
         SERVICE_CREATE_ALARM,
         SERVICE_DELETE_ALARM,
