@@ -115,3 +115,7 @@ The script also should be save to re-run, even with a later version with updated
 It should not fail, but just adapt new files as needed.
 This is extra important for the folder copy/rename parts, we can't just overwrite existing folders.
 Instead, if that folder already exists, ask for each non-existing file if it should be copied over and adapted or skipped.
+
+———————
+
+Add `make init`.
