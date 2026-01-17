@@ -156,3 +156,13 @@ Make sure `init.sh` cleans up template-specific stuff, like the `ai/plugin_templ
 ——————
 
 Have the script first check for uncommited changes, and allow to commit before continuing, with a user specified message.
+
+Make it add all new files (and deleted/moved ones) to git.
+At the end, ask if it should do a commit with the changed files.
+Template for the commit message header:
+```txt
+🛫 template | Applied plugin template with `init.sh`
+
+{configuration details here}
+```
+In that, include the configuration summary from the beginning once more, and any other relevant information (e.g. if a backend was included or not, frontend type, etc.)
