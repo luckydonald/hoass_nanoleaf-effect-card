@@ -173,6 +173,53 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
+# Check if we're in a git repository
+if [ ! -d ".git" ]; then
+    print_error "Not in a git repository!"
+    print_info "Initialize git first with: git init"
+    exit 1
+fi
+
+# Check for uncommitted changes
+if [ -n "$(git status --porcelain)" ]; then
+    print_warning "You have uncommitted changes:"
+    echo ""
+    git status --short
+    echo ""
+
+    read -p "Would you like to commit these changes before initializing? (y/n) [n]: " COMMIT_BEFORE
+    COMMIT_BEFORE=${COMMIT_BEFORE:-n}
+
+    if [[ "$COMMIT_BEFORE" =~ ^[Yy]$ ]]; then
+        echo ""
+        read -p "Enter commit message: " COMMIT_MSG
+
+        if [ -z "$COMMIT_MSG" ]; then
+            print_error "Commit message cannot be empty!"
+            exit 1
+        fi
+
+        print_info "Staging all changes..."
+        git add -A
+
+        print_info "Committing..."
+        git commit -m "$COMMIT_MSG"
+        print_success "Changes committed"
+        echo ""
+    else
+        print_warning "Continuing with uncommitted changes..."
+        print_warning "You may want to commit or stash them first"
+        echo ""
+        read -p "Continue anyway? (y/n) [n]: " CONTINUE_ANYWAY
+        CONTINUE_ANYWAY=${CONTINUE_ANYWAY:-n}
+
+        if [[ ! "$CONTINUE_ANYWAY" =~ ^[Yy]$ ]]; then
+            print_info "Initialization cancelled"
+            exit 0
+        fi
+    fi
+fi
+
 # Safety check: ensure this is the plugin_template repository OR already initialized
 ALREADY_INITIALIZED=false
 if [ -d "custom_components/plugin_template" ] || [ -d "frontend_vue" ] || [ -d "frontend_plain" ]; then
@@ -675,16 +722,91 @@ echo ""
 echo "Summary:"
 echo "  • Display Name: $DISPLAY_NAME"
 echo "  • Domain: $SNAKE_NAME"
+echo "  • GitHub: $GITHUB_URL"
 if [ "$KEEP_BACKEND" = true ]; then
-    echo "  • Component: custom_components/$SNAKE_NAME/"
+    echo "  • Backend: Python component (custom_components/$SNAKE_NAME/)"
+else
+    echo "  • Backend: None (frontend-only)"
 fi
 if [ -d "frontend" ]; then
-    echo "  • Frontend: frontend/"
+    echo "  • Frontend: $FRONTEND_CHOICE"
 fi
 if [ -d "tests" ]; then
-    echo "  • Tests: tests/"
+    echo "  • Tests: Included"
 fi
 echo ""
+
+# Ask about committing the changes
+if [ -n "$(git status --porcelain)" ]; then
+    print_info "Changes have been made to the repository"
+    echo ""
+    git status --short
+    echo ""
+
+    read -p "Would you like to commit these changes? (y/n) [y]: " COMMIT_AFTER
+    COMMIT_AFTER=${COMMIT_AFTER:-y}
+
+    if [[ "$COMMIT_AFTER" =~ ^[Yy]$ ]]; then
+        print_info "Staging all changes (including new and deleted files)..."
+        git add -A
+
+        # Build comprehensive commit message
+        COMMIT_HEADER="🛫 template | Applied plugin template with \`init.sh\`"
+        COMMIT_BODY=""
+        COMMIT_BODY+="Configuration:"
+        COMMIT_BODY+=$'\n'"  • Display Name: $DISPLAY_NAME"
+        COMMIT_BODY+=$'\n'"  • Domain: $SNAKE_NAME"
+        COMMIT_BODY+=$'\n'"  • Snake Case: $SNAKE_NAME"
+        COMMIT_BODY+=$'\n'"  • Dash Case: $DASH_NAME"
+        COMMIT_BODY+=$'\n'"  • PascalCase: $PASCAL_NAME"
+        COMMIT_BODY+=$'\n'"  • GitHub User: $GITHUB_USER"
+        COMMIT_BODY+=$'\n'"  • Repository: $GITHUB_URL"
+        COMMIT_BODY+=$'\n'
+
+        if [ "$KEEP_BACKEND" = true ]; then
+            COMMIT_BODY+=$'\n'"Backend: Python component included"
+            COMMIT_BODY+=$'\n'"  • Custom component: custom_components/$SNAKE_NAME/"
+            if [ -d "tests" ]; then
+                COMMIT_BODY+=$'\n'"  • Tests: Included"
+            fi
+        else
+            COMMIT_BODY+=$'\n'"Backend: Not included (frontend-only plugin)"
+        fi
+
+        COMMIT_BODY+=$'\n'
+        COMMIT_BODY+=$'\n'"Frontend: $FRONTEND_CHOICE"
+        COMMIT_BODY+=$'\n'"  • Framework: $([ "$FRONTEND_CHOICE" = "vue" ] && echo "Vue 3 + TypeScript + Vite" || echo "Plain JavaScript")"
+        COMMIT_BODY+=$'\n'"  • Directory: frontend/"
+
+        if [ "$ALREADY_INITIALIZED" = true ]; then
+            COMMIT_BODY+=$'\n'
+            COMMIT_BODY+=$'\n'"Note: This was a re-run of init.sh on an already initialized plugin"
+            COMMIT_BODY+=$'\n'"      Template files updated and new files added"
+        fi
+
+        # Combine header and body
+        FULL_COMMIT_MSG="$COMMIT_HEADER"
+        FULL_COMMIT_MSG+=$'\n'
+        FULL_COMMIT_MSG+=$'\n'"$COMMIT_BODY"
+
+        print_info "Committing with message:"
+        echo ""
+        echo "$FULL_COMMIT_MSG"
+        echo ""
+
+        git commit -m "$FULL_COMMIT_MSG"
+        print_success "Changes committed!"
+        echo ""
+    else
+        print_info "Changes not committed - you can commit them later with:"
+        echo "  git add -A"
+        echo "  git commit -m 'Applied plugin template'"
+        echo ""
+    fi
+else
+    print_info "No changes to commit"
+fi
+
 print_info "Next steps:"
 if [ "$ALREADY_INITIALIZED" = false ]; then
     echo "  1. Review the changes made to the files"
