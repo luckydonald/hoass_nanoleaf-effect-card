@@ -372,11 +372,6 @@ elif [ "$FRONTEND_CHOICE" = "plain" ]; then
         print_info "frontend/ directory already exists, keeping it"
     fi
 fi
-    else
-        print_error "frontend_plain/ directory not found!"
-        exit 1
-    fi
-fi
 
 # Generate PascalCase version for class names
 PASCAL_NAME=$(to_pascal_case "$DISPLAY_NAME")
