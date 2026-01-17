@@ -253,29 +253,6 @@ rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
 
-# Create the git rebase sequence
-REBASE_TODO=$(mktemp)
-trap "rm -f $REBASE_TODO $REBASE_SCRIPT" EXIT
-
-if [ "$IS_TEMPLATE_REPO" = true ]; then
-    # Get commits for this step (oldest first)
-    git log --format="%H" --grep="ai: \[$PADDED_STEP\]" --reverse > /tmp/commit_hashes.txt
-else
-    # Get commits for this step (oldest first)
-    git log --format="%H" --grep="ai: .*[.…].* ($STEP-" --reverse > /tmp/commit_hashes.txt
-fi
-
-# Build rebase todo list
-echo "# Rebase AI commits - fixing messages" > "$REBASE_TODO"
-while IFS= read -r commit_hash; do
-    COMMIT_MSG=$(git log --format=%s -1 "$commit_hash")
-    echo "exec $REBASE_SCRIPT '$COMMIT_MSG' > /tmp/new_msg_$$.txt" >> "$REBASE_TODO"
-    echo "pick $commit_hash" >> "$REBASE_TODO"
-    echo "exec git commit --amend -m \"\$(cat /tmp/new_msg_$$.txt)\" && rm /tmp/new_msg_$$.txt" >> "$REBASE_TODO"
-done < /tmp/commit_hashes.txt
-
-rm /tmp/commit_hashes.txt
-
 # Find the parent commit (the commit before the first AI commit in this batch)
 if [ "$IS_TEMPLATE_REPO" = true ]; then
     FIRST_COMMIT=$(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse | head -1)
@@ -285,6 +262,65 @@ fi
 
 PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
 
+# Create a set of commits to modify (for fast lookup)
+COMMITS_TO_MODIFY=$(mktemp)
+trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT" EXIT
+
+if [ "$IS_TEMPLATE_REPO" = true ]; then
+    git log --format="%H" --grep="ai: \[$PADDED_STEP\]" > "$COMMITS_TO_MODIFY"
+else
+    git log --format="%H" --grep="ai: .*[.…].* ($STEP-" > "$COMMITS_TO_MODIFY"
+fi
+
+# Create rebase editor script that modifies only our AI commits
+REBASE_EDITOR=$(mktemp)
+trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $REBASE_EDITOR" EXIT
+
+cat > "$REBASE_EDITOR" << 'EOF'
+#!/usr/bin/env bash
+# This script modifies the git rebase todo list
+# It adds exec commands only for the AI commits we want to fix
+
+TODO_FILE="$1"
+TEMP_FILE="${TODO_FILE}.tmp"
+
+> "$TEMP_FILE"
+
+while IFS= read -r line; do
+    # Extract commit hash from the line (format: "pick abc123 commit message")
+    if [[ "$line" =~ ^pick[[:space:]]+([a-f0-9]+) ]]; then
+        commit_hash="${BASH_REMATCH[1]}"
+
+        # Check if this commit is in our list to modify
+        if grep -q "^$commit_hash" "$COMMITS_TO_MODIFY_FILE"; then
+            # This is an AI commit we want to fix
+            commit_msg=$(git log --format=%s -1 "$commit_hash")
+
+            # Add exec to generate new message
+            echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $REBASE_SCRIPT_FILE '$commit_msg' > /tmp/new_msg_\$\$.txt" >> "$TEMP_FILE"
+            # Keep the pick
+            echo "$line" >> "$TEMP_FILE"
+            # Add exec to amend with new message
+            echo "exec git commit --amend -m \"\$(cat /tmp/new_msg_\$\$.txt)\" && rm /tmp/new_msg_\$\$.txt" >> "$TEMP_FILE"
+        else
+            # Not an AI commit, keep as-is
+            echo "$line" >> "$TEMP_FILE"
+        fi
+    else
+        # Not a pick line (comment, etc), keep as-is
+        echo "$line" >> "$TEMP_FILE"
+    fi
+done < "$TODO_FILE"
+
+mv "$TEMP_FILE" "$TODO_FILE"
+EOF
+
+chmod +x "$REBASE_EDITOR"
+
+# Export variables needed by the rebase editor
+export COMMITS_TO_MODIFY_FILE="$COMMITS_TO_MODIFY"
+export REBASE_SCRIPT_FILE="$REBASE_SCRIPT"
+
 print_info "Starting interactive rebase..."
 echo ""
 
@@ -292,7 +328,7 @@ echo ""
 export BATCH_MSG_ENV="$BATCH_MESSAGE"
 
 # Set up environment for the rebase
-export GIT_SEQUENCE_EDITOR="cat $REBASE_TODO >"
+export GIT_SEQUENCE_EDITOR="$REBASE_EDITOR"
 
 # Run the rebase
 if git rebase -i "$PARENT_COMMIT"; then
