@@ -152,3 +152,7 @@ In the case with the total, it should replace the X on that correct position wit
 ——————
 
 Make sure `init.sh` cleans up template-specific stuff, like the `ai/plugin_template/` dir or unused `frontend_*` folders.
+
+——————
+
+Have the script first check for uncommited changes, and allow to commit before continuing, with a user specified message.
