@@ -250,12 +250,21 @@ SNAKE_NAME=${SNAKE_NAME:-$DEFAULT_SNAKE}
 
 print_success "Snake_case name: $SNAKE_NAME"
 
-# Step 4: Construct GitHub URL
-GITHUB_URL="https://github.com/luckydonald/hoass_${DASH_NAME}.git"
-print_info "\nStep 4: GitHub Repository"
+# Step 4: Get GitHub username
+print_info "\nStep 4: GitHub Username"
+echo "This is your GitHub username for the repository URL."
+echo ""
+read -p "Enter GitHub username [luckydonald]: " GITHUB_USER
+GITHUB_USER=${GITHUB_USER:-luckydonald}
+
+print_success "GitHub username: $GITHUB_USER"
+
+# Step 5: Construct GitHub URL
+GITHUB_URL="https://github.com/${GITHUB_USER}/hoass_${DASH_NAME}.git"
+print_info "\nStep 5: GitHub Repository"
 print_success "GitHub URL: $GITHUB_URL"
 
-# Step 5: Ask about Python backend
+# Step 6: Ask about Python backend
 print_info "\nStep 5: Python Backend"
 read -p "Do you need a Python backend? (y/n) [y]: " NEED_BACKEND
 NEED_BACKEND=${NEED_BACKEND:-y}
