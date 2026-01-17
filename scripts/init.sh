@@ -73,6 +73,23 @@ to_pascal_case() {
     echo "$1" | sed -E 's/[^a-zA-Z0-9]+/ /g' | awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) tolower(substr($i,2))}}1' | sed 's/ //g'
 }
 
+# Function to extract plugin name from folder name
+extract_plugin_name_from_folder() {
+    local folder_name=$(basename "$PWD")
+
+    # Strip common prefixes (case insensitive)
+    local name="$folder_name"
+    name=$(echo "$name" | sed -E 's/^(ha|hacs|hoass|homeassistant)[-_]//i')
+
+    # Convert underscores and dashes to spaces for display name
+    name=$(echo "$name" | sed 's/[-_]/ /g')
+
+    # Capitalize each word
+    name=$(echo "$name" | awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}}1')
+
+    echo "$name"
+}
+
 # Function to safely move/merge directories
 safe_move_directory() {
     local src=$1
@@ -190,9 +207,19 @@ print_info "Working directory: $REPO_ROOT"
 # Step 1: Get the display name (UI name)
 print_info "Step 1: Plugin Display Name"
 echo "This is the name that will be shown in the Home Assistant UI."
-echo "Example: 'My Custom Widget'"
-echo ""
-read -p "Enter plugin display name: " DISPLAY_NAME
+
+# Try to deduce name from folder
+FOLDER_DEFAULT=$(extract_plugin_name_from_folder)
+if [ -n "$FOLDER_DEFAULT" ]; then
+    echo "Example: 'My Custom Widget'"
+    echo ""
+    read -p "Enter plugin display name [$FOLDER_DEFAULT]: " DISPLAY_NAME
+    DISPLAY_NAME=${DISPLAY_NAME:-$FOLDER_DEFAULT}
+else
+    echo "Example: 'My Custom Widget'"
+    echo ""
+    read -p "Enter plugin display name: " DISPLAY_NAME
+fi
 
 if [ -z "$DISPLAY_NAME" ]; then
     print_error "Display name cannot be empty!"
