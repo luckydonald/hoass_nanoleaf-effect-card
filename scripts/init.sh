@@ -265,7 +265,7 @@ print_info "\nStep 5: GitHub Repository"
 print_success "GitHub URL: $GITHUB_URL"
 
 # Step 6: Ask about Python backend
-print_info "\nStep 5: Python Backend"
+print_info "\nStep 6: Python Backend"
 read -p "Do you need a Python backend? (y/n) [y]: " NEED_BACKEND
 NEED_BACKEND=${NEED_BACKEND:-y}
 
