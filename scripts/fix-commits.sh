@@ -205,9 +205,9 @@ TOTAL="TOTAL_PLACEHOLDER"
 # Extract current message (everything between ] and ()
 CURRENT_MSG=$(echo "$1" | sed 's/.*\] \(.*\) (.*/\1/')
 
-# Use batch message if provided, otherwise check individual message
-if [ -n "BATCH_MESSAGE_PLACEHOLDER" ]; then
-    NEW_MSG="BATCH_MESSAGE_PLACEHOLDER"
+# Use batch message from environment variable if provided, otherwise check individual message
+if [ -n "$BATCH_MSG_ENV" ]; then
+    NEW_MSG="$BATCH_MSG_ENV"
 elif echo "$CURRENT_MSG" | grep -qE "^running[.…]+$"; then
     # Still default, keep it
     NEW_MSG="running…"
@@ -231,9 +231,9 @@ SUBSTEP=$(echo "$1" | sed -E 's/.*ai: .+[.…]+ \([0-9]+-([0-9]+)\).*/\1/')
 # Extract current message (everything between : and ()
 CURRENT_MSG=$(echo "$1" | sed -E 's/.*ai: (.+)[.…]+ \([0-9]+-[0-9]+\).*/\1/')
 
-# Use batch message if provided, otherwise check individual message
-if [ -n "BATCH_MESSAGE_PLACEHOLDER" ]; then
-    NEW_MSG="BATCH_MESSAGE_PLACEHOLDER"
+# Use batch message from environment variable if provided, otherwise check individual message
+if [ -n "$BATCH_MSG_ENV" ]; then
+    NEW_MSG="$BATCH_MSG_ENV"
 elif echo "$CURRENT_MSG" | grep -qE "^running[.…]*$"; then
     # Still default, keep it
     NEW_MSG="running…"
@@ -247,11 +247,8 @@ echo "✨ ai: $NEW_MSG ($STEP-$SUBSTEP)"
 EOFSCRIPT
 fi
 
-# Replace placeholders
-# Properly escape the batch message for sed
-ESCAPED_BATCH_MESSAGE=$(echo "$BATCH_MESSAGE" | sed 's/[\/&]/\\&/g' | sed "s/'/\\\\'/g" | sed 's/`/\\`/g' | sed 's/\$/\\$/g')
+# Replace TOTAL_PLACEHOLDER only (message will be passed via environment)
 sed -i.bak "s/TOTAL_PLACEHOLDER/$COMMIT_COUNT/g" "$REBASE_SCRIPT"
-sed -i.bak "s/BATCH_MESSAGE_PLACEHOLDER/$ESCAPED_BATCH_MESSAGE/g" "$REBASE_SCRIPT"
 rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
