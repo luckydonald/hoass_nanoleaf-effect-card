@@ -142,3 +142,4 @@ COMMIT_MSG_STEP_TEMPLATE="${COMMIT_PREFIX_TEMPLATE}✨ ai: [{padded_step}] {msg}
 ```
 Notice, the first part is `${COMMIT_PREFIX_TEMPLATE}`, the $step is now named $padded_step and zero-padded to three digits, and the substep is 2. The total_substeps will initially be "X", as it is currently unknown what the total number of substeps will be.
 If the template repo is detected, the search for the previous substep as above must be adapted to the new syntax as well.
+Keep in mind, that the message is not always "running...", but will later be changed with an rebase to something more useful. The detection must work with that. Also I use `…`, not three separate dots.
