@@ -385,6 +385,13 @@ if [ -d "custom_components/template" ]; then
     print_success "Renamed directory"
 fi
 
+# Rename the Vue component file if it exists
+if [ -f "frontend/src/AlarmClockCard.vue" ]; then
+    print_info "Renaming AlarmClockCard.vue to ${PASCAL_NAME}Card.vue"
+    mv "frontend/src/AlarmClockCard.vue" "frontend/src/${PASCAL_NAME}Card.vue"
+    print_success "Renamed Vue component"
+fi
+
 # Clean up backup files
 print_info "Cleaning up backup files..."
 find "$REPO_ROOT" -name "*.bak" -delete
