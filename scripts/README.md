@@ -1,10 +1,17 @@
 # Scripts Documentation
 
-## init.sh
+## Overview
 
 The `init.sh` script initializes a new Home Assistant plugin from this template repository.
 
-### Features
+**The script is safe to re-run** - it detects if you're running it on an already initialized plugin and will:
+- Only process files that still have template patterns
+- Offer to copy new files from template updates
+- Never overwrite your existing code without permission
+
+See [RERUN_GUIDE.md](../RERUN_GUIDE.md) for details on re-running the script.
+
+## Features
 
 The script performs the following operations:
 
