@@ -182,13 +182,8 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Get the repository root (parent of scripts/)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
 print_header "Starting Initialization"
 
-cd "$REPO_ROOT"
 
 # Step 7: Remove Python backend if not needed
 if [ "$KEEP_BACKEND" = false ]; then
