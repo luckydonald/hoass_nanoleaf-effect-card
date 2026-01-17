@@ -1,6 +1,29 @@
 #!/usr/bin/env bash
-# Script to initialize a new Home Assistant plugin from this template
-# This will rename the template to your custom plugin name
+# ============================================================================
+# Home Assistant Plugin Template Initializer
+# ============================================================================
+#
+# This script initializes a new Home Assistant plugin from this template.
+# It will:
+#   1. Ask for your plugin name (display name for UI)
+#   2. Calculate and confirm lowercase-dash version (for filenames)
+#   3. Calculate and confirm snake_case version (for Python modules)
+#   4. Generate GitHub repository URL
+#   5. Optionally remove Python backend files
+#   6. Choose frontend framework (vue or plain)
+#   7. Replace all template strings with your plugin names
+#   8. Rename directories appropriately
+#
+# Usage:
+#   cd /path/to/hoass_template
+#   ./scripts/init.sh
+#
+# Example:
+#   Plugin Display Name: Calendar Alarm Clock
+#   Lowercase-dash:      calendar-alarm-clock
+#   Snake_case:          calendar_alarm_clock
+#
+# ============================================================================
 
 set -e  # Exit on error
 
