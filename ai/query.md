@@ -21,3 +21,6 @@ For that it shall go through a hardcoded list of files and replace the relevant 
 —————
 
 please - in my local files - rename "template" to "plugin_template" (in all the cases needed. Also rename calendar_alarm_clock to plugin_template and all the other caseings similarly in the files directly, and adapt the script for that, so it's uniformly something which is easier to recognize.
+
+continue.
+Please additionally also remove code which might have been specific to the one I compied from - I only want a good starting point, so remove everything alarm-clock or calendar specific.
