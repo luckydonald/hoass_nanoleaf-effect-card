@@ -150,3 +150,28 @@ Date:   Sun Jan 18 00:32:15 2026 +0100
 ```
 Is very nice, but I still want a proper diff display!
 Attempt to use `bat` to have it colorised, but don't fail if it is not installed and show it uncolorized instead.
+
+—————
+
+ℹ Enter a message for all commits in this batch
+⚠ Leave empty to keep individual 'running…' messages
+⚠ Press Ctrl+C to cancel
+
+Message for step [022]: Fix `init.sh` to have a proper diff…
+
+ℹ Starting interactive rebase...
+
+Executing: BATCH_MSG_ENV="$BATCH_MSG_ENV" /var/folders/jv/xthv_j4x7xx6rg_dgpyypqcr0000gn/T/tmp.tUJxvKj2SJ '📄TEMPLATE | ✨ ai: [022] running… (1/X)' > /tmp/new_msg_$$.txt
+Executing: git commit --amend -m "$(cat /tmp/new_msg_$$.txt)" && rm /tmp/new_msg_$$.txt
+cat: /tmp/new_msg_3316.txt: No such file or directory
+Aborting commit due to empty commit message.
+warning: execution failed: git commit --amend -m "$(cat /tmp/new_msg_$$.txt)" && rm /tmp/new_msg_$$.txt
+You can fix the problem, and then run
+
+  git rebase --continue
+
+
+✗ Rebase failed or was aborted
+ℹ You can continue with: git rebase --continue
+ℹ Or abort with: git rebase --abort
+make: *** [fix-commits] Error 1
