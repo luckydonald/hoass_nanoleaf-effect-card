@@ -414,11 +414,13 @@ PASCAL_NAME=$(to_pascal_case "$DISPLAY_NAME")
 
 print_header "File Replacement Configuration"
 print_info "The following replacements will be made:"
-echo "  'template'        → '$SNAKE_NAME'"
-echo "  'Template'        → '$PASCAL_NAME'"
-echo "  'TEMPLATE'        → '$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')'"
-echo "  'plugin-template' → '$DASH_NAME'"
-echo "  'Plugin template' → '$DISPLAY_NAME'"
+echo "  'plugin_template'        → '$SNAKE_NAME'"
+echo "  'PluginTemplate'         → '$PASCAL_NAME'"
+echo "  'PLUGIN_TEMPLATE'        → '$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')'"
+echo "  'plugin-template'        → '$DASH_NAME'"
+echo "  'plugin-template-card'   → '${DASH_NAME}-card'"
+echo "  'Plugin Template'        → '$DISPLAY_NAME'"
+echo "  'hoass_plugin-template'  → 'hoass_${DASH_NAME}'"
 echo ""
 print_warning "Ready to perform replacements in all files."
 print_warning "This operation will modify files in place!"
@@ -635,6 +637,7 @@ TEMPLATE_DOCS=(
     "TEST_CHECKLIST.md"
     "INIT_ENHANCEMENTS_COMPLETE.md"
     "INIT_RERUN_COMPLETE.md"
+    "INIT_CLEANUP_COMPLETE.md"
     "RERUN_GUIDE.md"
     "COMMIT_TRACKING.md"
     "COMMIT_TRACKING_COMPLETE.md"
@@ -642,6 +645,9 @@ TEMPLATE_DOCS=(
     "TEMPLATE_COMMIT_COMPLETE.md"
     "FLEXIBLE_MESSAGE_COMPLETE.md"
     "SYNTAX_FIX.md"
+    "FIX_COMMITS_GUIDE.md"
+    "FIX_COMMITS_COMPLETE.md"
+    "FIX_COMMITS_FIXED.md"
 )
 
 for doc in "${TEMPLATE_DOCS[@]}"; do
