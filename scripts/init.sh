@@ -296,6 +296,13 @@ if [ "$KEEP_BACKEND" = true ] && [ -d "custom_components/plugin_template" ]; the
     while IFS= read -r -d '' file; do
         FILES_TO_PROCESS+=("$file")
     done < <(find custom_components/plugin_template -type f \( -name "*.py" -o -name "*.yaml" -o -name "*.json" \) -print0)
+
+    # Add test files if they exist
+    if [ -d "tests" ]; then
+        while IFS= read -r -d '' file; do
+            FILES_TO_PROCESS+=("$file")
+        done < <(find tests -type f -name "*.py" -print0)
+    fi
 fi
 
 # Add all relevant frontend files
@@ -304,12 +311,20 @@ if [ -d "frontend" ]; then
     [ -f "frontend/package.json" ] && FILES_TO_PROCESS+=("frontend/package.json")
     [ -f "frontend/index.html" ] && FILES_TO_PROCESS+=("frontend/index.html")
     [ -f "frontend/vite.config.ts" ] && FILES_TO_PROCESS+=("frontend/vite.config.ts")
+    [ -f "frontend/vitest.config.ts" ] && FILES_TO_PROCESS+=("frontend/vitest.config.ts")
     [ -f "frontend/README.md" ] && FILES_TO_PROCESS+=("frontend/README.md")
 
     # Add source files
     while IFS= read -r -d '' file; do
         FILES_TO_PROCESS+=("$file")
     done < <(find frontend/src -type f \( -name "*.ts" -o -name "*.vue" -o -name "*.js" \) 2>/dev/null -print0)
+
+    # Add test files
+    if [ -d "frontend/tests" ]; then
+        while IFS= read -r -d '' file; do
+            FILES_TO_PROCESS+=("$file")
+        done < <(find frontend/tests -type f \( -name "*.ts" -o -name "*.js" \) 2>/dev/null -print0)
+    fi
 fi
 
 # Function to replace text in a file
