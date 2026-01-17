@@ -382,7 +382,7 @@ class PluginTemplateCardEditor extends HTMLElement {
     return row;
   }
 
-  private _updateConfig(update: Partial<AlarmClockCardConfig>): void {
+  private _updateConfig(update: Partial<PluginTemplateCardConfig>): void {
     this._config = { ...this._config, ...update };
     this._fireConfigChanged();
   }
@@ -398,7 +398,8 @@ class PluginTemplateCardEditor extends HTMLElement {
 }
 
 // Register custom elements
-customElements.define('calender-alarm-clock-card', AlarmClockCardElement);
+customElements.define('plugin-template-card', PluginTemplateCardElement);
+customElements.define('plugin-template-card-editor', PluginTemplateCardEditor);
 customElements.define('calender-alarm-clock-card-editor', AlarmClockCardEditor);
 
 // Register with Home Assistant's custom card registry
