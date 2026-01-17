@@ -605,6 +605,52 @@ elif [ -f "frontend/src/${PASCAL_NAME}Card.vue" ]; then
     print_info "Component already renamed to ${PASCAL_NAME}Card.vue"
 fi
 
+# Clean up template-specific directories
+print_info "Cleaning up template-specific files..."
+
+# Remove ai/plugin_template/ directory (template-specific AI context)
+if [ -d "ai/plugin_template" ]; then
+    rm -rf "ai/plugin_template"
+    print_success "Removed ai/plugin_template/"
+fi
+
+# Remove unused frontend_* directories (if they still exist)
+if [ -d "frontend_vue" ]; then
+    rm -rf "frontend_vue"
+    print_success "Removed unused frontend_vue/"
+fi
+
+if [ -d "frontend_plain" ]; then
+    rm -rf "frontend_plain"
+    print_success "Removed unused frontend_plain/"
+fi
+
+# Remove template-specific documentation files
+TEMPLATE_DOCS=(
+    "CLEANUP_SUMMARY.md"
+    "TRANSFORMATION_COMPLETE.md"
+    "POST_TRANSFORMATION_CHECKLIST.md"
+    "TEST_SETUP_SUMMARY.md"
+    "TEST_INFRASTRUCTURE_COMPLETE.md"
+    "TEST_CHECKLIST.md"
+    "INIT_ENHANCEMENTS_COMPLETE.md"
+    "INIT_RERUN_COMPLETE.md"
+    "RERUN_GUIDE.md"
+    "COMMIT_TRACKING.md"
+    "COMMIT_TRACKING_COMPLETE.md"
+    "COMMIT_TEMPLATE_FORMAT.md"
+    "TEMPLATE_COMMIT_COMPLETE.md"
+    "FLEXIBLE_MESSAGE_COMPLETE.md"
+    "SYNTAX_FIX.md"
+)
+
+for doc in "${TEMPLATE_DOCS[@]}"; do
+    if [ -f "$doc" ]; then
+        rm "$doc"
+        print_success "Removed template doc: $doc"
+    fi
+done
+
 # Clean up backup files
 print_info "Cleaning up backup files..."
 find "$REPO_ROOT" -name "*.bak" -delete
