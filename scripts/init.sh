@@ -559,8 +559,8 @@ if [ -d "custom_components/plugin_template" ]; then
 
         # Copy new files from plugin_template to existing directory
         while IFS= read -r -d '' file; do
-            local rel_path="${file#custom_components/plugin_template/}"
-            local dest_file="custom_components/$SNAKE_NAME/$rel_path"
+            rel_path="${file#custom_components/plugin_template/}"
+            dest_file="custom_components/$SNAKE_NAME/$rel_path"
 
             if [ ! -f "$dest_file" ]; then
                 read -p "Copy new file $rel_path? (y/n) [y]: " COPY_NEW
