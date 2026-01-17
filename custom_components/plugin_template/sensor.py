@@ -110,9 +110,9 @@ class AlarmSensor(SensorEntity):
         """Return device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self._entry.entry_id)},
-            name="Calendar Alarm Clock",
+            name="Plugin Template",
             manufacturer="Custom",
-            model="Alarm Clock",
+            model="Plugin Template",
         )
 
     @property
@@ -183,9 +183,9 @@ class NextAlarmSensor(SensorEntity):
         """Return device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self._entry.entry_id)},
-            name="Calendar Alarm Clock",
+            name="Plugin Template",
             manufacturer="Custom",
-            model="Alarm Clock",
+            model="Plugin Template",
         )
 
     @property
@@ -233,9 +233,9 @@ class PreviousAlarmSensor(SensorEntity):
         """Return device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self._entry.entry_id)},
-            name="Calendar Alarm Clock",
+            name="Plugin Template",
             manufacturer="Custom",
-            model="Alarm Clock",
+            model="Plugin Template",
         )
 
     @property
