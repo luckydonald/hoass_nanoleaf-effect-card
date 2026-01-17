@@ -169,7 +169,9 @@ if [ -n "$(git status --porcelain)" ]; then
             continue
         fi
 
-        # Check for template format: "📄TEMPLATE | ✨ ai: [007] ... (2/X)" or "✨ ai: [007] ... (2/X)" (without prefix)
+        # Check for template format: "📄TEMPLATE | ✨ ai: [007] Any message… (2/X)"
+        # Message can be anything, and uses … (not ...)
+        if [ "$IS_TEMPLATE_REPO" = true ] && echo "$commit_msg" | grep -qE "ai: \[[0-9]{3}\].*\([0-9]+/"; then
             # Extract step and substep from template format
             last_step=$(echo "$commit_msg" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
             last_substep=$(echo "$commit_msg" | sed 's/.*(\([0-9]*\)\/.*/\1/')
