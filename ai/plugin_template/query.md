@@ -126,3 +126,9 @@ In the `scripts/init.sh`:
 - Try to deduct the name from the current folder name as default.
   - obviously, strip common prefixes like `ha_`, `hacs_`, `hoass_`, `homeassistant_` if existing.
 - after asking for the plugin name etc., also ask for a github username (defaulting to "luckydonald"), and use that in the constructed github repo url.
+
+———————
+
+I want to make the `commit.sh` script intelligent for the commit message ai-run-number increase:
+- Go back the commit messages, and if you find one matching `ai: running... ($step-$substep)`, use that to determine the current $substep. If you however first find a ai: updated query or ai: updated errors, reset the substep counter to 1, and increase the step counter by one instead.
+- If no previous ai: running... commit is found, start with (1-1).
