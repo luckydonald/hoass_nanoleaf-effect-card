@@ -38,7 +38,6 @@ The script will ask you for:
 - Offer to copy new files from template updates
 - Never overwrite your code without permission
 
-See [RERUN_GUIDE.md](RERUN_GUIDE.md) for details.
 
 ### 3. Start Developing
 
