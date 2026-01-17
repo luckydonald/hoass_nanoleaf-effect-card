@@ -144,8 +144,6 @@ See `make help` for all available commands.
 
 - **[TESTING.md](TESTING.md)** - Complete testing guide
 - **[scripts/README.md](scripts/README.md)** - Initialization script docs
-- **[TRANSFORMATION_COMPLETE.md](TRANSFORMATION_COMPLETE.md)** - Template overview
-- **[TEST_SETUP_SUMMARY.md](TEST_SETUP_SUMMARY.md)** - Testing infrastructure
 
 ## 🎯 What's Included
 

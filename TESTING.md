@@ -131,7 +131,7 @@ npm run test:coverage
 ```
 frontend_vue/tests/
 ├── setup.ts                     # Test setup and mocks
-├── PluginTemplateCard.test.ts  # Component tests
+├── PluginTemplateCard.test.ts   # Component tests
 ├── types.test.ts                # Type definition tests
 ├── main.test.ts                 # Registration tests
 └── utils.test.ts                # Utility function tests
