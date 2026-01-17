@@ -36,7 +36,7 @@ echo -e "${GREEN}🚀 Calendar Alarm Clock - Release Script${NC}"
 echo ""
 
 # Check we're in the right directory
-if [ ! -f "custom_components/calendar_alarm_clock/manifest.json" ]; then
+if [ ! -f "custom_components/plugin_template/manifest.json" ]; then
     echo -e "${RED}Error: Must be run from the repository root${NC}"
     exit 1
 fi
@@ -224,8 +224,8 @@ echo "  2. Create a release zip"
 echo "  3. Publish to GitHub Releases"
 echo ""
 echo "View the release at:"
-echo "  https://github.com/luckydonald/hoass_calendar-alarm-clock/releases/tag/v${NEW_VERSION}"
+echo "  https://github.com/luckydonald/hoass_plugin-template/releases/tag/v${NEW_VERSION}"
 echo ""
 echo "Install via HACS:"
-echo "  https://my.home-assistant.io/redirect/hacs_repository/?owner=luckydonald&repository=hoass_calendar-alarm-clock&category=integration"
+echo "  https://my.home-assistant.io/redirect/hacs_repository/?owner=luckydonald&repository=hoass_plugin-template&category=integration"
 

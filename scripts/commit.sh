@@ -35,7 +35,7 @@ COMMIT_MSG_OWN="👩‍💻 own: {msg}"
 # -------------------------------------------------
 . "${SCRIPT_DIR}/tmpl.sh"
 
-echo -e "${GREEN}📝 Calendar Alarm Clock - Commit Script${NC}"
+echo -e "${GREEN}📝 Plugin Template - Commit Script${NC}"
 echo ""
 
 # Check we're in the right directory

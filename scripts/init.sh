@@ -20,9 +20,9 @@
 #   ./scripts/init.sh
 #
 # Example:
-#   Plugin Display Name: Calendar Alarm Clock
-#   Lowercase-dash:      calendar-alarm-clock
-#   Snake_case:          calendar_alarm_clock
+#   Plugin Display Name: My Custom Widget
+#   Lowercase-dash:      my-custom-widget
+#   Snake_case:          my_custom_widget
 #
 # ============================================================================
 
@@ -93,7 +93,7 @@ print_info "Working directory: $REPO_ROOT"
 # Step 1: Get the display name (UI name)
 print_info "Step 1: Plugin Display Name"
 echo "This is the name that will be shown in the Home Assistant UI."
-echo "Example: 'Calendar Alarm Clock'"
+echo "Example: 'My Custom Widget'"
 echo ""
 read -p "Enter plugin display name: " DISPLAY_NAME
 
@@ -107,7 +107,7 @@ print_success "Display name: $DISPLAY_NAME"
 # Step 2: Get the lowercase-dash name
 print_info "\nStep 2: Lowercase-Dash Name"
 echo "This is used for custom component names and filenames."
-echo "Example: 'calendar-alarm-clock' (for <calendar-alarm-clock-card>, calendar-alarm-clock-card.js, etc.)"
+echo "Example: 'my-custom-widget' (for <my-custom-widget-card>, my-custom-widget-card.js, etc.)"
 DEFAULT_DASH=$(to_lowercase_dash "$DISPLAY_NAME")
 echo ""
 read -p "Enter lowercase-dash name [$DEFAULT_DASH]: " DASH_NAME
@@ -118,7 +118,7 @@ print_success "Lowercase-dash name: $DASH_NAME"
 # Step 3: Get the snake_case name
 print_info "\nStep 3: Snake_Case Name"
 echo "This is used for Python module names, integration domain, sensor names, etc."
-echo "Example: 'calendar_alarm_clock'"
+echo "Example: 'my_custom_widget'"
 DEFAULT_SNAKE=$(to_snake_case "$DASH_NAME")
 echo ""
 read -p "Enter snake_case name [$DEFAULT_SNAKE]: " SNAKE_NAME
@@ -291,7 +291,7 @@ FILES_TO_PROCESS=()
 [ -f "README.md" ] && FILES_TO_PROCESS+=("README.md")
 
 # Add all files in custom_components/plugin_template/ (if backend is kept)
-if [ "$KEEP_BACKEND" = true ] && [ -d "custom_components/template" ]; then
+if [ "$KEEP_BACKEND" = true ] && [ -d "custom_components/plugin_template" ]; then
     # Add Python files
     while IFS= read -r -d '' file; do
         FILES_TO_PROCESS+=("$file")
@@ -330,46 +330,38 @@ replace_in_file() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
         sed -i '' \
-            -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
-            -e "s/hoass_calendar-alarm-clock/hoass_${DASH_NAME}/g" \
-            -e "s/hoass_calendar_alarm_clock/hoass_${SNAKE_NAME}/g" \
-            -e "s/hoass_template/hoass_${SNAKE_NAME}/g" \
-            -e "s/calendar-alarm-clock-card/${DASH_NAME}-card/g" \
-            -e "s/alarm-clock-card/${DASH_NAME}-card/g" \
-            -e "s/calendar_alarm_clock/$SNAKE_NAME/g" \
-            -e "s/calender-alarm-clock-card/${DASH_NAME}-card/g" \
+            -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
+            -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
+            -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
+            -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
+            -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+            -e "s/plugin_template/$SNAKE_NAME/g" \
             -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
-            -e "s/from '\.\/AlarmClockCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
-            -e "s/AlarmClockCard/${PASCAL_NAME}Card/g" \
-            -e "s/Alarm Clock Card/${DISPLAY_NAME} Card/g" \
-            -e "s/Calendar Alarm Clock/$DISPLAY_NAME/g" \
-            -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
-            -e "s/Template/$PASCAL_NAME/g" \
-            -e "s/\btemplate\b/$SNAKE_NAME/g" \
+            -e "s/Plugin Template/$DISPLAY_NAME/g" \
+            -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
+            -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
+            -e "s/PluginTemplate/${PASCAL_NAME}/g" \
+            -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
             "$file"
     else
         # Linux
         sed -i \
-            -e "s|https://github.com/luckydonald/hoass_template|${GITHUB_URL%.git}|g" \
-            -e "s/hoass_calendar-alarm-clock/hoass_${DASH_NAME}/g" \
-            -e "s/hoass_calendar_alarm_clock/hoass_${SNAKE_NAME}/g" \
-            -e "s/hoass_template/hoass_${SNAKE_NAME}/g" \
-            -e "s/calendar-alarm-clock-card/${DASH_NAME}-card/g" \
-            -e "s/alarm-clock-card/${DASH_NAME}-card/g" \
-            -e "s/calendar_alarm_clock/$SNAKE_NAME/g" \
-            -e "s/calender-alarm-clock-card/${DASH_NAME}-card/g" \
+            -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
+            -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
+            -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
+            -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
+            -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+            -e "s/plugin_template/$SNAKE_NAME/g" \
             -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
             -e "s/plugin-template/$DASH_NAME/g" \
             -e "s/Plugin template/$DISPLAY_NAME/g" \
-            -e "s/from '\.\/AlarmClockCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
-            -e "s/AlarmClockCard/${PASCAL_NAME}Card/g" \
-            -e "s/Alarm Clock Card/${DISPLAY_NAME} Card/g" \
-            -e "s/Calendar Alarm Clock/$DISPLAY_NAME/g" \
-            -e "s/TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
-            -e "s/Template/$PASCAL_NAME/g" \
-            -e "s/\btemplate\b/$SNAKE_NAME/g" \
+            -e "s/Plugin Template/$DISPLAY_NAME/g" \
+            -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
+            -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
+            -e "s/PluginTemplate/${PASCAL_NAME}/g" \
+            -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
             "$file"
     fi
 
@@ -382,16 +374,16 @@ for file in "${FILES_TO_PROCESS[@]}"; do
 done
 
 # Rename the custom_components/plugin_template directory
-if [ -d "custom_components/template" ]; then
-    print_info "Renaming custom_components/template/ to custom_components/$SNAKE_NAME/"
-    mv "custom_components/template" "custom_components/$SNAKE_NAME"
+if [ -d "custom_components/plugin_template" ]; then
+    print_info "Renaming custom_components/plugin_template/ to custom_components/$SNAKE_NAME/"
+    mv "custom_components/plugin_template" "custom_components/$SNAKE_NAME"
     print_success "Renamed directory"
 fi
 
 # Rename the Vue component file if it exists
-if [ -f "frontend/src/AlarmClockCard.vue" ]; then
-    print_info "Renaming AlarmClockCard.vue to ${PASCAL_NAME}Card.vue"
-    mv "frontend/src/AlarmClockCard.vue" "frontend/src/${PASCAL_NAME}Card.vue"
+if [ -f "frontend/src/PluginTemplateCard.vue" ]; then
+    print_info "Renaming PluginTemplateCard.vue to ${PASCAL_NAME}Card.vue"
+    mv "frontend/src/PluginTemplateCard.vue" "frontend/src/${PASCAL_NAME}Card.vue"
     print_success "Renamed Vue component"
 fi
 
