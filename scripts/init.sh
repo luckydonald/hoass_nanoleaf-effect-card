@@ -459,6 +459,15 @@ replace_in_file() {
         return
     fi
 
+    # Check if file has already been processed (contains the target name already)
+    if grep -q "$SNAKE_NAME" "$file" 2>/dev/null || grep -q "$DASH_NAME" "$file" 2>/dev/null; then
+        # File might be already processed, check if it still has template patterns
+        if ! grep -q "plugin_template\|plugin-template\|PluginTemplate" "$file" 2>/dev/null; then
+            print_info "Skipped (already processed): $file"
+            return
+        fi
+    fi
+
     # Backup the file
     cp "$file" "$file.bak"
 
