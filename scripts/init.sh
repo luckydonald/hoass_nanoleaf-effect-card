@@ -73,6 +73,81 @@ to_pascal_case() {
     echo "$1" | sed -E 's/[^a-zA-Z0-9]+/ /g' | awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) tolower(substr($i,2))}}1' | sed 's/ //g'
 }
 
+# Function to safely move/merge directories
+safe_move_directory() {
+    local src=$1
+    local dest=$2
+    local desc=$3
+
+    if [ ! -d "$src" ]; then
+        print_warning "Source directory $src not found, skipping"
+        return 0
+    fi
+
+    if [ -d "$dest" ]; then
+        print_warning "$desc directory already exists at: $dest"
+        print_info "Will copy any new files from template..."
+
+        # Find files in source that don't exist in dest
+        local new_files=()
+        while IFS= read -r -d '' file; do
+            local rel_path="${file#$src/}"
+            if [ ! -f "$dest/$rel_path" ]; then
+                new_files+=("$rel_path")
+            fi
+        done < <(find "$src" -type f -print0)
+
+        if [ ${#new_files[@]} -eq 0 ]; then
+            print_info "No new files to copy from template"
+            rm -rf "$src"
+            return 0
+        fi
+
+        print_info "Found ${#new_files[@]} new file(s) in template:"
+        for file in "${new_files[@]}"; do
+            echo "  - $file"
+        done
+
+        read -p "Copy these files to your plugin? (y/n/selective) [y]: " COPY_CHOICE
+        COPY_CHOICE=${COPY_CHOICE:-y}
+
+        if [[ "$COPY_CHOICE" =~ ^[Yy]$ ]]; then
+            # Copy all new files
+            for file in "${new_files[@]}"; do
+                local src_file="$src/$file"
+                local dest_file="$dest/$file"
+                mkdir -p "$(dirname "$dest_file")"
+                cp "$src_file" "$dest_file"
+                print_success "Copied: $file"
+            done
+        elif [[ "$COPY_CHOICE" =~ ^[Ss]$ ]]; then
+            # Ask for each file
+            for file in "${new_files[@]}"; do
+                read -p "Copy $file? (y/n) [y]: " COPY_FILE
+                COPY_FILE=${COPY_FILE:-y}
+                if [[ "$COPY_FILE" =~ ^[Yy]$ ]]; then
+                    local src_file="$src/$file"
+                    local dest_file="$dest/$file"
+                    mkdir -p "$(dirname "$dest_file")"
+                    cp "$src_file" "$dest_file"
+                    print_success "Copied: $file"
+                else
+                    print_info "Skipped: $file"
+                fi
+            done
+        else
+            print_info "Skipped copying new files"
+        fi
+
+        # Remove source directory
+        rm -rf "$src"
+    else
+        # Simple rename
+        mv "$src" "$dest"
+        print_success "Renamed $src/ to $dest/"
+    fi
+}
+
 print_header "Home Assistant Plugin Template Initializer"
 
 # Get the repository root (parent of scripts/)
