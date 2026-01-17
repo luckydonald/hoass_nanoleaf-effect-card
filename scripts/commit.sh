@@ -21,13 +21,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+COMMIT_PREFIX_TEMPLATE="📄TEMPLATE | "
 COMMIT_MSG_ERRORS="🐞 ai: updated errors"
 COMMIT_MSG_QUERY="🤌 ai: updated query"
 COMMIT_MSG_STEP="✨ ai: running… ({step}-{substep})"
 COMMIT_MSG_STEP_TEMPLATE="${COMMIT_PREFIX_TEMPLATE}✨ ai: [{padded_step}] {msg} ({substep}/{total_substeps})"
 COMMIT_MSG_FIX="🫥 own: {msg}"
 COMMIT_MSG_OWN="👩‍💻 own: {msg}"
-COMMIT_PREFIX_TEMPLATE="📄TEMPLATE | "
 
 # Detect if we're in the template repository
 REPO_DIR=$(basename "$(cd "$SCRIPT_DIR/.." && pwd)")
