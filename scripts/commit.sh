@@ -42,8 +42,8 @@ echo ""
 # Check we're in the right directory
 if \
   [ ! -f "custom_components/plugin_template/manifest.json" ] \
-  [ ! -f "frontend{,_vue,_plain}/{package.json,src/main.ts}" ] \
-  [ ! -f "frontend{,_vue,_plain}/package.json" ] \
+  && [ ! -f "frontend{,_vue,_plain}/src/main.ts" ] \
+  && [ ! -f "frontend{,_vue,_plain}/package.json" ] \
 ; then
     echo -e "${RED}Error: Must be run from the repository root${NC}"
     exit 1
