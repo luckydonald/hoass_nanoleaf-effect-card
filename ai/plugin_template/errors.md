@@ -129,3 +129,5 @@ However, that seem to have broken something, as I got the commits
 ```txt
 📄TEMPLATE | ✨ ai: [017] Have  work with git… (2/2)
 ```
+
+They still are no longer in the commit message.
