@@ -554,42 +554,103 @@ replace_in_file() {
     # Perform replacements using sed
     # macOS sed requires '' after -i, Linux doesn't
     # IMPORTANT: Order matters! Replace more specific patterns first
+
+    # Determine if we need to replace author names
+    REPLACE_AUTHORS=false
+    if [ "$GITHUB_USER" != "luckydonald" ] && [ "$GITHUB_USER" != "luckylucy" ]; then
+        REPLACE_AUTHORS=true
+    fi
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        sed -i '' \
-            -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
-            -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
-            -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
-            -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
-            -e "s/plugin-template-card/${DASH_NAME}-card/g" \
-            -e "s/plugin_template/$SNAKE_NAME/g" \
-            -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
-            -e "s/plugin-template/$DASH_NAME/g" \
-            -e "s/Plugin template/$DISPLAY_NAME/g" \
-            -e "s/Plugin Template/$DISPLAY_NAME/g" \
-            -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
-            -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
-            -e "s/PluginTemplate/${PASCAL_NAME}/g" \
-            -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
-            "$file"
+        if [ "$REPLACE_AUTHORS" = true ]; then
+            sed -i '' \
+                -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
+                -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
+                -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
+                -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
+                -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/plugin_template/$SNAKE_NAME/g" \
+                -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
+                -e "s/plugin-template/$DASH_NAME/g" \
+                -e "s/Plugin template/$DISPLAY_NAME/g" \
+                -e "s/Plugin Template/$DISPLAY_NAME/g" \
+                -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
+                -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
+                -e "s/PluginTemplate/${PASCAL_NAME}/g" \
+                -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
+                -e "s/lucky lucy (aka\. luckydonald)/$GITHUB_USER/g" \
+                -e "s/@luckydonald\", \"@luckylucy/@$GITHUB_USER/g" \
+                -e "s/{ name = \"luckydonald\" }, { name = \"luckylucy\" }/{ name = \"$GITHUB_USER\" }/g" \
+                -e "s/@luckydonald/@$GITHUB_USER/g" \
+                -e "s/\"luckydonald\"/\"$GITHUB_USER\"/g" \
+                -e "s/luckydonald/$GITHUB_USER/g" \
+                -e "s/luckylucy/$GITHUB_USER/g" \
+                "$file"
+        else
+            # Don't replace author names
+            sed -i '' \
+                -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
+                -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
+                -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
+                -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
+                -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/plugin_template/$SNAKE_NAME/g" \
+                -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
+                -e "s/plugin-template/$DASH_NAME/g" \
+                -e "s/Plugin template/$DISPLAY_NAME/g" \
+                -e "s/Plugin Template/$DISPLAY_NAME/g" \
+                -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
+                -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
+                -e "s/PluginTemplate/${PASCAL_NAME}/g" \
+                -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
+                "$file"
+        fi
     else
         # Linux
-        sed -i \
-            -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
-            -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
-            -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
-            -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
-            -e "s/plugin-template-card/${DASH_NAME}-card/g" \
-            -e "s/plugin_template/$SNAKE_NAME/g" \
-            -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
-            -e "s/plugin-template/$DASH_NAME/g" \
-            -e "s/Plugin template/$DISPLAY_NAME/g" \
-            -e "s/Plugin Template/$DISPLAY_NAME/g" \
-            -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
-            -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
-            -e "s/PluginTemplate/${PASCAL_NAME}/g" \
-            -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
-            "$file"
+        if [ "$REPLACE_AUTHORS" = true ]; then
+            sed -i \
+                -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
+                -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
+                -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
+                -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
+                -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/plugin_template/$SNAKE_NAME/g" \
+                -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
+                -e "s/plugin-template/$DASH_NAME/g" \
+                -e "s/Plugin template/$DISPLAY_NAME/g" \
+                -e "s/Plugin Template/$DISPLAY_NAME/g" \
+                -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
+                -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
+                -e "s/PluginTemplate/${PASCAL_NAME}/g" \
+                -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
+                -e "s/lucky lucy (aka\. luckydonald)/$GITHUB_USER/g" \
+                -e "s/@luckydonald\", \"@luckylucy/@$GITHUB_USER/g" \
+                -e "s/{ name = \"luckydonald\" }, { name = \"luckylucy\" }/{ name = \"$GITHUB_USER\" }/g" \
+                -e "s/@luckydonald/@$GITHUB_USER/g" \
+                -e "s/\"luckydonald\"/\"$GITHUB_USER\"/g" \
+                -e "s/luckydonald/$GITHUB_USER/g" \
+                -e "s/luckylucy/$GITHUB_USER/g" \
+                "$file"
+        else
+            # Don't replace author names
+            sed -i \
+                -e "s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g" \
+                -e "s/hoass_plugin-template/hoass_${DASH_NAME}/g" \
+                -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
+                -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
+                -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/plugin_template/$SNAKE_NAME/g" \
+                -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
+                -e "s/plugin-template/$DASH_NAME/g" \
+                -e "s/Plugin template/$DISPLAY_NAME/g" \
+                -e "s/Plugin Template/$DISPLAY_NAME/g" \
+                -e "s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g" \
+                -e "s/PluginTemplateCard/${PASCAL_NAME}Card/g" \
+                -e "s/PluginTemplate/${PASCAL_NAME}/g" \
+                -e "s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g" \
+                "$file"
+        fi
     fi
 
     print_success "Processed: $file"
