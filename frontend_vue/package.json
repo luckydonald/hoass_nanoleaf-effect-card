@@ -1,6 +1,6 @@
 {
   "name": "calender-alarm-clock-card",
-  "version": "1.0.0",
+  "version": "0.0.0-dev0",
   "description": "Lovelace card for Calendar backed Alarm Clock for Home Assistant",
   "main": "dist/alarm-clock-card.js",
   "repository": {
