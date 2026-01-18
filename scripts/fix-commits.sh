@@ -211,20 +211,20 @@ else
     PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
     PARENT_MSG=$(git log --format=%s -1 "$PARENT_COMMIT")
 
+    if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
+        print_info "This batch was preceded by: $PARENT_MSG"
+        echo ""
+        print_info "Changes in that commit:"
+        echo ""
 
         # Disable pager unless USE_PAGER is set
         if [ -z "$USE_PAGER" ]; then
             export GIT_PAGER=cat
         fi
 
-        print_info "This batch was preceded by: $PARENT_MSG"
-        echo ""
-            git show "$PARENT_COMMIT" | bat --style=plain --color=always --language=diff --paging=never
-        echo ""
-
         # Try to use bat for colorized output, fall back to plain git show
         if command -v bat &> /dev/null; then
-            git show "$PARENT_COMMIT" | bat --style=plain --color=always --language=diff
+            git show "$PARENT_COMMIT" | bat --style=plain --color=always --language=diff --paging=never
         else
             git show "$PARENT_COMMIT"
         fi
