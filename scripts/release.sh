@@ -42,6 +42,16 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 eval "$(python3 scripts/get_project_settings.py)"
+# running get_project_settings.py should define:
+# DISPLAY_NAME=settings['display_name']
+# DASH_NAME=settings['dash_name']
+# SNAKE_NAME=settings['snake_name']
+# PASCAL_NAME=settings['pascal_name']
+# GITHUB_USER=settings['github_user']
+# GITHUB_URL=settings['github_url']
+# KEEP_BACKEND=str(settings['keep_backend']).lower()
+# FRONTEND_CHOICE=settings['frontend_choice']
+# CURRENT_YEAR=settings['current_year']
 
 # Check we're in the right directory
 # Look for custom_components directory with any subdirectory containing manifest.json, or hacs.json
