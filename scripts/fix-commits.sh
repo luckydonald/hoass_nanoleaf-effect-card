@@ -363,7 +363,7 @@ fi
 
 # Create rebase editor script that modifies only our AI commits
 REBASE_EDITOR=$(mktemp)
-trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $REBASE_EDITOR" EXIT
+trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $QUERY_ERROR_SCRIPT $REBASE_EDITOR" EXIT
 
 cat > "$REBASE_EDITOR" << 'EOF'
 #!/usr/bin/env bash
@@ -388,8 +388,14 @@ while IFS= read -r line; do
             # Use a unique temp file based on commit hash (not $$)
             temp_msg_file="/tmp/new_msg_${commit_hash}.txt"
 
-            # Add exec to generate new message
-            echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $REBASE_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
+            # Check if this is a query/error commit
+            if echo "$commit_msg" | grep -qE "(ai: updated query|ai: updated errors)"; then
+                # Query/error commit - use the query/error script to append message
+                echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $QUERY_ERROR_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
+            else
+                # Regular AI commit - use the regular script
+                echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $REBASE_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
+            fi
             # Keep the pick
             echo "$line" >> "$TEMP_FILE"
             # Add exec to amend with new message
