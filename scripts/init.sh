@@ -393,8 +393,12 @@ echo "Display Name:     $DISPLAY_NAME"
 echo "Lowercase-Dash:   $DASH_NAME"
 echo "Snake_Case:       $SNAKE_NAME"
 echo "GitHub URL:       $GITHUB_URL"
-echo "Python Backend:   $KEEP_BACKEND"
-echo "Frontend:         $([ "$FRONTEND_CHOICE" = "none" ] && echo "None (backend-only)" || echo "$FRONTEND_CHOICE")"
+echo "Python Backend:   $([ "$KEEP_BACKEND" = true ] && echo "yes" || echo "no")"
+if [ "$FRONTEND_CHOICE" = "none" ]; then
+    echo "Frontend:         no"
+else
+    echo "Frontend:         yes, $FRONTEND_CHOICE"
+fi
 echo ""
 read -p "Proceed with initialization? (y/n) [y]: " CONFIRM
 CONFIRM=${CONFIRM:-y}
