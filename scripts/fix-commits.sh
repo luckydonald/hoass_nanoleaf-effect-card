@@ -267,17 +267,73 @@ for ((i=0; i<${#COMMIT_HASHES[@]}-1; i++)); do
     COMMIT1="${COMMIT_HASHES[$i]}"
     COMMIT2="${COMMIT_HASHES[$((i+1))]}"
 
-    # Get the files changed in each commit
+    # Check if these commits can be squashed by analyzing line overlaps
+    can_squash=true
+
+    # Get all files changed in both commits
     FILES1=$(git diff-tree --no-commit-id --name-only -r "$COMMIT1" | sort)
     FILES2=$(git diff-tree --no-commit-id --name-only -r "$COMMIT2" | sort)
 
-    # Check if they touch different files (no overlap)
+    # Find files that appear in both commits
     COMMON_FILES=$(comm -12 <(echo "$FILES1") <(echo "$FILES2"))
 
-    if [ -z "$COMMON_FILES" ]; then
-        # No common files - they could potentially be squashed
-        # But we also need to check if they modify the same lines in different files
-        # For simplicity, if they touch completely different files, they can be squashed
+    if [ -n "$COMMON_FILES" ]; then
+        # They touch some common files - check if they modify different lines
+        while IFS= read -r file; do
+            if [ -z "$file" ]; then
+                continue
+            fi
+
+            # Get the line ranges modified in each commit for this file
+            # Use git diff to see which lines were changed
+
+            # Get parent of COMMIT1 to compare against
+            PARENT1=$(git rev-parse "$COMMIT1^")
+
+            # Get lines changed in COMMIT1 for this file
+            LINES1=$(git diff "$PARENT1" "$COMMIT1" -- "$file" 2>/dev/null | grep '^@@' | sed 's/@@ -[0-9,]* +\([0-9,]*\).*/\1/')
+
+            # Get lines changed in COMMIT2 for this file (comparing against COMMIT1)
+            LINES2=$(git diff "$COMMIT1" "$COMMIT2" -- "$file" 2>/dev/null | grep '^@@' | sed 's/@@ -[0-9,]* +\([0-9,]*\).*/\1/')
+
+            # Convert line ranges to actual line numbers for comparison
+            # This is a simplified check - if we can't determine, assume overlap
+            if [ -n "$LINES1" ] && [ -n "$LINES2" ]; then
+                # Extract starting line numbers
+                START1=$(echo "$LINES1" | head -1 | cut -d, -f1)
+                START2=$(echo "$LINES2" | head -1 | cut -d, -f1)
+
+                # Get ending line numbers (start + count, or just start if no comma)
+                if echo "$LINES1" | head -1 | grep -q ','; then
+                    COUNT1=$(echo "$LINES1" | head -1 | cut -d, -f2)
+                    END1=$((START1 + COUNT1))
+                else
+                    END1=$START1
+                fi
+
+                if echo "$LINES2" | head -1 | grep -q ','; then
+                    COUNT2=$(echo "$LINES2" | head -1 | cut -d, -f2)
+                    END2=$((START2 + COUNT2))
+                else
+                    END2=$START2
+                fi
+
+                # Check if ranges overlap
+                # Ranges overlap if: START1 <= END2 AND START2 <= END1
+                if [ "$START1" -le "$END2" ] && [ "$START2" -le "$END1" ]; then
+                    # Lines overlap - cannot squash
+                    can_squash=false
+                    break
+                fi
+            else
+                # Cannot determine line ranges safely - assume overlap
+                can_squash=false
+                break
+            fi
+        done <<< "$COMMON_FILES"
+    fi
+
+    if [ "$can_squash" = true ]; then
         SQUASH_COMMITS+=("$i:$((i+1))")
     fi
 done
@@ -320,7 +376,7 @@ if [ ${#SQUASH_COMMITS[@]} -gt 0 ]; then
         DO_SQUASH=false
     fi
 else
-    print_info "No obvious squashing opportunities found (all commits touch overlapping files)"
+    print_info "No squashing opportunities found (commits modify overlapping lines)"
     DO_SQUASH=false
 fi
 echo ""
@@ -606,4 +662,6 @@ else
     print_info "Or abort with: git rebase --abort"
     exit 1
 fi
+
+
 
