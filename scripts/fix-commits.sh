@@ -699,7 +699,7 @@ if git rebase -i "$REBASE_PARENT"; then
         done
         linebreak
 
-        read -p "Would you like to delete these old recovery tags? (y/n) [n]: " DELETE_TAGS
+        # read -p "Would you like to delete these old recovery tags? (y/n) [n]: " DELETE_TAGS
         DELETE_TAGS=${DELETE_TAGS:-n}
 
         if [[ "$DELETE_TAGS" =~ ^[Yy]$ ]]; then
@@ -727,7 +727,8 @@ if git rebase -i "$REBASE_PARENT"; then
 
     # Also delete the current recovery tag now that rebase succeeded
     linebreak
-    read -p "Delete the recovery tag for this rebase? (y/n) [n]: " DELETE_CURRENT
+
+    # read -p "Delete the recovery tag for this rebase? (y/n) [n]: " DELETE_CURRENT
     DELETE_CURRENT=${DELETE_CURRENT:-n}
 
     if [[ "$DELETE_CURRENT" =~ ^[Yy]$ ]]; then
