@@ -567,6 +567,10 @@ export BATCH_MSG_ENV="$BATCH_MESSAGE"
 # Set up environment for the rebase
 export GIT_SEQUENCE_EDITOR="$REBASE_EDITOR"
 
+# Set GIT_EDITOR to use the first message in squash scenarios (no interactive editor)
+# This prevents git from opening an editor when squashing commits
+export GIT_EDITOR="sed -i '' '1!d'"
+
 # Run the rebase
 if git rebase -i "$REBASE_PARENT"; then
     print_success "Rebase completed successfully!"
