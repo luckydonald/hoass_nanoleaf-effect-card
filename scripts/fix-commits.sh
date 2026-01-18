@@ -314,6 +314,29 @@ rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
 
+# Create a script for updating query/error commits
+QUERY_ERROR_SCRIPT=$(mktemp)
+trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $QUERY_ERROR_SCRIPT" EXIT
+
+cat > "$QUERY_ERROR_SCRIPT" << 'EOFSCRIPT'
+#!/usr/bin/env bash
+# Append message to query/error commit
+
+# Get the current commit message
+CURRENT_MSG="$1"
+
+# Check if batch message is provided
+if [ -n "$BATCH_MSG_ENV" ]; then
+    # Append ": message" to the existing query/error commit
+    echo "${CURRENT_MSG}: ${BATCH_MSG_ENV}"
+else
+    # No batch message, keep as-is
+    echo "$CURRENT_MSG"
+fi
+EOFSCRIPT
+
+chmod +x "$QUERY_ERROR_SCRIPT"
+
 # Find the parent commit (the commit before the first AI commit in this batch)
 if [ "$IS_TEMPLATE_REPO" = true ]; then
     FIRST_COMMIT=$(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse | head -1)
