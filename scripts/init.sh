@@ -353,6 +353,14 @@ else
     KEEP_BACKEND=false
 fi
 
+# Clean up lock files for backend if this is the first run
+if [ "$KEEP_BACKEND" = true ] && [ "$ALREADY_INITIALIZED" = false ]; then
+    if [ -f "uv.lock" ]; then
+        rm -f "uv.lock"
+        print_success "Removed uv.lock (will be regenerated)"
+    fi
+fi
+
 # Step 7: Ask about frontend choice
 print_info "\nStep 7: Frontend Framework"
 echo "Choose your frontend framework:"
@@ -496,6 +504,10 @@ if [ "$FRONTEND_CHOICE" = "none" ]; then
 
 elif [ "$FRONTEND_CHOICE" = "vue" ]; then
     if [ -d "frontend_vue" ]; then
+        # Clean up lock files from frontend_vue
+        [ -f "frontend_vue/yarn.lock" ] && rm -f "frontend_vue/yarn.lock" && print_success "Removed frontend_vue/yarn.lock"
+        [ -f "frontend_vue/package-lock.json" ] && rm -f "frontend_vue/package-lock.json" && print_success "Removed frontend_vue/package-lock.json"
+
         # Remove frontend_plain if it exists
         [ -d "frontend_plain" ] && rm -rf "frontend_plain" && print_success "Removed frontend_plain/"
 
@@ -511,6 +523,10 @@ elif [ "$FRONTEND_CHOICE" = "vue" ]; then
 # Uncomment when frontend_plain is implemented:
 # elif [ "$FRONTEND_CHOICE" = "plain" ]; then
 #     if [ -d "frontend_plain" ]; then
+#         # Clean up lock files from frontend_plain
+#         [ -f "frontend_plain/yarn.lock" ] && rm -f "frontend_plain/yarn.lock" && print_success "Removed frontend_plain/yarn.lock"
+#         [ -f "frontend_plain/package-lock.json" ] && rm -f "frontend_plain/package-lock.json" && print_success "Removed frontend_plain/package-lock.json"
+#
 #         # Remove frontend_vue if it exists
 #         [ -d "frontend_vue" ] && rm -rf "frontend_vue" && print_success "Removed frontend_vue/"
 #
