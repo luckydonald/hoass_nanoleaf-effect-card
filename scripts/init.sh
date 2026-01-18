@@ -877,9 +877,18 @@ if [ -n "$(git status --porcelain)" ]; then
         fi
 
         COMMIT_BODY+=$'\n'
-        COMMIT_BODY+=$'\n'"Frontend: $FRONTEND_CHOICE"
-        COMMIT_BODY+=$'\n'"  • Framework: $([ "$FRONTEND_CHOICE" = "vue" ] && echo "Vue 3 + TypeScript + Vite" || echo "Plain JavaScript")"
-        COMMIT_BODY+=$'\n'"  • Directory: frontend/"
+        if [ "$FRONTEND_CHOICE" = "none" ]; then
+            COMMIT_BODY+=$'\n'"Frontend: Not included (backend-only plugin)"
+        else
+            COMMIT_BODY+=$'\n'"Frontend: $FRONTEND_CHOICE"
+            if [ "$FRONTEND_CHOICE" = "vue" ]; then
+                COMMIT_BODY+=$'\n'"  • Framework: Vue 3 + TypeScript + Vite"
+            # Uncomment when frontend_plain is implemented:
+            # elif [ "$FRONTEND_CHOICE" = "plain" ]; then
+            #     COMMIT_BODY+=$'\n'"  • Framework: Plain TypeScript"
+            fi
+            COMMIT_BODY+=$'\n'"  • Directory: frontend/"
+        fi
 
         if [ "$ALREADY_INITIALIZED" = true ]; then
             COMMIT_BODY+=$'\n'
