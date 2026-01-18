@@ -418,6 +418,7 @@ chmod +x "$REBASE_EDITOR"
 # Export variables needed by the rebase editor
 export COMMITS_TO_MODIFY_FILE="$COMMITS_TO_MODIFY"
 export REBASE_SCRIPT_FILE="$REBASE_SCRIPT"
+export QUERY_ERROR_SCRIPT_FILE="$QUERY_ERROR_SCRIPT"
 
 print_info "Starting interactive rebase..."
 echo ""
