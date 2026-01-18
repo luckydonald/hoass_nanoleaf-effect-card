@@ -560,6 +560,7 @@ if git tag "$RECOVERY_TAG" "$CURRENT_HEAD" 2>/dev/null; then
     print_info "If something goes wrong, you can recover with: git reset --hard $RECOVERY_TAG"
 else
     print_warning "Could not create recovery tag (may already exist): $RECOVERY_TAG"
+    exit 2
 fi
 echo ""
 
