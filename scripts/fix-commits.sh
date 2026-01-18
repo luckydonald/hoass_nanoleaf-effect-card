@@ -338,13 +338,17 @@ EOFSCRIPT
 chmod +x "$QUERY_ERROR_SCRIPT"
 
 # Find the parent commit (the commit before the first AI commit in this batch)
-if [ "$IS_TEMPLATE_REPO" = true ]; then
-    FIRST_COMMIT=$(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse | head -1)
+# If there's a query/error commit, start from before that
+if [ -n "$QUERY_ERROR_COMMIT" ]; then
+    REBASE_PARENT=$(git rev-parse "$QUERY_ERROR_COMMIT^")
 else
-    FIRST_COMMIT=$(git log --format=%H --grep="ai: .*[.…].* ($STEP-" --reverse | head -1)
+    if [ "$IS_TEMPLATE_REPO" = true ]; then
+        FIRST_COMMIT=$(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse | head -1)
+    else
+        FIRST_COMMIT=$(git log --format=%H --grep="ai: .*[.…].* ($STEP-" --reverse | head -1)
+    fi
+    REBASE_PARENT=$(git rev-parse "$FIRST_COMMIT^")
 fi
-
-PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
 
 # Create a set of commits to modify (for fast lookup)
 COMMITS_TO_MODIFY=$(mktemp)
