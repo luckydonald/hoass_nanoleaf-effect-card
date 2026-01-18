@@ -191,3 +191,8 @@ plain - Plain Typescript (from frontend_plain/)
 ```
 text and code,
 also add a "none" option to skip frontend setup entirely.
+
+————
+
+While already editing the commit messages in `fix-commits.sh`, edit the query/error message too, appending a colon, space, and the user entered message there as well.
+Make sure to not drop commits in-between.
