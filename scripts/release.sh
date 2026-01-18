@@ -88,9 +88,9 @@ fi
 echo -e "New version: ${GREEN}v${NEW_VERSION}${NC}"
 echo ""
 
-read -p "Proceed with release? (y/N) " -n 1 -r
+read -p "Proceed with release? (Y/n) " -n 1 -r
 echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+if [[ $REPLY =~ ^[Nn]$ ]]; then
     echo "Aborted."
     exit 0
 fi
