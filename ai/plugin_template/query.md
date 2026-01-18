@@ -234,6 +234,8 @@ Make sure `init.sh` copies that over as well, and that plugin names are replaced
 
 ———
 
-Make merging commits the default option.
+Do not make merging commits the default option.
 
+———
 
+In `init.sh`, combine the sed commands which are shared between `$REPLACE_AUTHORS` and not, to reduce code duplication.
