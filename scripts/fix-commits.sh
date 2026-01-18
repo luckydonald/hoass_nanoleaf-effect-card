@@ -695,8 +695,13 @@ if git rebase -i "$REBASE_PARENT"; then
             print_success "Old recovery tags cleaned up"
         else
             print_info "Keeping old recovery tags"
-            print_info "You can manually delete them later with: git tag -d <tag-name>"
-        fi
+            # Print an actual git delete command including the tag names
+            DELETE_CMD="git tag -d"
+            for tag in "${OLD_TAGS[@]}"; do
+                DELETE_CMD+=" $tag"
+            done
+            print_info "You can manually delete them later with: $DELETE_CMD"
+          fi
     else
         print_info "No old recovery tags found to clean up"
     fi
