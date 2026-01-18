@@ -57,7 +57,7 @@ Or manually:
 - <kbd>homeassistant-custom-integration</kbd>
 - <kbd>custom-card</kbd>
 - <kbd>homeassistant-custom-card</kbd>
-
+- <kbd>lovelace-card</kbd>
 - <kbd>custom-component</kbd>
 - <kbd>homeassistant-custom-component</kbd>
 - <kbd>home-assistant-custom-component-hacs</kbd>
