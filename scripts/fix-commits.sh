@@ -434,7 +434,7 @@ export BATCH_MSG_ENV="$BATCH_MESSAGE"
 export GIT_SEQUENCE_EDITOR="$REBASE_EDITOR"
 
 # Run the rebase
-if git rebase -i "$PARENT_COMMIT"; then
+if git rebase -i "$REBASE_PARENT"; then
     print_success "Rebase completed successfully!"
     echo ""
     print_info "Updated commits:"
