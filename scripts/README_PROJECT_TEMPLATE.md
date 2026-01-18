@@ -4,8 +4,6 @@
 
 > <!-- repository sort description, complete it -->
 > A HACS-compatible Home Assistant custom card for …
-> <!-- repository tags, add fitting ones -->
-> <kbd>plugin-template</kbd>, <kbd>custom-card</kbd>, <kbd>homeassistant-integration</kbd>, <kbd>home-assistant-integration</kbd>, <kbd>hacs-integration</kbd>, <kbd>home-assistant</kbd>, <kbd>hacs</kbd>, <kbd>luckydonald</kbd>
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/release/luckydonald/hoass_plugin-template.svg)](https://github.com/luckydonald/hoass_plugin-template/releases)
@@ -46,3 +44,21 @@ Or manually:
 3. Copy `custom_components/plugin_template/www/plugin-template-card.js` to your `www` folder
 4. Restart Home Assistant
 
+
+<!-- footer -->
+# Repository Information
+## Tags
+- <kbd>plugin-template</kbd>
+- <kbd>home-assistant</kbd>
+- <kbd>hacs</kbd>
+- <kbd>hacs-integration</kbd>
+- <kbd>homeassistant-integration</kbd>
+- <kbd>home-assistant-integration</kbd>
+- <kbd>homeassistant-custom-integration</kbd>
+- <kbd>custom-card</kbd>
+- <kbd>homeassistant-custom-card</kbd>
+
+- <kbd>custom-component</kbd>
+- <kbd>homeassistant-custom-component</kbd>
+- <kbd>home-assistant-custom-component-hacs</kbd>
+- <kbd>luckydonald</kbd>
