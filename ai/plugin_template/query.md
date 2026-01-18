@@ -173,4 +173,10 @@ Have `fix-commits` display the diff for the detected query/error change, before 
 
 ——————
 
+Do not have the diff it go to a pager, unless some kind of env var is set or something.
+
+Also on start of the script make sure the head is not in a detached state or git already in a rebase, merge, whatever.
+
+——————
+
 
