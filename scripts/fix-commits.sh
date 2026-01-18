@@ -564,12 +564,29 @@ echo ""
 # Export the batch message as an environment variable (preserves all special characters)
 export BATCH_MSG_ENV="$BATCH_MESSAGE"
 
+# Create a custom git editor for handling squash commit messages
+GIT_EDITOR_SCRIPT=$(mktemp)
+trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $QUERY_ERROR_SCRIPT $REBASE_EDITOR $SQUASH_MAP $GIT_EDITOR_SCRIPT" EXIT
+
+cat > "$GIT_EDITOR_SCRIPT" << 'EOFEDITOR'
+#!/usr/bin/env bash
+# This script handles squash commit messages automatically
+# It keeps only the first non-comment line and removes the rest
+
+FILE="$1"
+
+# Get the first non-comment, non-empty line
+FIRST_MSG=$(grep -v '^#' "$FILE" | grep -v '^$' | head -1)
+
+# Replace the file content with just that message
+echo "$FIRST_MSG" > "$FILE"
+EOFEDITOR
+
+chmod +x "$GIT_EDITOR_SCRIPT"
+
 # Set up environment for the rebase
 export GIT_SEQUENCE_EDITOR="$REBASE_EDITOR"
-
-# Set GIT_EDITOR to use the first message in squash scenarios (no interactive editor)
-# This prevents git from opening an editor when squashing commits
-export GIT_EDITOR="sed -i '' '1!d'"
+export GIT_EDITOR="$GIT_EDITOR_SCRIPT"
 
 # Run the rebase
 if git rebase -i "$REBASE_PARENT"; then
