@@ -196,3 +196,8 @@ also add a "none" option to skip frontend setup entirely.
 
 While already editing the commit messages in `fix-commits.sh`, edit the query/error message too, appending a colon, space, and the user entered message there as well.
 Make sure to not drop commits in-between.
+
+————
+
+Update `fix-commits.sh` to further detect commit steps which do not touch the same lines and could be squashed to one, present those findings to the users, and ask him if we should squash.
+The sub-numbering should be adapted while merging commits.
