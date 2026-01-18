@@ -829,14 +829,14 @@ echo "  • Display Name: $DISPLAY_NAME"
 echo "  • Domain: $SNAKE_NAME"
 echo "  • GitHub: $GITHUB_URL"
 if [ "$KEEP_BACKEND" = true ]; then
-    echo "  • Backend: Python component (custom_components/$SNAKE_NAME/)"
+    echo "  • Backend: yes (custom_components/$SNAKE_NAME/)"
 else
-    echo "  • Backend: None (frontend-only)"
+    echo "  • Backend: no"
 fi
 if [ "$FRONTEND_CHOICE" = "none" ]; then
-    echo "  • Frontend: None (backend-only)"
+    echo "  • Frontend: no"
 elif [ -d "frontend" ]; then
-    echo "  • Frontend: $FRONTEND_CHOICE"
+    echo "  • Frontend: yes, $FRONTEND_CHOICE"
 fi
 if [ -d "tests" ]; then
     echo "  • Tests: Included"
