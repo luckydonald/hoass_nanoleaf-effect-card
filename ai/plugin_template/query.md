@@ -201,6 +201,7 @@ Make sure to not drop commits in-between.
 
 Update `fix-commits.sh` to further detect commit steps which do not touch the same lines and could be squashed to one, present those findings to the users, and ask him if we should squash.
 The sub-numbering should be adapted while merging commits.
+Note, actually check that the lines in the files do not overlap, but if they don't they can be merged. The files themselves can be merged into a single commit, if it's at different places.
 
 ————
 
