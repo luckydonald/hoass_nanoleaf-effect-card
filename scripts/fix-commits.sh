@@ -19,6 +19,10 @@
 
 set -e  # Exit on error
 
+# Recovery tag template - customize this as needed
+# Available variables: {step}, {date}, {time}
+RECOVERY_TAG_TEMPLATE="fix-commits-backup-step-{step}-{date}"
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -617,6 +621,27 @@ export SQUASH_MAP_FILE="$SQUASH_MAP"
 print_info "Starting interactive rebase..."
 echo ""
 
+# Create recovery tag before rebase
+CURRENT_HEAD=$(git rev-parse HEAD)
+DATE_STR=$(date +%Y%m%d)
+TIME_STR=$(date +%H%M%S)
+
+# Build recovery tag name from template
+if [ "$IS_TEMPLATE_REPO" = true ]; then
+    RECOVERY_TAG=$(echo "$RECOVERY_TAG_TEMPLATE" | sed "s/{step}/$PADDED_STEP/g" | sed "s/{date}/$DATE_STR/g" | sed "s/{time}/$TIME_STR/g")
+else
+    RECOVERY_TAG=$(echo "$RECOVERY_TAG_TEMPLATE" | sed "s/{step}/$STEP/g" | sed "s/{date}/$DATE_STR/g" | sed "s/{time}/$TIME_STR/g")
+fi
+
+# Create the recovery tag
+if git tag "$RECOVERY_TAG" "$CURRENT_HEAD" 2>/dev/null; then
+    print_success "Created recovery tag: $RECOVERY_TAG"
+    print_info "If something goes wrong, you can recover with: git reset --hard $RECOVERY_TAG"
+else
+    print_warning "Could not create recovery tag (may already exist): $RECOVERY_TAG"
+fi
+echo ""
+
 # Export the batch message as an environment variable (preserves all special characters)
 export BATCH_MSG_ENV="$BATCH_MESSAGE"
 
@@ -656,10 +681,83 @@ if git rebase -i "$REBASE_PARENT"; then
     fi
     echo ""
     print_success "All done! Commits have been fixed."
+    echo ""
+
+    # Clean up old recovery tags
+    print_info "Checking for old recovery tags to clean up..."
+
+    # Get current branch
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+    # Find all tags matching the recovery pattern
+    RECOVERY_PATTERN="fix-commits-backup-step-"
+    OLD_TAGS=()
+
+    while IFS= read -r tag; do
+        if [ -z "$tag" ]; then
+            continue
+        fi
+
+        # Skip the current recovery tag we just created
+        if [ "$tag" = "$RECOVERY_TAG" ]; then
+            continue
+        fi
+
+        # Check if tag is in the current branch
+        if ! git merge-base --is-ancestor "$tag" HEAD 2>/dev/null; then
+            # Tag is not in current branch history
+            OLD_TAGS+=("$tag")
+        fi
+    done < <(git tag -l "${RECOVERY_PATTERN}*")
+
+    if [ ${#OLD_TAGS[@]} -gt 0 ]; then
+        echo ""
+        print_warning "Found ${#OLD_TAGS[@]} old recovery tag(s) not in current branch:"
+        for tag in "${OLD_TAGS[@]}"; do
+            echo "  - $tag"
+        done
+        echo ""
+
+        read -p "Would you like to delete these old recovery tags? (y/n) [n]: " DELETE_TAGS
+        DELETE_TAGS=${DELETE_TAGS:-n}
+
+        if [[ "$DELETE_TAGS" =~ ^[Yy]$ ]]; then
+            for tag in "${OLD_TAGS[@]}"; do
+                if git tag -d "$tag" 2>/dev/null; then
+                    print_success "Deleted tag: $tag"
+                else
+                    print_warning "Could not delete tag: $tag"
+                fi
+            done
+            echo ""
+            print_success "Old recovery tags cleaned up"
+        else
+            print_info "Keeping old recovery tags"
+            print_info "You can manually delete them later with: git tag -d <tag-name>"
+        fi
+    else
+        print_info "No old recovery tags found to clean up"
+    fi
+
+    # Also delete the current recovery tag now that rebase succeeded
+    echo ""
+    read -p "Delete the recovery tag for this rebase? (y/n) [y]: " DELETE_CURRENT
+    DELETE_CURRENT=${DELETE_CURRENT:-y}
+
+    if [[ "$DELETE_CURRENT" =~ ^[Yy]$ ]]; then
+        if git tag -d "$RECOVERY_TAG" 2>/dev/null; then
+            print_success "Deleted recovery tag: $RECOVERY_TAG"
+        fi
+    else
+        print_info "Keeping recovery tag: $RECOVERY_TAG"
+        print_info "Delete it manually when no longer needed: git tag -d $RECOVERY_TAG"
+    fi
+
 else
     print_error "Rebase failed or was aborted"
     print_info "You can continue with: git rebase --continue"
     print_info "Or abort with: git rebase --abort"
+    print_info "To recover to the state before rebase: git reset --hard $RECOVERY_TAG"
     exit 1
 fi
 
