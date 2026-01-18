@@ -150,7 +150,9 @@ if [ "$IS_TEMPLATE_REPO" = true ]; then
     PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
     PARENT_MSG=$(git log --format=%s -1 "$PARENT_COMMIT")
 
+    QUERY_ERROR_COMMIT=""
     if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
+        QUERY_ERROR_COMMIT="$PARENT_COMMIT"
         print_info "This batch was preceded by: $PARENT_MSG"
         echo ""
         print_info "Changes in that commit:"
@@ -211,7 +213,9 @@ else
     PARENT_COMMIT=$(git rev-parse "$FIRST_COMMIT^")
     PARENT_MSG=$(git log --format=%s -1 "$PARENT_COMMIT")
 
+    QUERY_ERROR_COMMIT=""
     if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
+        QUERY_ERROR_COMMIT="$PARENT_COMMIT"
         print_info "This batch was preceded by: $PARENT_MSG"
         echo ""
         print_info "Changes in that commit:"
