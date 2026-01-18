@@ -548,7 +548,7 @@ echo ""
 
 # Create recovery tag before rebase
 CURRENT_HEAD=$(git rev-parse HEAD)
-DATE_STR=$(date +%Y%m%d)
+DATE_STR=$(date +%Y-%m-%d_%H-%M-%S)
 TIME_STR=$(date +%H%M%S)
 
 # Build recovery tag name from template (always use padded step)
