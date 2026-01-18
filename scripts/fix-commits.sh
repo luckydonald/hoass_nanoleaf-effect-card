@@ -53,6 +53,10 @@ print_success() {
     echo -e "${GREEN}✓${NC} $1"
 }
 
+linebreak() {
+  echo ""
+}
+
 print_header "Fix AI Commit Messages"
 
 # Get the repository root
@@ -188,12 +192,12 @@ fi
 print_success "Found $COMMIT_COUNT commit(s) in this connected batch"
 
 # Show the commits
-echo ""
+linebreak
 print_info "Commits to fix:"
 for commit_hash in "${COMMIT_HASHES[@]}"; do
     git log --oneline -1 "$commit_hash"
 done
-echo ""
+linebreak
 
 # Check if this batch was preceded by a query/error update
 FIRST_COMMIT="${COMMIT_HASHES[0]}"
@@ -204,9 +208,9 @@ QUERY_ERROR_COMMIT=""
 if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
     QUERY_ERROR_COMMIT="$PARENT_COMMIT"
     print_info "This batch was preceded by: $PARENT_MSG"
-    echo ""
+    linebreak
     print_info "Changes in that commit:"
-    echo ""
+    linebreak
 
     # Disable pager unless USE_PAGER is set
     if [ -z "$USE_PAGER" ]; then
@@ -219,17 +223,17 @@ if echo "$PARENT_MSG" | grep -qE "(ai: updated query|ai: updated errors)"; then
     else
         git show "$PARENT_COMMIT"
     fi
-    echo ""
+    linebreak
 fi
 
 # Ask for the message once for all commits in this batch
-echo ""
+linebreak
 print_info "Enter a message for all commits in this batch"
 print_warning "Leave empty to keep individual 'running…' messages"
 print_warning "Press Ctrl+C to cancel"
-echo ""
+linebreak
 read -p "Message for step [$PADDED_STEP]: " BATCH_MESSAGE
-echo ""
+linebreak
 
 # Analyze commits for potential squashing
 print_info "Analyzing commits for potential squashing..."
@@ -315,9 +319,9 @@ done
 
 # Present squashing opportunities to the user
 if [ ${#SQUASH_COMMITS[@]} -gt 0 ]; then
-    echo ""
+    linebreak
     print_info "Found commits that could potentially be squashed:"
-    echo ""
+    linebreak
 
     for pair in "${SQUASH_COMMITS[@]}"; do
         idx1=$(echo "$pair" | cut -d: -f1)
@@ -337,7 +341,7 @@ if [ ${#SQUASH_COMMITS[@]} -gt 0 ]; then
         files2=$(git diff-tree --no-commit-id --name-only -r "$commit2" | head -3)
         echo "    Files in [$((idx1+1))]: $(echo "$files1" | tr '\n' ', ' | sed 's/,$//')"
         echo "    Files in [$((idx2+1))]: $(echo "$files2" | tr '\n' ', ' | sed 's/,$//')"
-        echo ""
+        linebreak
     done
 
     read -p "Would you like to squash these commits? (y/n) [n]: " SQUASH_CHOICE
@@ -354,7 +358,7 @@ else
     print_info "No squashing opportunities found (commits modify overlapping lines)"
     DO_SQUASH=false
 fi
-echo ""
+linebreak
 
 # Create a temporary script for the rebase
 REBASE_SCRIPT=$(mktemp)
@@ -588,7 +592,7 @@ export DO_SQUASH_ENV="$DO_SQUASH"
 export SQUASH_MAP_FILE="$SQUASH_MAP"
 
 print_info "Starting interactive rebase..."
-echo ""
+linebreak
 
 # Create recovery tag before rebase
 CURRENT_HEAD=$(git rev-parse HEAD)
@@ -606,7 +610,7 @@ else
     print_warning "Could not create recovery tag (may already exist): $RECOVERY_TAG"
     exit 2
 fi
-echo ""
+linebreak
 
 # Export the batch message as an environment variable (preserves all special characters)
 export BATCH_MSG_ENV="$BATCH_MESSAGE"
@@ -631,7 +635,7 @@ export GIT_SEQUENCE_EDITOR="$REBASE_EDITOR"
 # Run the rebase
 if git rebase -i "$REBASE_PARENT"; then
     print_success "Rebase completed successfully!"
-    echo ""
+    linebreak
     print_info "Updated commits:"
     # Calculate expected number of commits after squashing
     if [ "$DO_SQUASH" = true ]; then
@@ -649,9 +653,9 @@ if git rebase -i "$REBASE_PARENT"; then
     for commit_hash in "${commits_after[@]}"; do
       git log --oneline -1 $commit_hash
     done
-    echo ""
+    linebreak
     print_success "All done! Commits have been fixed."
-    echo ""
+    linebreak
 
     # Restore the original core.editor
     if [ -n "$ORIGINAL_CORE_EDITOR" ]; then
@@ -688,12 +692,12 @@ if git rebase -i "$REBASE_PARENT"; then
     done < <(git tag -l "${RECOVERY_PATTERN}*")
 
     if [ ${#OLD_TAGS[@]} -gt 0 ]; then
-        echo ""
+        linebreak
         print_warning "Found ${#OLD_TAGS[@]} old recovery tag(s) not in current branch:"
         for tag in "${OLD_TAGS[@]}"; do
             echo "  - $tag"
         done
-        echo ""
+        linebreak
 
         read -p "Would you like to delete these old recovery tags? (y/n) [n]: " DELETE_TAGS
         DELETE_TAGS=${DELETE_TAGS:-n}
@@ -706,7 +710,7 @@ if git rebase -i "$REBASE_PARENT"; then
                     print_warning "Could not delete tag: $tag"
                 fi
             done
-            echo ""
+            linebreak
             print_success "Old recovery tags cleaned up"
         else
             print_info "Keeping old recovery tags"
@@ -722,7 +726,7 @@ if git rebase -i "$REBASE_PARENT"; then
     fi
 
     # Also delete the current recovery tag now that rebase succeeded
-    echo ""
+    linebreak
     read -p "Delete the recovery tag for this rebase? (y/n) [n]: " DELETE_CURRENT
     DELETE_CURRENT=${DELETE_CURRENT:-n}
 
