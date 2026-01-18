@@ -180,3 +180,73 @@ make: *** [fix-commits] Error 1
 
 ./scripts/fix-commits.sh: line 233: syntax error near unexpected token `fi'
 make: *** [fix-commits] Error 2
+
+———
+
+`fix-commits.sh` seem be broken:
+I got an editor to change the commit message? please do that automatically.
+```COMMIT_EDITMSG
+# This is a combination of 2 commits.
+# This is the 1st commit message:
+
+📄TEMPLATE | ✨  ai: [029] Squash non-conflicting commits… (1/1)
+
+# This is the commit message #2:
+
+📄TEMPLATE | ✨  ai: [029] running… (2/X)
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Sun Jan 18 01:28:45 2026 +0100
+#
+# interactive rebase in progress; onto a2c58f6
+# Last commands done (8 commands done):
+#    exec BATCH_MSG_ENV="$BATCH_MSG_ENV" SUBSTEP_OVERRIDE=2 /var/folders/jv/xthv_j4x7xx6rg_dgpyypqcr0000gn/T/tmp.WODCiwO84Q '📄TEMPLATE | ✨  ai: [029] running… (2/X)' > /tmp/new_msg_1113bf0.txt
+#    squash 1113bf0 📄TEMPLATE | ✨  ai: [029] running… (2/X)
+# Next command to do (1 remaining command):
+#    exec rm -f /tmp/new_msg_1113bf0.txt
+# You are currently rebasing branch 'mane' on 'a2c58f6'.
+#
+# Changes to be committed:
+#       new file:   FIX_COMMITS_SQUASHING.md
+#       modified:   scripts/fix-commits.sh
+#
+
+"~/Documents/programming/Python/HomeAssistant/hoass_template/.git/COMMIT_EDITMSG" 26L, 1008B
+```
+
+The script output looks like this:
+
+```txt
+ℹ Starting interactive rebase...
+
+Executing: BATCH_MSG_ENV="$BATCH_MSG_ENV" /var/folders/jv/xthv_j4x7xx6rg_dgpyypqcr0000gn/T/tmp.e0dT9QW5U8 '📄TEMPLATE | 🤌 ai: updated query' > /tmp/new_msg_ed45d1d.txt
+Executing: git commit --amend -m "$(cat /tmp/new_msg_ed45d1d.txt)" && rm -f /tmp/new_msg_ed45d1d.txt
+[detached HEAD 99e60f2] 📄TEMPLATE | 🤌 ai: updated query: Squash non-conflicting commits…
+ Date: Sun Jan 18 01:26:35 2026 +0100
+ 1 file changed, 5 insertions(+)
+Executing: BATCH_MSG_ENV="$BATCH_MSG_ENV" SUBSTEP_OVERRIDE=1 /var/folders/jv/xthv_j4x7xx6rg_dgpyypqcr0000gn/T/tmp.WODCiwO84Q '📄TEMPLATE | ✨ ai: [029] running… (1/X)' > /tmp/new_msg_37e2a10.txt
+Executing: git commit --amend -m "$(cat /tmp/new_msg_37e2a10.txt)" && rm -f /tmp/new_msg_37e2a10.txt
+[detached HEAD fdba3fe] 📄TEMPLATE | ✨ ai: [029] Squash non-conflicting commits… (1/1)
+ Date: Sun Jan 18 01:28:45 2026 +0100
+ 1 file changed, 142 insertions(+), 8 deletions(-)
+Executing: BATCH_MSG_ENV="$BATCH_MSG_ENV" SUBSTEP_OVERRIDE=2 /var/folders/jv/xthv_j4x7xx6rg_dgpyypqcr0000gn/T/tmp.WODCiwO84Q '📄TEMPLATE | ✨ ai: [029] running… (2/X)' > /tmp/new_msg_1113bf0.txt
+[detached HEAD f1545c9] 📄TEMPLATE | ✨ ai: [029] Squash non-conflicting commits… (1/1)
+ Date: Sun Jan 18 01:28:45 2026 +0100
+ 2 files changed, 508 insertions(+), 8 deletions(-)
+ create mode 100644 FIX_COMMITS_SQUASHING.md
+Executing: rm -f /tmp/new_msg_1113bf0.txt
+error: cannot rebase: You have unstaged changes.
+warning: execution succeeded: rm -f /tmp/new_msg_1113bf0.txt
+but left changes to the index and/or the working tree
+Commit or stash your changes, and then run
+
+  git rebase --continue
+
+
+✗ Rebase failed or was aborted
+ℹ You can continue with: git rebase --continue
+ℹ Or abort with: git rebase --abort
+make: *** [fix-commits] Error 1
+```
