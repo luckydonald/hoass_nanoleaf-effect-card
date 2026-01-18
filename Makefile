@@ -124,8 +124,9 @@ format: format-py format-ts
 format-py:
 ifeq ($(BACKEND),1)
 	@echo "Formatting Python..."
-	uv run ruff format custom_components/
 	uv run ruff check --fix custom_components/ || true
+	uv run ruff format custom_components/
+	uv run ruff check --fix custom_components/
 else
 	@echo "No Python sources detected – skipping backend format."
 endif
