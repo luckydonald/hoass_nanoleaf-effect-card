@@ -62,6 +62,39 @@ if [ ! -d ".git" ]; then
     exit 1
 fi
 
+# Check if HEAD is detached
+if ! git symbolic-ref -q HEAD > /dev/null; then
+    print_error "HEAD is in a detached state!"
+    print_info "Please checkout a branch first: git checkout <branch>"
+    exit 1
+fi
+
+# Check for ongoing git operations
+if [ -d ".git/rebase-merge" ] || [ -d ".git/rebase-apply" ]; then
+    print_error "A rebase is already in progress!"
+    print_info "Continue with: git rebase --continue"
+    print_info "Or abort with: git rebase --abort"
+    exit 1
+fi
+
+if [ -f ".git/MERGE_HEAD" ]; then
+    print_error "A merge is in progress!"
+    print_info "Complete the merge first or abort with: git merge --abort"
+    exit 1
+fi
+
+if [ -f ".git/CHERRY_PICK_HEAD" ]; then
+    print_error "A cherry-pick is in progress!"
+    print_info "Complete it or abort with: git cherry-pick --abort"
+    exit 1
+fi
+
+if [ -f ".git/REVERT_HEAD" ]; then
+    print_error "A revert is in progress!"
+    print_info "Complete it or abort with: git revert --abort"
+    exit 1
+fi
+
 # Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
     print_error "You have uncommitted changes. Please commit or stash them first."
