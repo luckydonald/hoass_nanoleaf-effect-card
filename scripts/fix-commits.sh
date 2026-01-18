@@ -191,11 +191,7 @@ echo ""
 print_info "Analyzing commits for potential squashing..."
 
 # Get list of commit hashes in this batch (oldest first)
-if [ "$IS_TEMPLATE_REPO" = true ]; then
-    COMMIT_HASHES=($(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse))
-else
-    COMMIT_HASHES=($(git log --format=%H --grep="ai: .*[.…].* ($STEP-" --reverse))
-fi
+COMMIT_HASHES=($(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse))
 
 # Array to track which commits to squash
 SQUASH_COMMITS=()
@@ -324,9 +320,7 @@ REBASE_SCRIPT=$(mktemp)
 trap "rm -f $REBASE_SCRIPT" EXIT
 
 # Generate the rebase script
-if [ "$IS_TEMPLATE_REPO" = true ]; then
-    # Template format
-    cat > "$REBASE_SCRIPT" << 'EOFSCRIPT'
+cat > "$REBASE_SCRIPT" << 'EOFSCRIPT'
 #!/usr/bin/env bash
 # Extract step and substep
 STEP=$(echo "$1" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
@@ -354,41 +348,10 @@ fi
 
 # Reconstruct the commit message with total
 PADDED_STEP=$(printf "%03d" "$STEP")
-echo "📄TEMPLATE | ✨ ai: [$PADDED_STEP] $NEW_MSG ($SUBSTEP/$TOTAL)"
+echo "COMMIT_PREFIX_PLACEHOLDER✨ ai: [$PADDED_STEP] $NEW_MSG ($SUBSTEP/$TOTAL)"
 EOFSCRIPT
-else
-    # Regular format - no total to fix, just allow message editing
-    cat > "$REBASE_SCRIPT" << 'EOFSCRIPT'
-#!/usr/bin/env bash
-# Extract step and substep
-STEP=$(echo "$1" | sed -E 's/.*ai: .+[.…]+ \(([0-9]+)-[0-9]+\).*/\1/')
-SUBSTEP=$(echo "$1" | sed -E 's/.*ai: .+[.…]+ \([0-9]+-([0-9]+)\).*/\1/')
 
-# Use override substep if provided (for renumbering after squash)
-if [ -n "$SUBSTEP_OVERRIDE" ]; then
-    SUBSTEP="$SUBSTEP_OVERRIDE"
-fi
-
-# Extract current message (everything between : and ()
-CURRENT_MSG=$(echo "$1" | sed -E 's/.*ai: (.+)[.…]+ \([0-9]+-[0-9]+\).*/\1/')
-
-# Use batch message from environment variable if provided, otherwise check individual message
-if [ -n "$BATCH_MSG_ENV" ]; then
-    NEW_MSG="$BATCH_MSG_ENV"
-elif echo "$CURRENT_MSG" | grep -qE "^running[.…]*$"; then
-    # Still default, keep it
-    NEW_MSG="running…"
-else
-    # Keep existing non-default message
-    NEW_MSG="$CURRENT_MSG"
-fi
-
-# Reconstruct the commit message
-echo "✨ ai: $NEW_MSG ($STEP-$SUBSTEP)"
-EOFSCRIPT
-fi
-
-# Replace TOTAL_PLACEHOLDER only (message will be passed via environment)
+# Replace placeholders
 # Adjust total if squashing
 if [ "$DO_SQUASH" = true ]; then
     ADJUSTED_TOTAL=$((COMMIT_COUNT - ${#SQUASH_COMMITS[@]}))
@@ -396,6 +359,12 @@ if [ "$DO_SQUASH" = true ]; then
 else
     sed -i.bak "s/TOTAL_PLACEHOLDER/$COMMIT_COUNT/g" "$REBASE_SCRIPT"
 fi
+
+# Replace COMMIT_PREFIX_PLACEHOLDER with actual prefix (empty string or TEMPLATE prefix)
+# Need to escape the prefix for sed
+ESCAPED_PREFIX=$(echo "$COMMIT_PREFIX" | sed 's/[\/&]/\\&/g')
+sed -i.bak "s/COMMIT_PREFIX_PLACEHOLDER/$ESCAPED_PREFIX/g" "$REBASE_SCRIPT"
+
 rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
@@ -414,14 +383,19 @@ CURRENT_MSG="$1"
 # Check if batch message is provided
 if [ -n "$BATCH_MSG_ENV" ]; then
     # Append ": message" to the existing query/error commit
-    echo "${CURRENT_MSG}: ${BATCH_MSG_ENV}"
+    echo "COMMIT_PREFIX_PLACEHOLDER${CURRENT_MSG}: ${BATCH_MSG_ENV}"
 else
-    # No batch message, keep as-is
-    echo "$CURRENT_MSG"
+    # No batch message, keep as-is but ensure prefix is correct
+    echo "COMMIT_PREFIX_PLACEHOLDER${CURRENT_MSG}"
 fi
 EOFSCRIPT
 
 chmod +x "$QUERY_ERROR_SCRIPT"
+
+# Replace COMMIT_PREFIX_PLACEHOLDER in query/error script
+ESCAPED_PREFIX=$(echo "$COMMIT_PREFIX" | sed 's/[\/&]/\\&/g')
+sed -i.bak "s/COMMIT_PREFIX_PLACEHOLDER/$ESCAPED_PREFIX/g" "$QUERY_ERROR_SCRIPT"
+rm -f "$QUERY_ERROR_SCRIPT.bak"
 
 # Find the parent commit (the commit before the first AI commit in this batch)
 # If there's a query/error commit, start from before that
@@ -560,12 +534,8 @@ CURRENT_HEAD=$(git rev-parse HEAD)
 DATE_STR=$(date +%Y%m%d)
 TIME_STR=$(date +%H%M%S)
 
-# Build recovery tag name from template
-if [ "$IS_TEMPLATE_REPO" = true ]; then
-    RECOVERY_TAG=$(echo "$RECOVERY_TAG_TEMPLATE" | sed "s/{step}/$PADDED_STEP/g" | sed "s/{date}/$DATE_STR/g" | sed "s/{time}/$TIME_STR/g")
-else
-    RECOVERY_TAG=$(echo "$RECOVERY_TAG_TEMPLATE" | sed "s/{step}/$STEP/g" | sed "s/{date}/$DATE_STR/g" | sed "s/{time}/$TIME_STR/g")
-fi
+# Build recovery tag name from template (always use padded step)
+RECOVERY_TAG=$(echo "$RECOVERY_TAG_TEMPLATE" | sed "s/{step}/$PADDED_STEP/g" | sed "s/{date}/$DATE_STR/g" | sed "s/{time}/$TIME_STR/g")
 
 # Create the recovery tag
 if git tag "$RECOVERY_TAG" "$CURRENT_HEAD" 2>/dev/null; then
@@ -608,11 +578,7 @@ if git rebase -i "$REBASE_PARENT"; then
     print_success "Rebase completed successfully!"
     echo ""
     print_info "Updated commits:"
-    if [ "$IS_TEMPLATE_REPO" = true ]; then
-        git log --oneline --grep="ai: \[$PADDED_STEP\]" --reverse
-    else
-        git log --oneline --grep="ai: .*[.…].* ($STEP-" --reverse
-    fi
+    git log --oneline --grep="ai: \[$PADDED_STEP\]" --reverse
     echo ""
     print_success "All done! Commits have been fixed."
     echo ""
