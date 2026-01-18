@@ -333,6 +333,11 @@ else
     git log --format="%H" --grep="ai: .*[.…].* ($STEP-" > "$COMMITS_TO_MODIFY"
 fi
 
+# Add query/error commit to the list if it exists
+if [ -n "$QUERY_ERROR_COMMIT" ]; then
+    echo "$QUERY_ERROR_COMMIT" >> "$COMMITS_TO_MODIFY"
+fi
+
 # Create rebase editor script that modifies only our AI commits
 REBASE_EDITOR=$(mktemp)
 trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $REBASE_EDITOR" EXIT
