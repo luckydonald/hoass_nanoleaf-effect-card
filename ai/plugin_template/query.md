@@ -179,4 +179,15 @@ Also on start of the script make sure the head is not in a detached state or git
 
 ——————
 
+In `init.sh`, Step 7: Frontend Framework:
 
+```txt
+Choose your frontend framework:
+  vue   - Vue.js framework (from frontend_vue/)
+```
+Please prepare a commented-out 
+```
+plain - Plain Typescript (from frontend_plain/)
+```
+text and code,
+also add a "none" option to skip frontend setup entirely.
