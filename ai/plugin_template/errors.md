@@ -175,3 +175,8 @@ You can fix the problem, and then run
 ℹ You can continue with: git rebase --continue
 ℹ Or abort with: git rebase --abort
 make: *** [fix-commits] Error 1
+
+————
+
+./scripts/fix-commits.sh: line 233: syntax error near unexpected token `fi'
+make: *** [fix-commits] Error 2
