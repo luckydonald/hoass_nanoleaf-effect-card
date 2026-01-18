@@ -47,6 +47,9 @@ Or manually:
 
 <!-- footer -->
 # Repository Information
+## License
+This project is licensed under the `MIT License` - see the [LICENSE](LICENSE) file for details.
+
 ## Tags
 - <kbd>plugin-template</kbd>
 - <kbd>home-assistant</kbd>
