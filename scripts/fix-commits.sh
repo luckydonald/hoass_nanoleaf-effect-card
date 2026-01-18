@@ -249,6 +249,82 @@ else
 fi
 echo ""
 
+# Analyze commits for potential squashing
+print_info "Analyzing commits for potential squashing..."
+
+# Get list of commit hashes in this batch (oldest first)
+if [ "$IS_TEMPLATE_REPO" = true ]; then
+    COMMIT_HASHES=($(git log --format=%H --grep="ai: \[$PADDED_STEP\]" --reverse))
+else
+    COMMIT_HASHES=($(git log --format=%H --grep="ai: .*[.…].* ($STEP-" --reverse))
+fi
+
+# Array to track which commits to squash
+SQUASH_COMMITS=()
+
+# Check each pair of consecutive commits
+for ((i=0; i<${#COMMIT_HASHES[@]}-1; i++)); do
+    COMMIT1="${COMMIT_HASHES[$i]}"
+    COMMIT2="${COMMIT_HASHES[$((i+1))]}"
+
+    # Get the files changed in each commit
+    FILES1=$(git diff-tree --no-commit-id --name-only -r "$COMMIT1" | sort)
+    FILES2=$(git diff-tree --no-commit-id --name-only -r "$COMMIT2" | sort)
+
+    # Check if they touch different files (no overlap)
+    COMMON_FILES=$(comm -12 <(echo "$FILES1") <(echo "$FILES2"))
+
+    if [ -z "$COMMON_FILES" ]; then
+        # No common files - they could potentially be squashed
+        # But we also need to check if they modify the same lines in different files
+        # For simplicity, if they touch completely different files, they can be squashed
+        SQUASH_COMMITS+=("$i:$((i+1))")
+    fi
+done
+
+# Present squashing opportunities to the user
+if [ ${#SQUASH_COMMITS[@]} -gt 0 ]; then
+    echo ""
+    print_info "Found commits that could potentially be squashed:"
+    echo ""
+
+    for pair in "${SQUASH_COMMITS[@]}"; do
+        idx1=$(echo "$pair" | cut -d: -f1)
+        idx2=$(echo "$pair" | cut -d: -f2)
+        commit1="${COMMIT_HASHES[$idx1]}"
+        commit2="${COMMIT_HASHES[$idx2]}"
+
+        msg1=$(git log --format=%s -1 "$commit1")
+        msg2=$(git log --format=%s -1 "$commit2")
+
+        echo "  Commits $((idx1+1)) and $((idx2+1)):"
+        echo "    [$((idx1+1))] $msg1"
+        echo "    [$((idx2+1))] $msg2"
+
+        # Show what files each touches
+        files1=$(git diff-tree --no-commit-id --name-only -r "$commit1" | head -3)
+        files2=$(git diff-tree --no-commit-id --name-only -r "$commit2" | head -3)
+        echo "    Files in [$((idx1+1))]: $(echo "$files1" | tr '\n' ', ' | sed 's/,$//')"
+        echo "    Files in [$((idx2+1))]: $(echo "$files2" | tr '\n' ', ' | sed 's/,$//')"
+        echo ""
+    done
+
+    read -p "Would you like to squash these commits? (y/n) [n]: " SQUASH_CHOICE
+    SQUASH_CHOICE=${SQUASH_CHOICE:-n}
+
+    if [[ "$SQUASH_CHOICE" =~ ^[Yy]$ ]]; then
+        print_info "Will squash the identified commits and adjust sub-numbering"
+        DO_SQUASH=true
+    else
+        print_info "Keeping all commits separate"
+        DO_SQUASH=false
+    fi
+else
+    print_info "No obvious squashing opportunities found (all commits touch overlapping files)"
+    DO_SQUASH=false
+fi
+echo ""
+
 # Create a temporary script for the rebase
 REBASE_SCRIPT=$(mktemp)
 trap "rm -f $REBASE_SCRIPT" EXIT
@@ -262,6 +338,11 @@ if [ "$IS_TEMPLATE_REPO" = true ]; then
 STEP=$(echo "$1" | sed 's/.*ai: \[\([0-9]*\)\].*/\1/' | sed 's/^0*//')
 SUBSTEP=$(echo "$1" | sed 's/.*(\([0-9]*\)\/.*/\1/')
 TOTAL="TOTAL_PLACEHOLDER"
+
+# Use override substep if provided (for renumbering after squash)
+if [ -n "$SUBSTEP_OVERRIDE" ]; then
+    SUBSTEP="$SUBSTEP_OVERRIDE"
+fi
 
 # Extract current message (everything between ] and ()
 CURRENT_MSG=$(echo "$1" | sed 's/.*\] \(.*\) (.*/\1/')
@@ -289,6 +370,11 @@ else
 STEP=$(echo "$1" | sed -E 's/.*ai: .+[.…]+ \(([0-9]+)-[0-9]+\).*/\1/')
 SUBSTEP=$(echo "$1" | sed -E 's/.*ai: .+[.…]+ \([0-9]+-([0-9]+)\).*/\1/')
 
+# Use override substep if provided (for renumbering after squash)
+if [ -n "$SUBSTEP_OVERRIDE" ]; then
+    SUBSTEP="$SUBSTEP_OVERRIDE"
+fi
+
 # Extract current message (everything between : and ()
 CURRENT_MSG=$(echo "$1" | sed -E 's/.*ai: (.+)[.…]+ \([0-9]+-[0-9]+\).*/\1/')
 
@@ -309,7 +395,13 @@ EOFSCRIPT
 fi
 
 # Replace TOTAL_PLACEHOLDER only (message will be passed via environment)
-sed -i.bak "s/TOTAL_PLACEHOLDER/$COMMIT_COUNT/g" "$REBASE_SCRIPT"
+# Adjust total if squashing
+if [ "$DO_SQUASH" = true ]; then
+    ADJUSTED_TOTAL=$((COMMIT_COUNT - ${#SQUASH_COMMITS[@]}))
+    sed -i.bak "s/TOTAL_PLACEHOLDER/$ADJUSTED_TOTAL/g" "$REBASE_SCRIPT"
+else
+    sed -i.bak "s/TOTAL_PLACEHOLDER/$COMMIT_COUNT/g" "$REBASE_SCRIPT"
+fi
 rm -f "$REBASE_SCRIPT.bak"
 
 chmod +x "$REBASE_SCRIPT"
@@ -367,29 +459,50 @@ fi
 
 # Create rebase editor script that modifies only our AI commits
 REBASE_EDITOR=$(mktemp)
-trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $QUERY_ERROR_SCRIPT $REBASE_EDITOR" EXIT
+SQUASH_MAP=$(mktemp)
+trap "rm -f $COMMITS_TO_MODIFY $REBASE_SCRIPT $QUERY_ERROR_SCRIPT $REBASE_EDITOR $SQUASH_MAP" EXIT
+
+# Build squash map if needed
+if [ "$DO_SQUASH" = true ]; then
+    # Create a map of which commits to squash
+    for pair in "${SQUASH_COMMITS[@]}"; do
+        idx1=$(echo "$pair" | cut -d: -f1)
+        idx2=$(echo "$pair" | cut -d: -f2)
+        echo "${COMMIT_HASHES[$idx2]}" >> "$SQUASH_MAP"
+    done
+fi
 
 cat > "$REBASE_EDITOR" << 'EOF'
 #!/usr/bin/env bash
 # This script modifies the git rebase todo list
 # It adds exec commands only for the AI commits we want to fix
+# And optionally marks commits for squashing
 
 TODO_FILE="$1"
 TEMP_FILE="${TODO_FILE}.tmp"
 
 > "$TEMP_FILE"
 
+# Track which substep we're on (for renumbering after squash)
+current_substep=1
+
 while IFS= read -r line; do
     # Extract commit hash from the line (format: "pick abc123 commit message")
     if [[ "$line" =~ ^pick[[:space:]]+([a-f0-9]+) ]]; then
         commit_hash="${BASH_REMATCH[1]}"
+
+        # Check if this commit should be squashed
+        should_squash=false
+        if [ "$DO_SQUASH_ENV" = "true" ] && grep -q "^$commit_hash" "$SQUASH_MAP_FILE" 2>/dev/null; then
+            should_squash=true
+        fi
 
         # Check if this commit is in our list to modify
         if grep -q "^$commit_hash" "$COMMITS_TO_MODIFY_FILE"; then
             # This is an AI commit we want to fix
             commit_msg=$(git log --format=%s -1 "$commit_hash")
 
-            # Use a unique temp file based on commit hash (not $$)
+            # Use a unique temp file based on commit hash
             temp_msg_file="/tmp/new_msg_${commit_hash}.txt"
 
             # Check if this is a query/error commit
@@ -398,12 +511,31 @@ while IFS= read -r line; do
                 echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $QUERY_ERROR_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
             else
                 # Regular AI commit - use the regular script
-                echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" $REBASE_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
+                # Pass the current substep for renumbering
+                echo "exec BATCH_MSG_ENV=\"\$BATCH_MSG_ENV\" SUBSTEP_OVERRIDE=$current_substep $REBASE_SCRIPT_FILE '$commit_msg' > $temp_msg_file" >> "$TEMP_FILE"
+
+                # Only increment substep if not squashing this commit
+                if [ "$should_squash" = false ]; then
+                    current_substep=$((current_substep + 1))
+                fi
             fi
-            # Keep the pick
-            echo "$line" >> "$TEMP_FILE"
-            # Add exec to amend with new message
-            echo "exec git commit --amend -m \"\$(cat $temp_msg_file)\" && rm -f $temp_msg_file" >> "$TEMP_FILE"
+
+            # Pick or squash
+            if [ "$should_squash" = true ]; then
+                # Change pick to squash
+                echo "squash $commit_hash $(git log --format=%s -1 "$commit_hash")" >> "$TEMP_FILE"
+            else
+                # Keep the pick
+                echo "$line" >> "$TEMP_FILE"
+            fi
+
+            # Add exec to amend with new message (only for non-squashed commits)
+            if [ "$should_squash" = false ]; then
+                echo "exec git commit --amend -m \"\$(cat $temp_msg_file)\" && rm -f $temp_msg_file" >> "$TEMP_FILE"
+            else
+                # For squashed commits, just clean up the temp file
+                echo "exec rm -f $temp_msg_file" >> "$TEMP_FILE"
+            fi
         else
             # Not an AI commit, keep as-is
             echo "$line" >> "$TEMP_FILE"
@@ -423,6 +555,8 @@ chmod +x "$REBASE_EDITOR"
 export COMMITS_TO_MODIFY_FILE="$COMMITS_TO_MODIFY"
 export REBASE_SCRIPT_FILE="$REBASE_SCRIPT"
 export QUERY_ERROR_SCRIPT_FILE="$QUERY_ERROR_SCRIPT"
+export DO_SQUASH_ENV="$DO_SQUASH"
+export SQUASH_MAP_FILE="$SQUASH_MAP"
 
 print_info "Starting interactive rebase..."
 echo ""
