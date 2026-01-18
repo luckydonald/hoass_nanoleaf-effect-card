@@ -189,7 +189,7 @@ print_success "Found $COMMIT_COUNT commit(s) in this connected batch"
 
 # Show the commits
 echo ""
-echo "Commits to fix:"
+print_info "Commits to fix:"
 for commit_hash in "${COMMIT_HASHES[@]}"; do
     git log --oneline -1 "$commit_hash"
 done
@@ -639,7 +639,16 @@ if git rebase -i "$REBASE_PARENT"; then
     else
         EXPECTED_COUNT=$COMMIT_COUNT
     fi
-    git log --oneline --grep="ai: \[$PADDED_STEP\]" --reverse | head -n "$EXPECTED_COUNT"
+    # shellcheck disable=SC2207
+    commits_after=($(
+      git log --oneline --pretty=format:"%H" --grep="ai: \[$PADDED_STEP\]" --reverse \
+      | head -n "$EXPECTED_COUNT"
+    ))
+
+    # Loop over each hash
+    for commit_hash in "${commits_after[@]}"; do
+      git log --oneline -1 $commit_hash
+    done
     echo ""
     print_success "All done! Commits have been fixed."
     echo ""
