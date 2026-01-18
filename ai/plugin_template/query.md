@@ -201,3 +201,13 @@ Make sure to not drop commits in-between.
 
 Update `fix-commits.sh` to further detect commit steps which do not touch the same lines and could be squashed to one, present those findings to the users, and ask him if we should squash.
 The sub-numbering should be adapted while merging commits.
+
+————
+
+Update `init.sh` to, in the summary, write:
+```diff
+- Python Backend:   true
++ Python Backend:   yes
+- Frontend:         vue
++ Frontend:         yes, vue
+```
