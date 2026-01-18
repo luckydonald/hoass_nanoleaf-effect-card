@@ -442,3 +442,7 @@ error: Please commit or stash them.
 ℹ Or abort with: git rebase --abort
 ℹ To recover to the state before rebase: git reset --hard fix-commits-backup-step-048-20260118
 make: *** [fix-commits] Error 1
+
+———
+
+Fix `PLUGIN-TEMPLATE-CARD` not being replaced in `main.ts`.
