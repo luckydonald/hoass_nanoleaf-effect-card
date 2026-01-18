@@ -337,37 +337,55 @@ HAS_PLAIN=false
 if [ "$HAS_VUE" = true ]; then
     echo "  vue   - Vue.js framework (from frontend_vue/)"
 fi
-if [ "$HAS_PLAIN" = true ]; then
-    echo "  plain - Plain HTML/JS/CSS (from frontend_plain/)"
-fi
+# Uncomment when frontend_plain is implemented:
+# if [ "$HAS_PLAIN" = true ]; then
+#     echo "  plain - Plain TypeScript (from frontend_plain/)"
+# fi
+echo "  none  - No frontend (backend-only plugin)"
 
 # Determine default based on what exists
 if [ "$HAS_VUE" = true ]; then
     DEFAULT_FRONTEND="vue"
-elif [ "$HAS_PLAIN" = true ]; then
-    DEFAULT_FRONTEND="plain"
+# Uncomment when frontend_plain is implemented:
+# elif [ "$HAS_PLAIN" = true ]; then
+#     DEFAULT_FRONTEND="plain"
 else
-    print_error "No frontend directories found (frontend_vue/ or frontend_plain/)"
-    exit 1
+    DEFAULT_FRONTEND="none"
 fi
 
 echo ""
-read -p "Enter frontend choice ($([ "$HAS_VUE" = true ] && echo -n "vue")$([ "$HAS_VUE" = true ] && [ "$HAS_PLAIN" = true ] && echo -n "/")$([ "$HAS_PLAIN" = true ] && echo -n "plain")) [$DEFAULT_FRONTEND]: " FRONTEND_CHOICE
+# Build the choice prompt dynamically
+CHOICES=""
+[ "$HAS_VUE" = true ] && CHOICES="vue"
+# Uncomment when frontend_plain is implemented:
+# [ "$HAS_PLAIN" = true ] && CHOICES="${CHOICES:+$CHOICES/}plain"
+CHOICES="${CHOICES:+$CHOICES/}none"
+
+read -p "Enter frontend choice ($CHOICES) [$DEFAULT_FRONTEND]: " FRONTEND_CHOICE
 FRONTEND_CHOICE=${FRONTEND_CHOICE:-$DEFAULT_FRONTEND}
 
 # Validate choice
 if [[ "$FRONTEND_CHOICE" == "vue" && "$HAS_VUE" = false ]]; then
     print_error "frontend_vue/ directory does not exist"
     exit 1
-elif [[ "$FRONTEND_CHOICE" == "plain" && "$HAS_PLAIN" = false ]]; then
-    print_error "frontend_plain/ directory does not exist"
-    exit 1
-elif [[ "$FRONTEND_CHOICE" != "vue" && "$FRONTEND_CHOICE" != "plain" ]]; then
-    print_error "Invalid frontend choice. Must be 'vue' or 'plain'"
+# Uncomment when frontend_plain is implemented:
+# elif [[ "$FRONTEND_CHOICE" == "plain" && "$HAS_PLAIN" = false ]]; then
+#     print_error "frontend_plain/ directory does not exist"
+#     exit 1
+elif [[ "$FRONTEND_CHOICE" != "vue" && "$FRONTEND_CHOICE" != "none" ]]; then
+    # Uncomment when frontend_plain is implemented:
+    # elif [[ "$FRONTEND_CHOICE" != "vue" && "$FRONTEND_CHOICE" != "plain" && "$FRONTEND_CHOICE" != "none" ]]; then
+    print_error "Invalid frontend choice. Must be 'vue' or 'none'"
+    # Uncomment when frontend_plain is implemented:
+    # print_error "Invalid frontend choice. Must be 'vue', 'plain', or 'none'"
     exit 1
 fi
 
-print_success "Frontend choice: $FRONTEND_CHOICE"
+if [ "$FRONTEND_CHOICE" = "none" ]; then
+    print_warning "No frontend will be configured"
+else
+    print_success "Frontend choice: $FRONTEND_CHOICE"
+fi
 
 # Summary
 print_header "Configuration Summary"
@@ -376,7 +394,7 @@ echo "Lowercase-Dash:   $DASH_NAME"
 echo "Snake_Case:       $SNAKE_NAME"
 echo "GitHub URL:       $GITHUB_URL"
 echo "Python Backend:   $KEEP_BACKEND"
-echo "Frontend:         $FRONTEND_CHOICE"
+echo "Frontend:         $([ "$FRONTEND_CHOICE" = "none" ] && echo "None (backend-only)" || echo "$FRONTEND_CHOICE")"
 echo ""
 read -p "Proceed with initialization? (y/n) [y]: " CONFIRM
 CONFIRM=${CONFIRM:-y}
@@ -428,7 +446,15 @@ fi
 # Step 8: Handle frontend choice
 print_info "Setting up frontend..."
 
-if [ "$FRONTEND_CHOICE" = "vue" ]; then
+if [ "$FRONTEND_CHOICE" = "none" ]; then
+    # Remove all frontend directories
+    print_warning "Removing all frontend directories..."
+    [ -d "frontend_vue" ] && rm -rf "frontend_vue" && print_success "Removed frontend_vue/"
+    [ -d "frontend_plain" ] && rm -rf "frontend_plain" && print_success "Removed frontend_plain/"
+    [ -d "frontend" ] && rm -rf "frontend" && print_success "Removed frontend/"
+    print_success "Frontend setup skipped (backend-only plugin)"
+
+elif [ "$FRONTEND_CHOICE" = "vue" ]; then
     if [ -d "frontend_vue" ]; then
         # Remove frontend_plain if it exists
         [ -d "frontend_plain" ] && rm -rf "frontend_plain" && print_success "Removed frontend_plain/"
@@ -441,19 +467,21 @@ if [ "$FRONTEND_CHOICE" = "vue" ]; then
     else
         print_info "frontend/ directory already exists, keeping it"
     fi
-elif [ "$FRONTEND_CHOICE" = "plain" ]; then
-    if [ -d "frontend_plain" ]; then
-        # Remove frontend_vue if it exists
-        [ -d "frontend_vue" ] && rm -rf "frontend_vue" && print_success "Removed frontend_vue/"
 
-        # Safely move/merge frontend_plain to frontend
-        safe_move_directory "frontend_plain" "frontend" "Frontend"
-    elif [ ! -d "frontend" ]; then
-        print_error "frontend_plain/ directory not found and no frontend/ exists!"
-        exit 1
-    else
-        print_info "frontend/ directory already exists, keeping it"
-    fi
+# Uncomment when frontend_plain is implemented:
+# elif [ "$FRONTEND_CHOICE" = "plain" ]; then
+#     if [ -d "frontend_plain" ]; then
+#         # Remove frontend_vue if it exists
+#         [ -d "frontend_vue" ] && rm -rf "frontend_vue" && print_success "Removed frontend_vue/"
+#
+#         # Safely move/merge frontend_plain to frontend
+#         safe_move_directory "frontend_plain" "frontend" "Frontend"
+#     elif [ ! -d "frontend" ]; then
+#         print_error "frontend_plain/ directory not found and no frontend/ exists!"
+#         exit 1
+#     else
+#         print_info "frontend/ directory already exists, keeping it"
+#     fi
 fi
 
 # Generate PascalCase version for class names
@@ -801,7 +829,9 @@ if [ "$KEEP_BACKEND" = true ]; then
 else
     echo "  • Backend: None (frontend-only)"
 fi
-if [ -d "frontend" ]; then
+if [ "$FRONTEND_CHOICE" = "none" ]; then
+    echo "  • Frontend: None (backend-only)"
+elif [ -d "frontend" ]; then
     echo "  • Frontend: $FRONTEND_CHOICE"
 fi
 if [ -d "tests" ]; then
