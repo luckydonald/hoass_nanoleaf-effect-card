@@ -632,6 +632,7 @@ replace_in_file() {
                 -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
                 -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
                 -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/PLUGIN-TEMPLATE-CARD/$(echo $DASH_NAME | tr '[:lower:]' '[:upper:]')-CARD/g" \
                 -e "s/plugin_template/$SNAKE_NAME/g" \
                 -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
                 -e "s/plugin-template/$DASH_NAME/g" \
@@ -657,6 +658,7 @@ replace_in_file() {
                 -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
                 -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
                 -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/PLUGIN-TEMPLATE-CARD/$(echo $DASH_NAME | tr '[:lower:]' '[:upper:]')-CARD/g" \
                 -e "s/plugin_template/$SNAKE_NAME/g" \
                 -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
                 -e "s/plugin-template/$DASH_NAME/g" \
@@ -677,6 +679,7 @@ replace_in_file() {
                 -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
                 -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
                 -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/PLUGIN-TEMPLATE-CARD/$(echo $DASH_NAME | tr '[:lower:]' '[:upper:]')-CARD/g" \
                 -e "s/plugin_template/$SNAKE_NAME/g" \
                 -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
                 -e "s/plugin-template/$DASH_NAME/g" \
@@ -702,6 +705,7 @@ replace_in_file() {
                 -e "s/hoass_plugin_template/hoass_${SNAKE_NAME}/g" \
                 -e "s/hoass-plugin-template/hoass-${DASH_NAME}/g" \
                 -e "s/plugin-template-card/${DASH_NAME}-card/g" \
+                -e "s/PLUGIN-TEMPLATE-CARD/$(echo $DASH_NAME | tr '[:lower:]' '[:upper:]')-CARD/g" \
                 -e "s/plugin_template/$SNAKE_NAME/g" \
                 -e "s/plugin-template\.zip/${DASH_NAME}.zip/g" \
                 -e "s/plugin-template/$DASH_NAME/g" \
