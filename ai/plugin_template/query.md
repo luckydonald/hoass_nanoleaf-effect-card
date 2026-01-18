@@ -261,3 +261,7 @@ If all those conditions are met:
 - do the replacements in `README.md`
 For readability, refactor the `Setting up README files...` in a function, and reorder the `if`s to have a early-return approch instead of nesting those `if`s.
 No need to delete `scripts/README_PROJECT_TEMPLATE.md`.
+
+———
+
+Hacs and Hassfest recommends to have the workflow run on `push`, on `pull_request` and on a schedule (weekly is fine).

@@ -2,13 +2,10 @@ name: CI
 
 on:
   push:
-    branches:
-      - mane
-      - main
   pull_request:
-    branches:
-      - mane
-      - main
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   python-lint:
