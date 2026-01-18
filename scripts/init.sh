@@ -623,6 +623,35 @@ replace_in_file() {
         REPLACE_AUTHORS=true
     fi
 
+    # Build the sed command with common replacements
+    SED_CMD=""
+    SED_CMD+=" -e \"s|https://github.com/luckydonald/hoass_plugin-template|${GITHUB_URL%.git}|g\""
+    SED_CMD+=" -e \"s/hoass_plugin-template/hoass_${DASH_NAME}/g\""
+    SED_CMD+=" -e \"s/hoass_plugin_template/hoass_${SNAKE_NAME}/g\""
+    SED_CMD+=" -e \"s/hoass-plugin-template/hoass-${DASH_NAME}/g\""
+    SED_CMD+=" -e \"s/plugin-template-card/${DASH_NAME}-card/g\""
+    SED_CMD+=" -e \"s/PLUGIN-TEMPLATE-CARD/$(echo $DASH_NAME | tr '[:lower:]' '[:upper:]')-CARD/g\""
+    SED_CMD+=" -e \"s/plugin_template/$SNAKE_NAME/g\""
+    SED_CMD+=" -e \"s/plugin-template\.zip/${DASH_NAME}.zip/g\""
+    SED_CMD+=" -e \"s/plugin-template/$DASH_NAME/g\""
+    SED_CMD+=" -e \"s/Plugin template/$DISPLAY_NAME/g\""
+    SED_CMD+=" -e \"s/Plugin Template/$DISPLAY_NAME/g\""
+    SED_CMD+=" -e \"s/from '\.\/PluginTemplateCard\.vue'/from '.\/${PASCAL_NAME}Card.vue'/g\""
+    SED_CMD+=" -e \"s/PluginTemplateCard/${PASCAL_NAME}Card/g\""
+    SED_CMD+=" -e \"s/PluginTemplate/${PASCAL_NAME}/g\""
+    SED_CMD+=" -e \"s/PLUGIN_TEMPLATE/$(echo $SNAKE_NAME | tr '[:lower:]' '[:upper:]')/g\""
+
+    # Add author replacements if needed
+    if [ "$REPLACE_AUTHORS" = true ]; then
+        SED_CMD+=" -e \"s/lucky lucy (aka\. luckydonald)/$GITHUB_USER/g\""
+        SED_CMD+=" -e \"s/@luckydonald\", \"@luckylucy/@$GITHUB_USER/g\""
+        SED_CMD+=" -e \"s/{ name = \\\"luckydonald\\\" }, { name = \\\"luckylucy\\\" }/{ name = \\\"$GITHUB_USER\\\" }/g\""
+        SED_CMD+=" -e \"s/@luckydonald/@$GITHUB_USER/g\""
+        SED_CMD+=" -e \"s/\\\"luckydonald\\\"/\\\"$GITHUB_USER\\\"/g\""
+        SED_CMD+=" -e \"s/luckydonald/$GITHUB_USER/g\""
+        SED_CMD+=" -e \"s/luckylucy/$GITHUB_USER/g\""
+    fi
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
         eval "sed -i '' $SED_CMD \"$file\""
@@ -873,3 +902,4 @@ fi
 echo ""
 print_warning "Note: You may need to restart Home Assistant and clear browser cache"
 echo ""
+
