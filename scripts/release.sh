@@ -109,16 +109,6 @@ else
     exit 1
 fi
 
-echo -e "New version: ${GREEN}v${NEW_VERSION}${NC}"
-echo ""
-
-read -p "Proceed with release? (Y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Nn]$ ]]; then
-    echo "Aborted."
-    exit 0
-fi
-
 # Step 1: Check for type errors (not lint - we'll fix those in step 3)
 echo ""
 echo -e "${GREEN}🔍 Step 1: Check for type errors${NC}"
@@ -197,6 +187,19 @@ cd ..
 echo "  Frontend built successfully!"
 
 # Step 7: Bump version AFTER all tests pass
+
+# but first let the user confirm, lol
+echo -e "New version: ${GREEN}v${NEW_VERSION}${NC}"
+echo ""
+
+read -p "Proceed with release? (Y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "Aborted."
+    exit 0
+fi
+
+# now actually bump the version
 echo ""
 echo -e "${GREEN}🏷️  Step 7: Update version${NC}"
 sed -i.bak 's/"version": "[^"]*"/"version": "'"${NEW_VERSION}"'"/' "custom_components/${SNAKE_NAME}/manifest.json"
