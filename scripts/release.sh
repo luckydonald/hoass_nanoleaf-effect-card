@@ -165,7 +165,7 @@ echo -e "${GREEN}🐍 Step 4: Format Python code${NC}"
 uv run ruff format custom_components/
 if ! git diff --quiet -- custom_components/; then
     git add -u custom_components/
-    git commit -m "$(reason="ruff" tmpl "${COMMIT_MSG_LINT}")"
+    git commit -m "$(reason="ruff autoformat" tmpl "${COMMIT_MSG_LINT}")"
     echo "  Committed Python formatting changes"
 else
     echo "  No Python formatting changes needed"
@@ -179,7 +179,7 @@ yarn format
 cd ..
 if ! git diff --quiet -- frontend/; then
     git add -u frontend/
-    git commit -m "$(reason="ts" tmpl "${COMMIT_MSG_LINT}")"
+    git commit -m "$(reason="ts autoformat" tmpl "${COMMIT_MSG_LINT}")"
     echo "  Committed TypeScript formatting changes"
 else
     echo "  No TypeScript formatting changes needed"
