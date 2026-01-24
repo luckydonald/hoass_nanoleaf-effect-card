@@ -22,7 +22,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 COMMIT_MSG_VERSION_BUMP="⬆️ version: bumped \`{from}\` → \`{to}\`"
-COMMIT_MSG_LINT="🔧 lint: {reason}"
+COMMIT_MSG_AUTOFIX="🔧{emoji} lint: {reason}"
+COMMIT_MSG_LINT="🧹{emoji} lint: {reason}"
 
 # -------------------------------------------------
 # tmpl  –  expand a template using environment variables
@@ -135,7 +136,7 @@ echo -e "${GREEN}🔧 Step 3: Auto-fix lint errors${NC}"
 uv run ruff check --fix custom_components/
 if ! git diff --quiet -- custom_components/; then
     git add -u custom_components/
-    git commit -m "$(reason="ruff autofix" tmpl "${COMMIT_MSG_LINT}")"
+    git commit -m "$(reason="ruff autofix" emoji="🐍" tmpl "${COMMIT_MSG_AUTOFIX}")"
     echo "  Committed auto-fixed lint errors"
 else
     echo "  No auto-fixable lint errors"
@@ -151,11 +152,11 @@ echo "  All lint errors resolved!"
 
 # Step 4: Run Python formatter and commit
 echo ""
-echo -e "${GREEN}🐍 Step 4: Format Python code${NC}"
+echo -e "${GREEN} Step 4: Format Python code${NC}"
 uv run ruff format custom_components/
 if ! git diff --quiet -- custom_components/; then
     git add -u custom_components/
-    git commit -m "$(reason="ruff autoformat" tmpl "${COMMIT_MSG_LINT}")"
+    git commit -m "$(reason="ruff autoformat" emoji="🐍" tmpl "${COMMIT_MSG_LINT}")"
     echo "  Committed Python formatting changes"
 else
     echo "  No Python formatting changes needed"
@@ -169,7 +170,7 @@ yarn format
 cd ..
 if ! git diff --quiet -- frontend/; then
     git add -u frontend/
-    git commit -m "$(reason="ts autoformat" tmpl "${COMMIT_MSG_LINT}")"
+    git commit -m "$(reason="ts autoformat" emoji="📘" tmpl "${COMMIT_MSG_LINT}")"
     echo "  Committed TypeScript formatting changes"
 else
     echo "  No TypeScript formatting changes needed"
