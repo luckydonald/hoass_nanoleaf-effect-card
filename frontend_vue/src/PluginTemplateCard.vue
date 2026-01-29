@@ -150,4 +150,3 @@ ha-card {
   font-style: italic;
 }
 </style>
-
