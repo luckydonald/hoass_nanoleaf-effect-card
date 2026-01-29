@@ -306,3 +306,11 @@ Then modify `release.sh` to read that file, and use the name instead of `plugin_
 Actually, write that to a separate script, `get_project_settings.py`, which can be used in any of those scripts to get the json data as variables.
 So basically, read the file, if it is missing, error out, with a hint to run `init.sh` / `make init` first.
 Additionally, `init.sh` shall read the file at the beginning, and if existing, pre-fill the prompts with the existing values, instead of the computed folder-based defaults.
+———
+I want to add the airbnb style for my typescript and in the TS in the vue components.
+Also HTML attributes should be on separate lines, in witch case also and tag start and end would be on their own line. Also the content would be on it's own line too.
+
+Make sure that the formatter DOES NOT colapse multiline stuff back into a single line once it's deemed short enough, both for ts arrays, imports, argument lists, ... and vue html stuff.
+The idea is to have as minimal diffs as possible when changing stuff. It may expand stuff to multiple lines, but never collapse it back.
+
+Please explain me the options I have, first.
