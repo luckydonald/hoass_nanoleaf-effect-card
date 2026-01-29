@@ -1,18 +1,18 @@
 # Is this a frontend or backend project, or both?
 # Set explicit (e.g. by `make lint FRONTEND=1 BACKEND=1`), or detect the
 # presence of the directories. FRONTEND_DIR picks the concrete frontend folder.
-+
-+# Prefer frontend/ then frontend_vue/
-+FRONTEND_DIR :=
-+ifneq ($(wildcard frontend),)
-+FRONTEND_DIR := frontend
-+else ifneq ($(wildcard frontend_vue),)
-+FRONTEND_DIR := frontend_vue
-+endif
-+
-+# FRONTEND is 1 if we found a frontend dir
-+FRONTEND ?= $(if $(FRONTEND_DIR),1,0)
-+BACKEND  ?= $(if $(wildcard custom_components),1,0)
+
+# Prefer frontend/ then frontend_vue/
+FRONTEND_DIR :=
+ifneq ($(wildcard frontend),)
+FRONTEND_DIR := frontend
+else ifneq ($(wildcard frontend_vue),)
+FRONTEND_DIR := frontend_vue
+endif
+
+# FRONTEND is 1 if we found a frontend dir
+FRONTEND ?= $(if $(FRONTEND_DIR),1,0)
+BACKEND  ?= $(if $(wildcard custom_components),1,0)
 
 .PHONY: release lint format build setup help commit init fix-commits commit-fix rebase-template template-rebase
 
