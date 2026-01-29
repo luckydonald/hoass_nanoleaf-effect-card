@@ -11,25 +11,70 @@ fi
 
 cd "${FRONTEND_DIR}"
 
-# Try lint autofix (lint:fix) if present, else run lint. Then run format if present.
-if command -v npm >/dev/null 2>&1; then
-  if grep -q '"lint:fix"' package.json >/dev/null 2>&1; then
-    npm run lint:fix || true
-  elif grep -q '"lint"' package.json >/dev/null 2>&1; then
-    npm run lint || true
+# Helper: check if package.json has a script
+has_script() {
+  local name="$1"
+  grep -q "\"${name}\"\s*:\s*\"" package.json >/dev/null 2>&1
+}
+
+# Helper: run npm/yarn script
+run_script() {
+  local name="$1"
+  if command -v npm >/dev/null 2>&1; then
+    echo "Running: npm run ${name}"
+    npm run "${name}"
+  elif command -v yarn >/dev/null 2>&1; then
+    echo "Running: yarn ${name}"
+    yarn "${name}"
+  else
+    return 127
   fi
-  if grep -q '"format"' package.json >/dev/null 2>&1; then
-    npm run format || true
+}
+
+# Helper: run local binary (node_modules/.bin) or global fallback
+run_local_or_global() {
+  local cmd="${1}"
+  shift
+  local args=("$@")
+  if [ -x "./node_modules/.bin/${cmd}" ]; then
+    echo "Running local: ./node_modules/.bin/${cmd} ${args[*]}"
+    ./node_modules/.bin/${cmd} "${args[@]}"
+    return $?
   fi
-elif command -v yarn >/dev/null 2>&1; then
-  if grep -q '"lint:fix"' package.json >/dev/null 2>&1; then
-    yarn lint:fix || true
-  elif grep -q '"lint"' package.json >/dev/null 2>&1; then
-    yarn lint || true
+  if command -v ${cmd} >/dev/null 2>&1; then
+    echo "Running global: ${cmd} ${args[*]}"
+    ${cmd} "${args[@]}"
+    return $?
   fi
-  if grep -q '"format"' package.json >/dev/null 2>&1; then
-    yarn format || true
-  fi
+  return 127
+}
+
+STATUS=0
+
+# 1) Lint autofix: prefer package script lint:fix, else try eslint --fix
+if has_script "lint:fix"; then
+  if ! run_script "lint:fix"; then STATUS=$?; fi
 else
-  echo "No npm/yarn found - skipping frontend format."
+  # try eslint --fix via local/global binary
+  if run_local_or_global "eslint" "--ext" ".ts,.tsx,.js,.vue" "--fix" "." >/dev/null 2>&1; then
+    if ! run_local_or_global "eslint" "--ext" ".ts,.tsx,.js,.vue" "--fix" "."; then STATUS=$?; fi
+  else
+    echo "No lint:fix script and no eslint binary found. Skipping lint autofix."
+  fi
 fi
+
+# 2) Formatter: prefer package script 'format', else try dprint or prettier
+if has_script "format"; then
+  if ! run_script "format"; then STATUS=$((STATUS|$?)); fi
+else
+  # try dprint
+  if run_local_or_global "dprint" "fmt" >/dev/null 2>&1; then
+    if ! run_local_or_global "dprint" "fmt"; then STATUS=$((STATUS|$?)); fi
+  elif run_local_or_global "prettier" "--write" "." >/dev/null 2>&1; then
+    if ! run_local_or_global "prettier" "--write" "."; then STATUS=$((STATUS|$?)); fi
+  else
+    echo "No format script and no known formatter (dprint/prettier) found. Skipping format."
+  fi
+fi
+
+exit ${STATUS}
