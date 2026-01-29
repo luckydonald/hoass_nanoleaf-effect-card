@@ -14,7 +14,7 @@ endif
 FRONTEND ?= $(if $(FRONTEND_DIR),1,0)
 BACKEND  ?= $(if $(wildcard custom_components),1,0)
 
-.PHONY: release lint format build setup help commit init fix-commits commit-fix rebase-template template-rebase merge-template template-merge
+.PHONY: release lint format build setup help commit init fix-commits commit-fix rebase-template template-rebase merge-template template-merge check-slots
 
 help:
 	@echo "Plugin Template - Development Commands"
@@ -200,6 +200,9 @@ merge-template:
 	@./scripts/merge-from-template.sh
 
 template-merge: merge-template
+
+check-slots:
+	@node scripts/check_slots.js frontend_vue || true
 
 %:
 	@echo "Unknown target '$@'. Showing help:"
