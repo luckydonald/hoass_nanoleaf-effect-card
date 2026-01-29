@@ -43,6 +43,21 @@ module.exports = {
     'vue/multiline-html-element-content-newline': ['error', { ignoreWhenEmpty: true, allowEmptyLines: false }],
     'vue/singleline-html-element-content-newline': 'off',
     'vue/html-indent': ['error', 2],
+    // Prefer self-closing form for void elements like <input />, <img />, <br /> to match HTML XML-style preferences
+    'vue/html-self-closing': ['error', {
+      'html': {
+        'void': 'always',
+        'normal': 'never',
+        'component': 'always'
+      },
+      'svg': 'always',
+      'math': 'always'
+    }],
+    // Disable rules that auto-convert legacy `slot` attributes to `v-slot` templates
+    // for custom web components (Home Assistant `ha-*` elements). These are not
+    // Vue components and should keep their native `slot="..."` attribute.
+    'vue/no-deprecated-slot-attribute': 'off',
+    'vue/v-slot-style': 'off',
 
     // Project-specific relaxations to match existing code style
     // Allow underscore usage in properties and members (Home Assistant style)
