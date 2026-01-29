@@ -11,11 +11,37 @@ fi
 
 cd "${FRONTEND_DIR}"
 
-# Prefer npm, fall back to yarn. Try lint, otherwise try type-check.
+# Run both type-check and lint (if present) and return non-zero if either fails.
+STATUS=0
+
 if command -v npm >/dev/null 2>&1; then
-  npm run lint || npm run type-check || true
+  # type-check
+  if grep -q '"type-check"' package.json >/dev/null 2>&1; then
+    echo "Running: npm run type-check"
+    npm run type-check || STATUS=$?
+  fi
+
+  # lint
+  if grep -q '"lint"' package.json >/dev/null 2>&1; then
+    echo "Running: npm run lint"
+    npm run lint || STATUS=$((STATUS|$?))
+  fi
+
 elif command -v yarn >/dev/null 2>&1; then
-  yarn lint || yarn type-check || true
+  # type-check
+  if grep -q '"type-check"' package.json >/dev/null 2>&1; then
+    echo "Running: yarn type-check"
+    yarn type-check || STATUS=$?
+  fi
+
+  # lint
+  if grep -q '"lint"' package.json >/dev/null 2>&1; then
+    echo "Running: yarn lint"
+    yarn lint || STATUS=$((STATUS|$?))
+  fi
+
 else
   echo "No npm/yarn found - skipping frontend lint."
 fi
+
+exit ${STATUS}
