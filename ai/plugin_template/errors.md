@@ -729,3 +729,6 @@ The merge variant has the same problem with opening a EDITOR instead of automati
 ———
 The merge script seems to be missing the `# Re-check after auto-staging` part?
 Also, it should edit the existing message the editor would display, not create (overwrite) the existing / a new one - uncommenting there would pretty useless, no?.
+———
+./scripts/release.sh: line 162: syntax error near unexpected token `)'
+./scripts/release.sh: SC1075: Use 'elif' instead of 'else if' (or put 'if' on new line if nesting).
