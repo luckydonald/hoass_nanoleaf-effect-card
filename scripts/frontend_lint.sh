@@ -11,37 +11,71 @@ fi
 
 cd "${FRONTEND_DIR}"
 
-# Run both type-check and lint (if present) and return non-zero if either fails.
+# Helper: check if package.json has a script
+has_script() {
+  local name="$1"
+  grep -q "\"${name}\"\s*:\s*\"" package.json >/dev/null 2>&1
+}
+
+# Helper: run npm/yarn script
+run_script() {
+  local name="$1"
+  if command -v npm >/dev/null 2>&1; then
+    echo "Running: npm run ${name}"
+    npm run "${name}"
+  elif command -v yarn >/dev/null 2>&1; then
+    echo "Running: yarn ${name}"
+    yarn "${name}"
+  else
+    return 127
+  fi
+}
+
+# Helper: run local binary (node_modules/.bin) or global fallback
+run_local_or_global() {
+  local cmd="${1}"
+  shift
+  local args=("$@")
+  if [ -x "./node_modules/.bin/${cmd}" ]; then
+    echo "Running local: ./node_modules/.bin/${cmd} ${args[*]}"
+    ./node_modules/.bin/${cmd} "${args[@]}"
+    return $?
+  fi
+  if command -v ${cmd} >/dev/null 2>&1; then
+    echo "Running global: ${cmd} ${args[*]}"
+    ${cmd} "${args[@]}"
+    return $?
+  fi
+  return 127
+}
+
 STATUS=0
 
-if command -v npm >/dev/null 2>&1; then
-  # type-check
-  if grep -q '"type-check"' package.json >/dev/null 2>&1; then
-    echo "Running: npm run type-check"
-    npm run type-check || STATUS=$?
-  fi
-
-  # lint
-  if grep -q '"lint"' package.json >/dev/null 2>&1; then
-    echo "Running: npm run lint"
-    npm run lint || STATUS=$((STATUS|$?))
-  fi
-
-elif command -v yarn >/dev/null 2>&1; then
-  # type-check
-  if grep -q '"type-check"' package.json >/dev/null 2>&1; then
-    echo "Running: yarn type-check"
-    yarn type-check || STATUS=$?
-  fi
-
-  # lint
-  if grep -q '"lint"' package.json >/dev/null 2>&1; then
-    echo "Running: yarn lint"
-    yarn lint || STATUS=$((STATUS|$?))
-  fi
-
+# 1) Type check: prefer script, else try local binaries (vue-tsc or tsc)
+if has_script "type-check"; then
+  if ! run_script "type-check"; then STATUS=$?; fi
 else
-  echo "No npm/yarn found - skipping frontend lint."
+  if ! run_local_or_global "vue-tsc" "-b" >/dev/null 2>&1; then
+    if ! run_local_or_global "tsc" "-p" "." >/dev/null 2>&1; then
+      echo "No type-check script or suitable local/global binary (vue-tsc/tsc) found. Skipping type-check."
+    else
+      if ! run_local_or_global "tsc" "-p" "."; then STATUS=$?; fi
+    fi
+  else
+    if ! run_local_or_global "vue-tsc" "-b"; then STATUS=$?; fi
+  fi
+fi
+
+# 2) Lint: prefer script, else try local/global eslint
+if has_script "lint"; then
+  if ! run_script "lint"; then STATUS=$((STATUS|$?)); fi
+else
+  # run eslint on src files
+  if run_local_or_global "eslint" "--ext" ".ts,.tsx,.js,.vue" "." >/dev/null 2>&1; then
+    if ! run_local_or_global "eslint" "--ext" ".ts,.tsx,.js,.vue" "."; then STATUS=$((STATUS|$?)); fi
+  else
+    echo "No lint script and no eslint binary found. Skipping lint."
+  fi
 fi
 
 exit ${STATUS}
