@@ -49,9 +49,11 @@ async function callService(domain: string, service: string, data: any = {}) {
 }
 
 // Format time for display
-const formatTime = (date: Date): string => {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
+const formatTime = (date: Date): string =>
+  date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 </script>
 
 <template>
@@ -67,13 +69,24 @@ const formatTime = (date: Date): string => {
       </div>
 
       <!-- Example section: Display entity if configured -->
-      <div v-if="config.entity" class="section">
+      <div
+        v-if="config.entity"
+        class="section"
+      >
         <h3>Entity State</h3>
-        <div v-if="getEntityState(config.entity)" class="entity-info">
+        <div
+          v-if="getEntityState(config.entity)"
+          class="entity-info"
+        >
           <p><strong>Entity:</strong> {{ config.entity }}</p>
           <p><strong>State:</strong> {{ getEntityState(config.entity)?.state }}</p>
         </div>
-        <p v-else class="warning">Entity not found</p>
+        <p
+          v-else
+          class="warning"
+        >
+          Entity not found
+        </p>
       </div>
 
       <!-- Placeholder for your custom content -->

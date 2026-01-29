@@ -13,8 +13,11 @@ interface AppData {
 
 class PluginTemplateCardElement extends HTMLElement {
   private _config: PluginTemplateCardConfig = {};
+
   private _hass: HomeAssistant | null = null;
+
   private _app: App | null = null;
+
   private _root: HTMLDivElement | null = null;
 
   public set hass(hass: HomeAssistant) {
@@ -86,6 +89,7 @@ class PluginTemplateCardElement extends HTMLElement {
 
 class PluginTemplateCardEditor extends HTMLElement {
   private _config: PluginTemplateCardConfig = {};
+
   private _hass: HomeAssistant | null = null;
 
   public set hass(hass: HomeAssistant) {
@@ -128,10 +132,22 @@ class PluginTemplateCardEditor extends HTMLElement {
       'Clock Display',
       this._config.clock_display ?? 'analog',
       [
-        { value: 'analog', label: 'Analog' },
-        { value: '24h', label: 'Digital (24h)' },
-        { value: '12h', label: 'Digital (12h)' },
-        { value: 'none', label: 'None' },
+        {
+          value: 'analog',
+          label: 'Analog',
+        },
+        {
+          value: '24h',
+          label: 'Digital (24h)',
+        },
+        {
+          value: '12h',
+          label: 'Digital (12h)',
+        },
+        {
+          value: 'none',
+          label: 'None',
+        },
       ],
     ));
 
@@ -141,8 +157,14 @@ class PluginTemplateCardEditor extends HTMLElement {
       'Alarm List Mode',
       this._config.alarm_list_mode ?? 'days',
       [
-        { value: 'days', label: 'Show alarms for X days' },
-        { value: 'count', label: 'Show X alarms' },
+        {
+          value: 'days',
+          label: 'Show alarms for X days',
+        },
+        {
+          value: 'count',
+          label: 'Show X alarms',
+        },
       ],
     ));
 
@@ -196,9 +218,18 @@ class PluginTemplateCardEditor extends HTMLElement {
       'Add Alarm Section',
       this._config.show_add_section ?? 'auto',
       [
-        { value: 'auto', label: 'Auto (show when Add clicked)' },
-        { value: 'on', label: 'Always show' },
-        { value: 'off', label: 'Never show (dialog only)' },
+        {
+          value: 'auto',
+          label: 'Auto (show when Add clicked)',
+        },
+        {
+          value: 'on',
+          label: 'Always show',
+        },
+        {
+          value: 'off',
+          label: 'Never show (dialog only)',
+        },
       ],
     ));
 
@@ -363,7 +394,9 @@ class PluginTemplateCardEditor extends HTMLElement {
       entityPicker.setAttribute('value', this._config.entity);
     }
     (entityPicker as any).hass = this._hass;
-    (entityPicker as any).includeDomains = ['sensor'];
+    (entityPicker as any).includeDomains = [
+      'sensor',
+    ];
     entityPicker.style.width = '100%';
     entityPicker.addEventListener('value-changed', (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -376,7 +409,10 @@ class PluginTemplateCardEditor extends HTMLElement {
   }
 
   private _updateConfig(update: Partial<PluginTemplateCardConfig>): void {
-    this._config = { ...this._config, ...update };
+    this._config = {
+      ...this._config,
+      ...update,
+    };
     this._fireConfigChanged();
   }
 
