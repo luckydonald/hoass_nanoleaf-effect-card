@@ -159,9 +159,9 @@ if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
     echo "  Running frontend eslint autofix..."
     if grep -q '"lint:fix"' "${FRONTEND_DIR}/package.json" || grep -q '"lint"' "${FRONTEND_DIR}/package.json"; then
         if command -v npm >/dev/null 2>&1; then
-            (cd "${FRONTEND_DIR}" && if grep -q '"lint:fix"' package.json; then npm run lint:fix || true; else if grep -q '"lint"' package.json; then npm run lint || true; fi)
+            (cd "${FRONTEND_DIR}" && if grep -q '"lint:fix"' package.json; then npm run lint:fix || true; elif grep -q '"lint"' package.json; then npm run lint || true; fi)
         elif command -v yarn >/dev/null 2>&1; then
-            (cd "${FRONTEND_DIR}" && if grep -q '"lint:fix"' package.json; then yarn lint:fix || true; else if grep -q '"lint"' package.json; then yarn lint || true; fi)
+            (cd "${FRONTEND_DIR}" && if grep -q '"lint:fix"' package.json; then yarn lint:fix || true; elif grep -q '"lint"' package.json; then yarn lint || true; fi)
         else
             echo "  No npm/yarn found - skipping frontend lint autofix"
         fi
