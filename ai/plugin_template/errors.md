@@ -556,3 +556,30 @@ Proceed with release? (Y/n) n
 Aborted.
 
 -> `release.sh` should actually abort if the json file can not be loaded (probably the exit state of the python script is not checked/set?)
+
+———
+
+➜ make lint-ts
+Type checking / linting frontend...
+
+> plugin-template-card@0.0.0-dev0 lint
+> eslint "**/*.{ts,js,vue}" --quiet
+
+sh: eslint: command not found
+
+> plugin-template-card@0.0.0-dev0 type-check
+> vue-tsc -b
+
+sh: vue-tsc: command not found
+
+
+➜ make format-ts
+Formatting TypeScript...
+
+> plugin-template-card@0.0.0-dev0 format
+> dprint fmt
+
+sh: dprint: command not found
+make: *** [format-ts] Error 127
+
+--> SOLUTION: `make setup-frontend` 
