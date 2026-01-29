@@ -153,7 +153,19 @@ ifeq ($(FRONTEND),1)
 	@echo "Formatting TypeScript..."
 	@if [ -n "$(FRONTEND_DIR)" ]; then \
 		cd $(FRONTEND_DIR) && if [ -f package.json ]; then \
-			if command -v npm >/dev/null 2>&1; then npm run format; elif command -v yarn >/dev/null 2>&1; then yarn format; else echo "No npm/yarn found"; fi; \
+			if command -v npm >/dev/null 2>&1; then \
+				# Run lint autofix if available, else run lint (non-fix) as fallback
+				if grep -q '"lint:fix"' package.json >/dev/null 2>&1; then npm run lint:fix || true; \
+				elif grep -q '"lint"' package.json >/dev/null 2>&1; then npm run lint || true; \
+				fi; \
+				# Then run the formatter (if defined)
+				if grep -q '"format"' package.json >/dev/null 2>&1; then npm run format || true; fi; \
+			elif command -v yarn >/dev/null 2>&1; then \
+				if grep -q '"lint:fix"' package.json >/dev/null 2>&1; then yarn lint:fix || true; \
+				elif grep -q '"lint"' package.json >/dev/null 2>&1; then yarn lint || true; \
+				fi; \
+				if grep -q '"format"' package.json >/dev/null 2>&1; then yarn format || true; fi; \
+			else echo "No npm/yarn found"; fi; \
 		fi; \
 	fi
 else
