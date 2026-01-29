@@ -312,3 +312,7 @@ Also HTML attributes should be on separate lines, in witch case also and tag sta
 
 Make sure that the formatter DOES NOT colapse multiline stuff back into a single line once it's deemed short enough, both for ts arrays, imports, argument lists, ... and vue html stuff.
 The idea is to have as minimal diffs as possible when changing stuff. It may expand stuff to multiple lines, but never collapse it back.
+
+Please configure `eslint` with the required plugins and settings. Check on NPM for the latest version of each. I do not desire to use prettier.
+Please do integrate it into `Makefile` and the [`release.sh`](../../scripts/release.sh)` deploy script.
+Running `make format-ts` should contain the `--fix` one as well, just like `format-py` also builds upon `lint-py` with `--fix`.
