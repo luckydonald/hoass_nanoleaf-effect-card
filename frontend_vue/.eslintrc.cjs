@@ -4,9 +4,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    // Use an eslint-specific tsconfig that includes tests and config files
-    project: './tsconfig.eslint.json',
-    // Quiet the unsupported TypeScript version warning for now
+    // Do NOT set project here to avoid parserServices errors when linting JS files.
     warnOnUnsupportedTypeScriptVersion: false,
   },
   env: {
@@ -120,7 +118,15 @@ module.exports = {
       parser: 'vue-eslint-parser',
       parserOptions: {
         parser: '@typescript-eslint/parser',
+        project: './tsconfig.eslint.json',
         extraFileExtensions: ['.vue']
+      }
+    },
+    {
+      files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        project: './tsconfig.eslint.json'
       }
     },
     // Relax rules for test and config files
