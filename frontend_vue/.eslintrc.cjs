@@ -53,7 +53,28 @@ module.exports = {
       'math': 'always'
     }],
     // Disable rules that auto-convert legacy `slot` attributes to `v-slot` templates
-    'vue/no-deprecated-slot-attribute': 'off',
+    'vue/no-deprecated-slot-attribute': [
+      'error',
+      {
+        ignore: [
+          'ha-card',
+          'ha-icon-button',
+          'ha-switch',
+          'ha-select',
+          'ha-radio',
+          'ha-formfield',
+          'ha-list-item',
+          'ha-menu-button',
+          'ha-button-menu',
+          'ha-tabs',
+          'ha-tab',
+          'ha-expansion-panel',
+          'ha-expansion-panel-summary',
+          'ha-expansion-panel-details',
+          'ha-svg-icon',
+        ],
+      },
+    ],
     'vue/v-slot-style': 'off',
 
     // Project-specific relaxations to match existing code style
