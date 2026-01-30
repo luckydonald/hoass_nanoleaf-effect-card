@@ -61,6 +61,12 @@ module.exports = {
           'ha-button',
           'ha-icon',
         ],
+        ignoreParents: [
+          'ha-expansion-panel',
+          'ha-button',
+          'ha-fab',
+          'ha-dialog',
+        ],
       },
     ],
     'vue/v-slot-style': 'off',
