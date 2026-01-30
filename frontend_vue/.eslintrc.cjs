@@ -49,7 +49,7 @@ module.exports = {
     'vue/html-self-closing': ['error', {
       'html': {
         'void': 'always',
-        // Allow normal HTML elements to be self-closing (preserve `<div class="line" />`)
+        // Allow normal HTML elements to be self-closing
         'normal': 'always',
         'component': 'always'
       },
@@ -57,8 +57,6 @@ module.exports = {
       'math': 'always'
     }],
     // Disable rules that auto-convert legacy `slot` attributes to `v-slot` templates
-    // for custom web components (Home Assistant `ha-*` elements). These are not
-    // Vue components and should keep their native `slot="..."` attribute.
     'vue/no-deprecated-slot-attribute': 'off',
     'vue/v-slot-style': 'off',
 
@@ -81,11 +79,7 @@ module.exports = {
       {
         selector: 'typeProperty',
         format: ['camelCase', 'snake_case', 'PascalCase', 'UPPER_CASE'],
-        leadingUnderscore: 'allow',
-        filter: {
-          regex: '^--[a-z0-9-]+$',
-          match: true
-        }
+        leadingUnderscore: 'allow'
       },
       {
         // Allow object literal properties that are CSS custom properties (e.g. "--hour-background")
@@ -140,6 +134,14 @@ module.exports = {
         'array-element-newline': 'off',
         '@typescript-eslint/naming-convention': 'off',
         'no-multiple-empty-lines': 'off'
+      }
+    },
+    {
+      files: ['vite.config.js', 'vite.config.ts'],
+      parser: 'espree',
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module'
       }
     }
   ]
