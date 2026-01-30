@@ -150,7 +150,6 @@ module.exports = {
         ecmaVersion: 2020,
         sourceType: 'module',
         project: './tsconfig.eslint.json',
-        extraFileExtensions: ['.js'],
         warnOnUnsupportedTypeScriptVersion: false,
         // Allow linting JS files with the TS parser so parserServices are available
         allowJs: true
