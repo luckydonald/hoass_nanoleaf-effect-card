@@ -2,6 +2,29 @@
 const fs = require('fs');
 const path = require('path');
 
+// Load eslint config from frontend/.eslintrc.cjs if available to honor ignore lists
+const eslintConfigPath = path.join(process.cwd(), 'frontend', '.eslintrc.cjs');
+let eslintIgnore = [];
+let eslintIgnoreParents = [];
+if (fs.existsSync(eslintConfigPath)) {
+  try {
+    // eslint config is a CJS module
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    const eslintrc = require(eslintConfigPath);
+    const rule = eslintrc && eslintrc.rules && eslintrc.rules['vue/no-deprecated-slot-attribute'];
+    if (Array.isArray(rule)) {
+      const config = rule[1] || {};
+      if (config && typeof config === 'object') {
+        eslintIgnore = Array.isArray(config.ignore) ? config.ignore : [];
+        eslintIgnoreParents = Array.isArray(config.ignoreParents) ? config.ignoreParents : [];
+      }
+    }
+  } catch (err) {
+    // If loading fails, just continue with empty ignore lists
+    // console.warn('Failed to load eslint config:', err.message);
+  }
+}
+
 function walk(dir) {
   const res = [];
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -41,14 +64,27 @@ function checkFile(file) {
       const slotMatch = attrs.match(/\bslot\s*=\s*['\"]([^'\"]+)['\"]/);
       if (slotMatch) {
         const slot = slotMatch[1];
+
+        // Normalize tag and parent to lower-case for comparison
+        const tagNorm = (tag || '').toLowerCase();
+        const parentNorm = parent ? parent.toLowerCase() : null;
+
         // If tag itself is ha-* it's allowed
-        if (!tag.startsWith('ha-')) {
-          // Otherwise allow if parent is ha-*
-          if (!(parent && parent.startsWith('ha-'))) {
-            const upTo = text.slice(0, m.index);
-            const line = upTo.split('\n').length;
-            problems.push({ file, line, tag, slot, attrs });
-          }
+        let allowed = tagNorm.startsWith('ha-');
+
+        // Allow if parent is ha-*
+        if (!allowed && parentNorm && parentNorm.startsWith('ha-')) allowed = true;
+
+        // Allow if tag is explicitly ignored in eslint config
+        if (!allowed && eslintIgnore.includes(tagNorm)) allowed = true;
+
+        // Allow if parent is explicitly listed in eslintIgnoreParents
+        if (!allowed && parentNorm && eslintIgnoreParents.includes(parentNorm)) allowed = true;
+
+        if (!allowed) {
+          const upTo = text.slice(0, m.index);
+          const line = upTo.split('\n').length;
+          problems.push({ file, line, tag, slot, attrs });
         }
       }
 
