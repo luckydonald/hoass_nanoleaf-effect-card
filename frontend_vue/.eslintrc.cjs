@@ -5,6 +5,7 @@ module.exports = {
     ecmaVersion: 2020,
     sourceType: 'module',
     // Do NOT set project here to avoid parserServices errors when linting JS files.
+    // Quiet the unsupported TypeScript version warning for now
     warnOnUnsupportedTypeScriptVersion: false,
   },
   env: {
