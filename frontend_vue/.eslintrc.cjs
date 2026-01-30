@@ -150,6 +150,13 @@ module.exports = {
         ecmaVersion: 2020,
         sourceType: 'module'
       }
+    },
+    {
+      files: ['vite.config.js'],
+      rules: {
+        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/no-unused-vars': 'off'
+      }
     }
   ]
 };
