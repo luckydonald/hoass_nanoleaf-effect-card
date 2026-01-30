@@ -1,3 +1,4 @@
+import airbnb from './eslint.airbnb.mjs';
 import base from './eslint.base.js';
 import ts from './eslint.ts.js';
 
@@ -19,6 +20,7 @@ const optionals = await Promise.allSettled(
 );
 
 export default [
+  ...airbnb,
   ...base,
   ...ts,
   ...optionals,
