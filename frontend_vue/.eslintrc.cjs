@@ -39,7 +39,6 @@ module.exports = {
     'vue/max-attributes-per-line': ['error', { singleline: 1, multiline: { max: 1 } }],
     'vue/html-closing-bracket-newline': ['error', { singleline: 'never', multiline: 'always' }],
     'vue/multiline-html-element-content-newline': ['error', { ignoreWhenEmpty: true, allowEmptyLines: false }],
-    'vue/singleline-html-element-content-newline': 'off',
     'vue/html-indent': ['error', 2],
     // Prefer self-closing form for void elements like <input />, <img />, <br /> to match HTML XML-style preferences
     'vue/html-self-closing': ['error', {
@@ -70,7 +69,16 @@ module.exports = {
       },
     ],
     'vue/v-slot-style': 'off',
-
+    'vue/array-bracket-newline': [
+      "error",
+      "consistent",
+    ],
+    "vue/v-bind-style": [
+      "error",
+      "shorthand", {
+        "sameNameShorthand": "always",
+      }
+    ],
     // Project-specific relaxations to match existing code style
     // Allow underscore usage in properties and members (Home Assistant style)
     'no-underscore-dangle': 'off',
