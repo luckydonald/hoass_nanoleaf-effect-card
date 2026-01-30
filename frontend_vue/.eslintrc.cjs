@@ -144,15 +144,26 @@ module.exports = {
       }
     },
     {
-      files: ['vite.config.js', 'vite.config.ts'],
+      files: ['vite.config.js'],
+      parser: 'espree',
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module'
+      },
+      rules: {
+        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/dot-notation': 'off',
+        '@typescript-eslint/no-unused-vars': 'off'
+      }
+    },
+    {
+      files: ['vite.config.ts', 'vitest.config.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
         project: './tsconfig.eslint.json',
-        warnOnUnsupportedTypeScriptVersion: false,
-        // Allow linting JS files with the TS parser so parserServices are available
-        allowJs: true
+        warnOnUnsupportedTypeScriptVersion: false
       }
     }
   ]
