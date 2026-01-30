@@ -9,8 +9,8 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "vite.config.ts",
-    "vite.config.js",
-    "vitest.config.ts"
+    "./vite.config.ts",
+    "./vite.config.js",
+    "./vitest.config.ts"
   ]
 }
