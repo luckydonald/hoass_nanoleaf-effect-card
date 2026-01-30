@@ -124,7 +124,7 @@ module.exports = {
       }
     },
     {
-      files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx'],
+      files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx', '*.ts', 'vite.config.ts', 'vitest.config.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         project: './tsconfig.eslint.json'
