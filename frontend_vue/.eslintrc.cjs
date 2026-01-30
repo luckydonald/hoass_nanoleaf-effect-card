@@ -62,14 +62,14 @@ module.exports = {
     'max-classes-per-file': ['error', 3],
     'class-methods-use-this': 'off',
     'no-console': 'warn',
-    'no-restricted-globals': ['error', {"name": "event", "message": "Do not use global event"}],
+    'no-restricted-globals': ['error', {'name': 'event', 'message': 'Do not use global event'}],
     'no-spaced-func': 'off', // deprecated, trouble with TS
     'default-case': 'off',
   },
   overrides: [
     // JavaScript config files (no type checking)
     {
-      files: ['*.js', '*.cjs', '*.mjs', 'vite.config.js', 'vitest.config.js'],
+      files: ['*.js', '*.cjs', '*.mjs'],
       parser: 'espree',
       parserOptions: {
         ecmaVersion: 2020,
@@ -80,6 +80,36 @@ module.exports = {
         'import/no-extraneous-dependencies': 'off',
         'array-bracket-newline': 'off',
         'array-element-newline': 'off',
+      }
+    },
+    // Config files in TypeScript (NO airbnb-typescript, NO type checking)
+    {
+      files: ['vite.config.ts', 'vitest.config.ts'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        // Explicitly NO project or projectService
+      },
+      plugins: ['@typescript-eslint'],
+      // Only use base rules, NOT airbnb-typescript/base
+      rules: {
+        // Disable all TypeScript rules that require type information
+        '@typescript-eslint/dot-notation': 'off',
+        '@typescript-eslint/no-implied-eval': 'off',
+        '@typescript-eslint/no-throw-literal': 'off',
+        '@typescript-eslint/return-await': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
+        'import/extensions': 'off',
+        'import/no-extraneous-dependencies': 'off',
+        'array-bracket-newline': 'off',
+        'array-element-newline': 'off',
+        '@typescript-eslint/naming-convention': 'off',
+        'no-multiple-empty-lines': 'off',
+        // Use base eslint rules instead
+        'dot-notation': 'off',
+        'no-implied-eval': 'error',
+        'no-throw-literal': 'error',
       }
     },
     // Vue files
@@ -100,7 +130,7 @@ module.exports = {
     },
     // TypeScript source files
     {
-      files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx', '*.ts'],
+      files: ['src/**/*.{ts,tsx}', '*.ts'],
       excludedFiles: ['vite.config.ts', 'vitest.config.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
@@ -154,28 +184,6 @@ module.exports = {
         ],
         '@typescript-eslint/no-use-before-define': ['error', {'functions': false, 'classes': true, 'variables': true}],
         '@typescript-eslint/no-unused-vars': ['error', {'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_'}]
-      }
-    },
-    // TypeScript config files (with relaxed rules, no type checking)
-    {
-      files: ['vite.config.ts', 'vitest.config.ts'],
-      parser: '@typescript-eslint/parser',
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module',
-        // No project/projectService - config files don't need type checking
-      },
-      extends: [
-        'airbnb-typescript/base',
-      ],
-      rules: {
-        '@typescript-eslint/no-unused-vars': 'off',
-        'import/extensions': 'off',
-        'import/no-extraneous-dependencies': 'off',
-        'array-bracket-newline': 'off',
-        'array-element-newline': 'off',
-        '@typescript-eslint/naming-convention': 'off',
-        'no-multiple-empty-lines': 'off'
       }
     },
     // Test files (with type checking but relaxed rules)
