@@ -59,6 +59,7 @@ module.exports = {
         ignore: [
           'ha-card',
           'ha-button',
+          'ha-icon',
         ],
       },
     ],
