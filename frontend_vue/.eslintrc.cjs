@@ -13,9 +13,7 @@ module.exports = {
   },
   extends: [
     'airbnb-base',
-    'airbnb-typescript/base',
     'plugin:vue/vue3-recommended',
-    'plugin:@typescript-eslint/stylistic-type-checked',
   ],
   plugins: ['@typescript-eslint', 'vue'],
   rules: {
@@ -61,89 +59,115 @@ module.exports = {
     // Project-specific relaxations to match existing code style
     // Allow underscore usage in properties and members (Home Assistant style)
     'no-underscore-dangle': 'off',
-    '@typescript-eslint/naming-convention': [
-      'error',
-      {
-        selector: 'default',
-        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
-        leadingUnderscore: 'forbid'
-      },
-      {
-        // Allow object properties (including interface/type properties) to use snake_case
-        selector: 'property',
-        format: ['camelCase', 'snake_case', 'PascalCase', 'UPPER_CASE'],
-        leadingUnderscore: 'allow'
-      },
-      {
-        selector: 'typeProperty',
-        format: ['camelCase', 'snake_case', 'PascalCase', 'UPPER_CASE'],
-        leadingUnderscore: 'allow'
-      },
-      {
-        // Allow object literal properties that are CSS custom properties (e.g. "--hour-background")
-        selector: 'objectLiteralProperty',
-        format: null,
-        filter: {
-          regex: '^--[a-z0-9-]+$',
-          match: true
-        }
-      },
-      // Allow leading underscore for class methods and functions (common internal helpers)
-      {
-        selector: 'method',
-        format: ['camelCase', 'PascalCase'],
-        leadingUnderscore: 'allow'
-      },
-      {
-        selector: 'function',
-        format: ['camelCase', 'PascalCase'],
-        leadingUnderscore: 'allow'
-      }
-    ],
     'max-classes-per-file': ['error', 3],
     'class-methods-use-this': 'off',
     'no-console': 'warn',
-    // Relax template-specific rules that cause noise in copied projects
-    '@typescript-eslint/no-use-before-define': ['error', {'functions': false, 'classes': true, 'variables': true}],
-    'no-restricted-globals': ['error', {'name': 'event', 'message': 'Do not use global event'}],
+    'no-restricted-globals': ['error', {"name": "event", "message": "Do not use global event"}],
     'no-spaced-func': 'off', // deprecated, trouble with TS
     'default-case': 'off',
-
-    // Allow unused vars that start with an underscore (common pattern in function args)
-    '@typescript-eslint/no-unused-vars': ['error', {'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_'}]
   },
   overrides: [
+    // JavaScript config files (no type checking)
+    {
+      files: ['*.js', '*.cjs', '*.mjs', 'vite.config.js', 'vitest.config.js'],
+      parser: 'espree',
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module'
+      },
+      rules: {
+        'import/extensions': 'off',
+        'import/no-extraneous-dependencies': 'off',
+        'array-bracket-newline': 'off',
+        'array-element-newline': 'off',
+      }
+    },
+    // Vue files
     {
       files: ['*.vue'],
       parser: 'vue-eslint-parser',
       parserOptions: {
+        parser: '@typescript-eslint/parser',
         projectService: true,
         tsconfigRootDir: __dirname,
         project: __dirname + '/tsconfig.eslint.json',
         extraFileExtensions: ['.vue']
-      }
+      },
+      extends: [
+        'airbnb-typescript/base',
+        'plugin:@typescript-eslint/stylistic-type-checked',
+      ],
     },
+    // TypeScript source files
     {
       files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx', '*.ts'],
+      excludedFiles: ['vite.config.ts', 'vitest.config.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         projectService: true,
         tsconfigRootDir: __dirname,
         project: __dirname + '/tsconfig.eslint.json',
+      },
+      extends: [
+        'airbnb-typescript/base',
+        'plugin:@typescript-eslint/stylistic-type-checked',
+      ],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'default',
+            format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+            leadingUnderscore: 'forbid'
+          },
+          {
+            // Allow object properties (including interface/type properties) to use snake_case
+            selector: 'property',
+            format: ['camelCase', 'snake_case', 'PascalCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow'
+          },
+          {
+            selector: 'typeProperty',
+            format: ['camelCase', 'snake_case', 'PascalCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow'
+          },
+          {
+            // Allow object literal properties that are CSS custom properties (e.g. "--hour-background")
+            selector: 'objectLiteralProperty',
+            format: null,
+            filter: {
+              regex: '^--[a-z0-9-]+$',
+              match: true
+            }
+          },
+          // Allow leading underscore for class methods and functions (common internal helpers)
+          {
+            selector: 'method',
+            format: ['camelCase', 'PascalCase'],
+            leadingUnderscore: 'allow'
+          },
+          {
+            selector: 'function',
+            format: ['camelCase', 'PascalCase'],
+            leadingUnderscore: 'allow'
+          }
+        ],
+        '@typescript-eslint/no-use-before-define': ['error', {'functions': false, 'classes': true, 'variables': true}],
+        '@typescript-eslint/no-unused-vars': ['error', {'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_'}]
       }
     },
-    // Config files like vite.config.ts need special handling
+    // TypeScript config files (with relaxed rules, no type checking)
     {
       files: ['vite.config.ts', 'vitest.config.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
-        projectService: true,
-        tsconfigRootDir: __dirname,
-        project: './tsconfig.eslint.json',
-        warnOnUnsupportedTypeScriptVersion: false
+        // No project/projectService - config files don't need type checking
       },
+      extends: [
+        'airbnb-typescript/base',
+      ],
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
         'import/extensions': 'off',
@@ -154,9 +178,19 @@ module.exports = {
         'no-multiple-empty-lines': 'off'
       }
     },
-    // Relax rules for test files
+    // Test files (with type checking but relaxed rules)
     {
-      files: ['tests/**/*.ts'],
+      files: ['tests/**/*.ts', 'tests/**/*.tsx'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: __dirname,
+        project: __dirname + '/tsconfig.eslint.json',
+      },
+      extends: [
+        'airbnb-typescript/base',
+        'plugin:@typescript-eslint/stylistic-type-checked',
+      ],
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
         'import/extensions': 'off',
