@@ -16,8 +16,14 @@ module.exports = {
   extends: [
     'airbnb-base',
     'airbnb-typescript/base',
-    'plugin:vue/vue3-recommended'
+    'plugin:vue/vue3-recommended',
+    'plugin:@typescript-eslint/stylistic-type-checked',
+
   ],
+  parserOptions: {
+    projectService: true,
+    tsconfigRootDir: __dirname,
+  },
   plugins: ['@typescript-eslint', 'vue'],
   rules: {
     // Arrays: force elements on separate lines
