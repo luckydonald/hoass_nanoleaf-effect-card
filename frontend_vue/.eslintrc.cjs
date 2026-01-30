@@ -4,8 +4,6 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    // Do NOT set project here to avoid parserServices errors when linting JS files.
-    // Quiet the unsupported TypeScript version warning for now
     warnOnUnsupportedTypeScriptVersion: false,
   },
   env: {
@@ -18,22 +16,17 @@ module.exports = {
     'airbnb-typescript/base',
     'plugin:vue/vue3-recommended',
     'plugin:@typescript-eslint/stylistic-type-checked',
-
   ],
-  parserOptions: {
-    projectService: true,
-    tsconfigRootDir: __dirname,
-  },
   plugins: ['@typescript-eslint', 'vue'],
   rules: {
     // Arrays: force elements on separate lines
-    'array-bracket-newline': ['error', { multiline: true, minItems: 1 }],
+    'array-bracket-newline': ['error', {multiline: true, minItems: 1}],
     'array-element-newline': ['error', 'always'],
 
     // Objects
-    'object-curly-newline': ['error', { multiline: true, consistent: true }],
+    'object-curly-newline': ['error', {multiline: true, consistent: true}],
     // Allow short object properties on same line to avoid noisy errors for small inline objects
-    'object-property-newline': ['error', { allowAllPropertiesOnSameLine: true }],
+    'object-property-newline': ['error', {allowAllPropertiesOnSameLine: true}],
 
     // Functions
     'function-call-argument-newline': ['error', 'consistent'],
@@ -45,9 +38,9 @@ module.exports = {
     'max-len': 'off',
 
     // Vue template rules
-    'vue/max-attributes-per-line': ['error', { singleline: 1, multiline: { max: 1 } }],
-    'vue/html-closing-bracket-newline': ['error', { singleline: 'never', multiline: 'always' }],
-    'vue/multiline-html-element-content-newline': ['error', { ignoreWhenEmpty: true, allowEmptyLines: false }],
+    'vue/max-attributes-per-line': ['error', {singleline: 1, multiline: {max: 1}}],
+    'vue/html-closing-bracket-newline': ['error', {singleline: 'never', multiline: 'always'}],
+    'vue/multiline-html-element-content-newline': ['error', {ignoreWhenEmpty: true, allowEmptyLines: false}],
     'vue/singleline-html-element-content-newline': 'off',
     'vue/html-indent': ['error', 2],
     // Prefer self-closing form for void elements like <input />, <img />, <br /> to match HTML XML-style preferences
@@ -111,34 +104,46 @@ module.exports = {
     'class-methods-use-this': 'off',
     'no-console': 'warn',
     // Relax template-specific rules that cause noise in copied projects
-    '@typescript-eslint/no-use-before-define': ['error', { 'functions': false, 'classes': true, 'variables': true }],
-    'no-restricted-globals': ['error', { 'name': 'event', 'message': 'Do not use global event' }],
+    '@typescript-eslint/no-use-before-define': ['error', {'functions': false, 'classes': true, 'variables': true}],
+    'no-restricted-globals': ['error', {'name': 'event', 'message': 'Do not use global event'}],
     'no-spaced-func': 'off', // deprecated, trouble with TS
     'default-case': 'off',
 
     // Allow unused vars that start with an underscore (common pattern in function args)
-    '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }]
+    '@typescript-eslint/no-unused-vars': ['error', {'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_'}]
   },
   overrides: [
     {
       files: ['*.vue'],
       parser: 'vue-eslint-parser',
       parserOptions: {
-        parser: '@typescript-eslint/parser',
-        project: './tsconfig.eslint.json',
+        projectService: true,
+        tsconfigRootDir: __dirname,
+        project: __dirname + '/tsconfig.eslint.json',
         extraFileExtensions: ['.vue']
       }
     },
     {
-      files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx', '*.ts', 'vite.config.ts', 'vitest.config.ts'],
+      files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts', 'tests/**/*.tsx', '*.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
-        project: './tsconfig.eslint.json'
+        projectService: true,
+        tsconfigRootDir: __dirname,
+        project: __dirname + '/tsconfig.eslint.json',
       }
     },
-    // Relax rules for test and config files
+    // Config files like vite.config.ts need special handling
     {
-      files: ['tests/**/*.ts', 'vite.config.ts', 'vitest.config.ts'],
+      files: ['vite.config.ts', 'vitest.config.ts'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        projectService: true,
+        tsconfigRootDir: __dirname,
+        project: './tsconfig.eslint.json',
+        warnOnUnsupportedTypeScriptVersion: false
+      },
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
         'import/extensions': 'off',
@@ -149,27 +154,17 @@ module.exports = {
         'no-multiple-empty-lines': 'off'
       }
     },
+    // Relax rules for test files
     {
-      files: ['vite.config.js'],
-      parser: 'espree',
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module'
-      },
+      files: ['tests/**/*.ts'],
       rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
+        'import/extensions': 'off',
+        'import/no-extraneous-dependencies': 'off',
+        'array-bracket-newline': 'off',
+        'array-element-newline': 'off',
         '@typescript-eslint/naming-convention': 'off',
-        '@typescript-eslint/dot-notation': 'off',
-        '@typescript-eslint/no-unused-vars': 'off'
-      }
-    },
-    {
-      files: ['vite.config.ts', 'vitest.config.ts'],
-      parser: '@typescript-eslint/parser',
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module',
-        project: './tsconfig.eslint.json',
-        warnOnUnsupportedTypeScriptVersion: false
+        'no-multiple-empty-lines': 'off'
       }
     }
   ]
