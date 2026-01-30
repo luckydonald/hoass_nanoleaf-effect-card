@@ -52,14 +52,11 @@ module.exports = {
       math: 'always',
     }],
     // Disable rules that auto-convert legacy `slot` attributes to `v-slot` templates
+    // for custom web components (Home Assistant `ha-*` elements). These are not
+    // Vue components and should keep their native `slot="..."` attribute.
     'vue/no-deprecated-slot-attribute': [
       'error',
       {
-        ignore: [
-          'ha-card',
-          'ha-button',
-          'ha-icon',
-        ],
         ignoreParents: [
           'ha-expansion-panel',
           'ha-button',
