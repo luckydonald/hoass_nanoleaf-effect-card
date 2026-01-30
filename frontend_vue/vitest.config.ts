@@ -1,3 +1,5 @@
+/** eslint-disable */
+// eslint-disable-next-line import/no-unresolved
 import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 import { resolve, dirname } from 'path';
