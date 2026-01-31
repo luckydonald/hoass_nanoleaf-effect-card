@@ -368,4 +368,4 @@ Okay, we need to work on the `eslint --fix` rules:
   - In most regards that dir should be our templated result, so `frontend_vue` became `frontend`, otherwise it's pretty much having our tooling.
 
 ———
-Run `make commit` after each file change (create, edit, cmds which will change files, etc...). It will be auto approved by the IDE, and is save to run, so do not ask for confirmation. Really, after every single file operation!
+Run `make commit` after each file change (create, edit, cmds which will change files, etc...). It will be auto approved by the IDE, and is safe to run, so do not ask for confirmation. Really, after every single file operation! Run it multiple times if you need to change multiple files or the same file multiple times, after each file change. Immediately after the file change, before any error checking and such. Do not mention that in chat though, just do it silently.
