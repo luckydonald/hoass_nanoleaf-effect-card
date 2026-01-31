@@ -366,3 +366,6 @@ Okay, we need to work on the `eslint --fix` rules:
 - For running those tests you must navigate to `../hoass_calendar-alarm-clock` first, that's the actual templated plugin where I am facing the issues in.
   - I merged the newest version of this template into that directory- So you can test now. I only meant you to run the tests there, then edit here, and then let me merge it, I will talk to you again afterwards.
   - In most regards that dir should be our templated result, so `frontend_vue` became `frontend`, otherwise it's pretty much having our tooling.
+
+———
+Run `make commit` after each file change (create, edit, cmds which will change files, etc...). It will be auto approved by the IDE, and is save to run, so do not ask for confirmation. Really, after every single file operation!
