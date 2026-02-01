@@ -41,7 +41,6 @@ export interface MountedWrapperExtras<CONFIG> extends WrapperExtras<CONFIG> {
 
 export type Wrapper<CONFIG, ELEMENT extends HTMLElement = HTMLDivElement> = ELEMENT & Partial<WrapperExtras<CONFIG>>;
 
-
 export interface CardConfig {
   type?: string;
   entity?: string;

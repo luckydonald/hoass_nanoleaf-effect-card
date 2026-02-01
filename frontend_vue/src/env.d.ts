@@ -128,20 +128,20 @@ declare module 'vue' {
 
 // Export the element types for consumers (allow importing e.g. { HASelectElement })
 export type {
+  HAButtonElement,
   HACardElement,
-  HAIconElement,
-  HAIconButtonElement,
-  HASwitchElement,
   HADialogElement,
-  HATextfieldElement,
-  HASelectElement,
+  HAEntityPickerElement,
+  HAExpansionPanelElement,
   HAFabElement,
+  HAFormfieldElement,
+  HAIconButtonElement,
+  HAIconElement,
   HAListElement,
   HAListItemElement,
-  HAExpansionPanelElement,
-  HAFormfieldElement,
-  HAEntityPickerElement,
-  HAButtonElement,
+  HASelectElement,
+  HASwitchElement,
+  HATextfieldElement,
 };
 
 export {};
