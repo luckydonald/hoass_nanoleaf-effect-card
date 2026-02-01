@@ -335,7 +335,7 @@ echo "This is used for custom component names and filenames."
 echo "Example: 'my-custom-widget' (for <my-custom-widget-card>, my-custom-widget-card.js, etc.)"
 # Compute default from display name, but respect existing DASH_NAME loaded from settings
 DEFAULT_DASH=$(to_lowercase_dash "$DISPLAY_NAME")
-read -p ""
+echo ""
 read -p "Enter lowercase-dash name [$DEFAULT_DASH]: " INPUT_DASH
 if [ -n "$INPUT_DASH" ]; then
     DASH_NAME="$INPUT_DASH"
@@ -351,7 +351,7 @@ echo "This is used for Python module names, integration domain, sensor names, et
 echo "Example: 'my_custom_widget'"
 # Compute default from dash name, but respect existing SNAKE_NAME loaded from settings
 DEFAULT_SNAKE=$(to_snake_case "$DASH_NAME")
-read -p ""
+echo ""
 read -p "Enter snake_case name [$DEFAULT_SNAKE]: " INPUT_SNAKE
 if [ -n "$INPUT_SNAKE" ]; then
     SNAKE_NAME="$INPUT_SNAKE"
