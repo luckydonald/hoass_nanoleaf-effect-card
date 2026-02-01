@@ -30,6 +30,12 @@ Additionally:
 - So the order will be:
   - first check for all errors except formating nitpicks
   - run commit.sh
+  - commit lockfiles `frontend(_vue)/{yarn.lock,package-lock.json}` and `uv.lock` (root folder, for backend) be commited separately. 
+     - Commit message (use template script):  
+       ```txt
+       🔏 Updated package version lock for frontend.
+       ```
+       (or `backend`)
   - run the python formatter
   - commit those changes with `lint: ruff`
   - run the ts formatter
