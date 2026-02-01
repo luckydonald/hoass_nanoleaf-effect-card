@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 // Exported element interfaces for Home Assistant web components
+import pkg from "../package.json";
+
 export interface HACardElement extends HTMLElement {
   header?: string;
 }
@@ -102,6 +104,7 @@ declare global {
       name: string;
       description: string;
       preview?: boolean;
+      version?: string;
     }[];
   }
 }
