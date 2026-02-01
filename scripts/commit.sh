@@ -72,21 +72,6 @@ if [ -n "$(git diff --cached --name-only)" ]; then
     STASH_STAGED=true
 fi
 
-# Restore staged changes before the final commit
-if [ "$STASH_STAGED" = true ]; then
-    echo -e "${YELLOW}Restoring staged changes...${NC}"
-    # Re-stage the files that were originally staged
-    # (They've been in the working directory this whole time, unchanged)
-    RESTORED_COUNT=0
-    echo "$STAGED_FILES" | while IFS= read -r file; do
-        if [ -n "$file" ] && ([ -f "$file" ] || [ -d "$file" ]); then
-            git add "$file"
-            RESTORED_COUNT=$((RESTORED_COUNT + 1))
-        fi
-    done
-    echo "  Re-staged files"
-fi
-
 # Commit frontend lock files separately (frontend and frontend_vue)
 # This ensures package lock updates are recorded with a focused commit message.
 if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$' || \
@@ -139,6 +124,21 @@ elif [ -f "ai/errors.md" ] && git ls-files --others --exclude-standard | grep -q
     echo "  Done"
 else
     echo -e "${YELLOW}No changes to ai/errors.md${NC}"
+fi
+
+# Restore staged changes before the final commit
+if [ "$STASH_STAGED" = true ]; then
+    echo -e "${YELLOW}Restoring staged changes...${NC}"
+    # Re-stage the files that were originally staged
+    # (They've been in the working directory this whole time, unchanged)
+    RESTORED_COUNT=0
+    echo "$STAGED_FILES" | while IFS= read -r file; do
+        if [ -n "$file" ] && ([ -f "$file" ] || [ -d "$file" ]); then
+            git add "$file"
+            RESTORED_COUNT=$((RESTORED_COUNT + 1))
+        fi
+    done
+    echo "  Re-staged files"
 fi
 
 # Commit ai/plugin_template/query.md if it has changes
