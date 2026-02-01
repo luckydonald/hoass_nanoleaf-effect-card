@@ -99,7 +99,7 @@ if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-
       frontend/package-lock.json \
       frontend_vue/yarn.lock \
       frontend_vue/package-lock.json \
-      --ignore-missing
+      --ignore-errors || echo "  Some files were missing."
     # Commit with templating
     git commit -m "${COMMIT_PREFIX}$(lock_type="frontend" tmpl "${COMMIT_MSG_LOCK}")"
     echo "  Done"
