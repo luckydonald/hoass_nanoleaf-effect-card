@@ -58,6 +58,32 @@ print_success() {
     echo -e "${GREEN}✓${NC} $1"
 }
 
+# Prompt helper: read from terminal if available, otherwise fall back to default
+# Usage: result=$(prompt_default "Prompt text" "default")
+prompt_default() {
+    local prompt="$1"
+    local default="$2"
+    local ans=""
+
+    # Prefer reading from /dev/tty so we don't consume process-substitution stdin
+    if [ -e /dev/tty ] && [ -r /dev/tty ]; then
+        # shellcheck disable=SC2034
+        if read -r -p "$prompt" ans </dev/tty; then :; else ans="$default"; fi
+    elif [ -t 0 ]; then
+        # fallback: stdin is a TTY
+        if read -r -p "$prompt" ans; then :; else ans="$default"; fi
+    else
+        # Non-interactive: use default
+        ans="$default"
+    fi
+
+    # Apply default when empty
+    if [ -z "$ans" ]; then
+        ans="$default"
+    fi
+    echo "$ans"
+}
+
 # Function to convert string to lowercase-dash format
 to_lowercase_dash() {
     echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//'
@@ -770,8 +796,7 @@ if [ -d "custom_components/plugin_template" ]; then
             dest_file="custom_components/$SNAKE_NAME/$rel_path"
 
             if [ ! -f "$dest_file" ]; then
-                read -p "Copy new file $rel_path? (y/n) [y]: " COPY_NEW
-                COPY_NEW=${COPY_NEW:-y}
+                COPY_NEW=$(prompt_default "Copy new file $rel_path? (y/n) [y]: " "y")
                 if [[ "$COPY_NEW" =~ ^[Yy]$ ]]; then
                     mkdir -p "$(dirname "$dest_file")"
                     cp "$file" "$dest_file"
