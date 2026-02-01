@@ -125,22 +125,8 @@ endif
 setup-ts:
 ifeq ($(FRONTEND),1)
 	@echo "Setting up frontend development environment..."
-	@if [ -n "$(FRONTEND_DIR)" ]; then \
-		cd $(FRONTEND_DIR) && if [ -f package.json ]; then \
-			# Use the reusable script to enable Corepack and activate the package manager declared in package.json
-			if [ -x "$(CURDIR)/scripts/ensure_yarn.sh" ]; then \
-				"$(CURDIR)/scripts/ensure_yarn.sh" "$(FRONTEND_DIR)" || true; \
-			fi; \
-			# Run install using yarn if available, prefer immutable install when lockfile exists
-			if command -v yarn >/dev/null 2>&1; then \
-				if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then yarn install --immutable; else yarn install; fi; \
-			elif command -v npm >/dev/null 2>&1; then \
-				npm install; \
-			else \
-				echo "No npm/yarn found"; \
-			fi; \
-		fi; \
-	fi
+	@chmod +x scripts/setup_frontend.sh || true
+	@./scripts/setup_frontend.sh "$(FRONTEND_DIR)"
 else
 	@echo "No frontend sources detected – skipping frontend setup."
 endif
