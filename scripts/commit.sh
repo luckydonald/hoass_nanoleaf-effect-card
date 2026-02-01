@@ -94,12 +94,10 @@ if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-
    git ls-files --others --exclude-standard | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$'; then
     echo -e "${GREEN}Committing frontend lock files...${NC}"
     # Add both possible frontend lock files if present; ignore errors if some don't exist
-    git add \
-      frontend/yarn.lock \
-      frontend/package-lock.json \
-      frontend_vue/yarn.lock \
-      frontend_vue/package-lock.json \
-      --ignore-errors || echo "  Some files were missing."
+    git add frontend/yarn.lock || true
+    git add frontend/package-lock.json || true
+    git add frontend_vue/yarn.lock || true
+    git add frontend_vue/package-lock.json || true
     # Commit with templating
     git commit -m "${COMMIT_PREFIX}$(lock_type="frontend" tmpl "${COMMIT_MSG_LOCK}")"
     echo "  Done"
