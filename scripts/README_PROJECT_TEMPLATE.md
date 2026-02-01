@@ -71,7 +71,7 @@ Additionally, each commit includes a marker if it was AI-assisted or not:
   - <kbd>🫥</kbd> **I manually fixed the mess AI made.**
 - TOOLING:
   - <kbd>⬆️ version: </kbd> Automated bump of this plugin's version. Usually, this will also be a tagged release. Invoked by `make release` script.
-  - <kbd>⚙️</kbd> Automated lockfile updates upon running a normal `install` (usually `yarn.lock` and `uv.lock`)
+  - <kbd>🔏</kbd> or <kbd>⚙️</kbd> Automated lockfile updates upon running a normal `install` (usually `yarn.lock` and `uv.lock`)
   - <kbd>🧹</kbd> or <kbd>🔧</kbd> Automated code formatting changes and fixes through common tools.
 - AI
   - <kbd>🤌</kbd> I updated the AI prompt in `ai/query.md`.
