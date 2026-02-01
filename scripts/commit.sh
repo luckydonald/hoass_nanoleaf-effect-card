@@ -72,6 +72,45 @@ if [ -n "$(git diff --cached --name-only)" ]; then
     STASH_STAGED=true
 fi
 
+# Restore staged changes before the final commit
+if [ "$STASH_STAGED" = true ]; then
+    echo -e "${YELLOW}Restoring staged changes...${NC}"
+    # Re-stage the files that were originally staged
+    # (They've been in the working directory this whole time, unchanged)
+    RESTORED_COUNT=0
+    echo "$STAGED_FILES" | while IFS= read -r file; do
+        if [ -n "$file" ] && ([ -f "$file" ] || [ -d "$file" ]); then
+            git add "$file"
+            RESTORED_COUNT=$((RESTORED_COUNT + 1))
+        fi
+    done
+    echo "  Re-staged files"
+fi
+
+# Commit frontend lock files separately (frontend and frontend_vue)
+# This ensures package lock updates are recorded with a focused commit message.
+if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$' || \
+   git ls-files --others --exclude-standard | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$'; then
+    echo -e "${GREEN}Committing frontend lock files...${NC}"
+    # Add both possible frontend lock files if present; ignore errors if some don't exist
+    git add frontend/yarn.lock frontend/package-lock.json frontend_vue/yarn.lock frontend_vue/package-lock.json 2>/dev/null || true
+    # Commit with Template prefix when applicable
+    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for frontend." || true
+    echo "  Done"
+else
+    echo -e "${YELLOW}No frontend lock file changes to commit${NC}"
+fi
+
+# Commit backend uv.lock separately
+if git diff --name-only | grep -qE '^uv.lock$' || git ls-files --others --exclude-standard | grep -qE '^uv.lock$'; then
+    echo -e "${GREEN}Committing uv.lock...${NC}"
+    git add uv.lock
+    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for backend." || true
+    echo "  Done"
+else
+    echo -e "${YELLOW}No uv.lock changes to commit${NC}"
+fi
+
 # Commit ai/query.md if it has changes
 if git diff --name-only | grep -q "^ai/query.md$"; then
     echo -e "${GREEN}Committing ai/query.md...${NC}"
@@ -130,45 +169,6 @@ elif [ -f "ai/plugin_template/errors.md" ] && git ls-files --others --exclude-st
     echo "  Done"
 # else
 #     echo -e "${YELLOW}No changes to ai/plugin_template/errors.md${NC}"
-fi
-
-# Restore staged changes before the final commit
-if [ "$STASH_STAGED" = true ]; then
-    echo -e "${YELLOW}Restoring staged changes...${NC}"
-    # Re-stage the files that were originally staged
-    # (They've been in the working directory this whole time, unchanged)
-    RESTORED_COUNT=0
-    echo "$STAGED_FILES" | while IFS= read -r file; do
-        if [ -n "$file" ] && ([ -f "$file" ] || [ -d "$file" ]); then
-            git add "$file"
-            RESTORED_COUNT=$((RESTORED_COUNT + 1))
-        fi
-    done
-    echo "  Re-staged files"
-fi
-
-# Commit frontend lock files separately (frontend and frontend_vue)
-# This ensures package lock updates are recorded with a focused commit message.
-if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$' || \
-   git ls-files --others --exclude-standard | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$'; then
-    echo -e "${GREEN}Committing frontend lock files...${NC}"
-    # Add both possible frontend lock files if present; ignore errors if some don't exist
-    git add frontend/yarn.lock frontend/package-lock.json frontend_vue/yarn.lock frontend_vue/package-lock.json 2>/dev/null || true
-    # Commit with Template prefix when applicable
-    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for frontend." || true
-    echo "  Done"
-else
-    echo -e "${YELLOW}No frontend lock file changes to commit${NC}"
-fi
-
-# Commit backend uv.lock separately
-if git diff --name-only | grep -qE '^uv.lock$' || git ls-files --others --exclude-standard | grep -qE '^uv.lock$'; then
-    echo -e "${GREEN}Committing uv.lock...${NC}"
-    git add uv.lock
-    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for backend." || true
-    echo "  Done"
-else
-    echo -e "${YELLOW}No uv.lock changes to commit${NC}"
 fi
 
 # Check if there are any other changes to commit
