@@ -90,4 +90,17 @@ else
   fi
 fi
 
+# 3) Validate typescript
+if has_script "type-check"; then
+  if ! run_script "type-check"; then STATUS=$((STATUS|$?)); fi
+else
+  if run_local_or_global "vue-tsc" "-b" >/dev/null 2>&1; then
+    if ! run_local_or_global "vue-tsc" "-b"; then STATUS=$((STATUS|$?)); fi
+  elif run_local_or_global "tsc" "-p" "." >/dev/null 2>&1; then
+    if ! run_local_or_global "tsc" "-p" "."; then STATUS=$((STATUS|$?)); fi
+  else
+    echo "No type-check script or suitable local/global binary (vue-tsc/tsc) found. Skipping type-check."
+  fi
+fi
+
 exit ${STATUS}
