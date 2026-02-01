@@ -33,12 +33,22 @@ has_script() {
 # Helper: run npm/yarn script
 run_script() {
   local name="$1"
-  if command -v npm >/dev/null 2>&1; then
-    echo "Running: npm run ${name}"
-    npm run "${name}"
-  elif command -v yarn >/dev/null 2>&1; then
+  # Try to detect packageManager from package.json
+  PM=""
+  if command -v node >/dev/null 2>&1; then
+    PM=$(node -e "try{console.log(require('./package.json').packageManager||'')}catch(e){console.log('')}") || true
+    PM=$(echo "$PM" | tr -d '\r')
+  fi
+  # Prefer packageManager declared (yarn/pnpm), otherwise prefer yarn, then npm
+  if echo "$PM" | grep -q '^yarn' >/dev/null 2>&1 || command -v yarn >/dev/null 2>&1; then
     echo "Running: yarn ${name}"
     yarn "${name}"
+  elif echo "$PM" | grep -q '^pnpm' >/dev/null 2>&1 || command -v pnpm >/dev/null 2>&1; then
+    echo "Running: pnpm run ${name}"
+    pnpm run "${name}"
+  elif command -v npm >/dev/null 2>&1; then
+    echo "Running: npm run ${name}"
+    npm run "${name}"
   else
     return 127
   fi
