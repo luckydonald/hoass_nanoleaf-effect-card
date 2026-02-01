@@ -14,7 +14,7 @@ endif
 FRONTEND ?= $(if $(FRONTEND_DIR),1,0)
 BACKEND  ?= $(if $(wildcard custom_components),1,0)
 
-.PHONY: release lint format build setup help commit init fix-commits commit-fix rebase-template template-rebase merge-template template-merge check-slots
+.PHONY: release lint format build setup setup-py setup-ts setup-backend setup-frontend help commit init fix-commits commit-fix rebase-template template-rebase merge-template template-merge check-slots
 
 # If user runs: make commit-fix --start-commit <hash> ...
 # then MAKECMDGOALS contains: commit-fix --start-commit <hash> ...
@@ -99,9 +99,10 @@ fix-commits:
 
 commit-fix: fix-commits
 
-setup: setup-backend setup-frontend
+setup: setup-py setup-ts
 
-setup-backend:
+# Backend setup (Python)
+setup-py:
 ifeq ($(BACKEND),1)
 	@echo "Setting up Python development environment..."
 	uv sync
@@ -109,17 +110,22 @@ else
 	@echo "No Python sources detected – skipping backend setup."
 endif
 
-setup-frontend:
+# Frontend setup (TypeScript) - prefer yarn over npm
+setup-ts:
 ifeq ($(FRONTEND),1)
 	@echo "Setting up frontend development environment..."
 	@if [ -n "$(FRONTEND_DIR)" ]; then \
 		cd $(FRONTEND_DIR) && if [ -f package.json ]; then \
-			if command -v npm >/dev/null 2>&1; then npm install; elif command -v yarn >/dev/null 2>&1; then yarn install; else echo "No npm/yarn found"; fi; \
+			if command -v yarn >/dev/null 2>&1; then yarn install; elif command -v npm >/dev/null 2>&1; then npm install; else echo "No npm/yarn found"; fi; \
 		fi; \
 	fi
 else
 	@echo "No frontend sources detected – skipping frontend setup."
 endif
+
+# Backwards compatible aliases for older naming
+setup-backend: setup-py
+setup-frontend: setup-ts
 
 test: test-py test-ts
 
