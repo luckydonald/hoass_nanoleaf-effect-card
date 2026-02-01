@@ -1,4 +1,4 @@
-s#!/usr/bin/env bash
+#!/usr/bin/env bash
 # Ensure Corepack is enabled and the package manager declared in the frontend's package.json is activated.
 # Usage: ./scripts/ensure_yarn.sh [<frontend-dir>]
 set -euo pipefail
