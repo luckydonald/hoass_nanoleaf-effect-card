@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Enable Corepack and activate Yarn (from package.json)
+      - name: Enable Corepack and activate package manager (from package.json)
         run: |
           chmod +x ./scripts/ensure_yarn.sh || true
           ./scripts/ensure_yarn.sh
