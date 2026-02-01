@@ -31,6 +31,17 @@ export interface HomeAssistant {
   ) => Promise<void>;
 }
 
+export interface WrapperExtras<CONFIG> {
+  config: CONFIG;
+  setConfig: (config: CONFIG) => void;
+}
+export interface MountedWrapperExtras<CONFIG> extends WrapperExtras<CONFIG> {
+  hass: HomeAssistant;
+}
+
+export type Wrapper<CONFIG, ELEMENT extends HTMLElement = HTMLDivElement> = ELEMENT & Partial<WrapperExtras<CONFIG>>;
+
+
 export interface CardConfig {
   type?: string;
   entity?: string;

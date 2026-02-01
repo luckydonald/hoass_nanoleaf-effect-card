@@ -7,7 +7,7 @@ import PluginTemplateCard from './PluginTemplateCard.vue';
 
 import type { App, ComponentPublicInstance } from 'vue';
 
-import type { CardConfig, HomeAssistant } from './types';
+import {CardConfig, HomeAssistant, MountedWrapperExtras, Wrapper} from './types';
 
 interface PluginTemplateCardConfig extends CardConfig {
   type?: string;
@@ -93,8 +93,57 @@ class PluginTemplateCardElement extends HTMLElement {
     return 4;
   }
 
-  public static getConfigElement(): PluginTemplateCardEditor {
-    return document.createElement('plugin-template-card-editor') as PluginTemplateCardEditor;
+  public static getConfigElement(): HTMLElement {
+    // Create a wrapper element and mount the Vue editor into it.
+    // Define 'hass' and 'setConfig' on the element so Home Assistant can safely set properties.
+    const wrapper: Wrapper<PluginTemplateCardConfig> = document.createElement('div');
+
+    // Mount the Vue editor into the wrapper. Keep a reference to the VM proxy so we can update props.
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    const app = createApp(PluginTemplateCardEditor, {
+      hass: null,
+      config: {},
+      onConfigChanged: (cfg: PluginTemplateCardConfig) => {
+        // When the editor notifies of config changes, dispatch an event from the wrapper so HA picks it up
+        const event = new CustomEvent('config-changed', {
+          detail: { config: cfg },
+          bubbles: true,
+          composed: true,
+        });
+        wrapper.dispatchEvent(event);
+      },
+    });
+
+    // noinspection UnnecessaryLocalVariableJS
+    const vmOrigForTyping = app.mount(wrapper);
+    const vm = vmOrigForTyping as typeof vmOrigForTyping & MountedWrapperExtras<PluginTemplateCardConfig>;
+
+    // Define a 'hass' property so HA can set it (and we forward it to the Vue component proxy)
+    Object.defineProperty(wrapper, 'hass', {
+      configurable: true,
+      enumerable: true,
+      set(hass: HomeAssistant) {
+        try {
+          if (vm) vm.hass = hass;
+        } catch {
+          // ignore errors setting on vm
+        }
+      },
+      get(): HomeAssistant | null {
+        return vm?.hass ?? null;
+      },
+    });
+
+    // Provide a setConfig method which HA uses to initialize the editor
+    wrapper.setConfig = (config: PluginTemplateCardConfig) => {
+      try {
+        if (vm) vm.config = config;
+      } catch {
+        // ignore
+      }
+    };
+
+    return wrapper;
   }
 
   public static getStubConfig(): PluginTemplateCardConfig {

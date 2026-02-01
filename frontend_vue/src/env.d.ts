@@ -55,6 +55,15 @@ declare global {
       label: string;
       includeDomains: string[];
     };
+    'ha-button': HTMLElement & {
+      raised: boolean;
+      outlined: boolean;
+      dense: boolean;
+      slot: string;
+      dialogAction: string;
+      // Optional version field embedded from frontend/package.json
+      version?: string;
+    };
   }
 
   interface Window {
@@ -83,6 +92,7 @@ declare module 'vue' {
     'ha-expansion-panel': HTMLElement;
     'ha-formfield': HTMLElement;
     'ha-entity-picker': HTMLElement;
+    'ha-button': HTMLElement;
   }
 }
 
