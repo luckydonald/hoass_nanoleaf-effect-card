@@ -734,4 +734,8 @@ Also, it should edit the existing message the editor would display, not create (
 ./scripts/release.sh: SC1075: Use 'elif' instead of 'else if' (or put 'if' on new line if nesting).
 ./scripts/fix-commits.sh: line 188: mapfile: command not found
 ./scripts/fix-commits.sh: line 433: PRINT_DRY_RUN_HEADER: command not found
-
+———
+My GitHub workflow(s) has/have the problem:
+```txt
+error This project's package.json defines "packageManager": "yarn@4.12.0". However the current global version of Yarn is 1.22.22.
+```
