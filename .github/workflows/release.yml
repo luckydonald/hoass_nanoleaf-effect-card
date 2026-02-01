@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Enable Corepack and activate Yarn 4.12.0
+      - name: Enable Corepack and activate package manager (from package.json)
         run: |
           chmod +x ./scripts/ensure_yarn.sh || true
           ./scripts/ensure_yarn.sh
