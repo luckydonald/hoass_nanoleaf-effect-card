@@ -147,6 +147,30 @@ if [ "$STASH_STAGED" = true ]; then
     echo "  Re-staged files"
 fi
 
+# Commit frontend lock files separately (frontend and frontend_vue)
+# This ensures package lock updates are recorded with a focused commit message.
+if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$' || \
+   git ls-files --others --exclude-standard | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$'; then
+    echo -e "${GREEN}Committing frontend lock files...${NC}"
+    # Add both possible frontend lock files if present; ignore errors if some don't exist
+    git add frontend/yarn.lock frontend/package-lock.json frontend_vue/yarn.lock frontend_vue/package-lock.json 2>/dev/null || true
+    # Commit with Template prefix when applicable
+    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for frontend." || true
+    echo "  Done"
+else
+    echo -e "${YELLOW}No frontend lock file changes to commit${NC}"
+fi
+
+# Commit backend uv.lock separately
+if git diff --name-only | grep -qE '^uv.lock$' || git ls-files --others --exclude-standard | grep -qE '^uv.lock$'; then
+    echo -e "${GREEN}Committing uv.lock...${NC}"
+    git add uv.lock
+    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for backend." || true
+    echo "  Done"
+else
+    echo -e "${YELLOW}No uv.lock changes to commit${NC}"
+fi
+
 # Check if there are any other changes to commit
 if [ -n "$(git status --porcelain)" ]; then
     # Intelligently determine step and substep numbers from commit history
@@ -213,4 +237,3 @@ fi
 
 echo ""
 echo -e "${GREEN}✅ Commits complete!${NC}"
-
