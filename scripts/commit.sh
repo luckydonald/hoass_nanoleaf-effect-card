@@ -26,6 +26,7 @@ COMMIT_PREFIX_TEMPLATE="📄TEMPLATE | "
 COMMIT_MSG_ERRORS="🐞 ai: updated errors"
 COMMIT_MSG_QUERY="🤌 ai: updated query"
 COMMIT_MSG_STEP="✨ ai: [{padded_step}] {msg} ({substep}/{total_substeps})"
+COMMIT_MSG_LOCK="🔏 Updated package versions for {lock_type}."
 
 # Detect if we're in the template repository
 REPO_DIR=$(basename "$(cd "$SCRIPT_DIR/.." && pwd)")
@@ -78,9 +79,14 @@ if git diff --name-only | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-
    git ls-files --others --exclude-standard | grep -qE '^(frontend|frontend_vue)/(yarn.lock|package-lock.json)$'; then
     echo -e "${GREEN}Committing frontend lock files...${NC}"
     # Add both possible frontend lock files if present; ignore errors if some don't exist
-    git add frontend/yarn.lock frontend/package-lock.json frontend_vue/yarn.lock frontend_vue/package-lock.json 2>/dev/null || true
-    # Commit with Template prefix when applicable
-    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for frontend." || true
+    git add \
+      frontend/yarn.lock \
+      frontend/package-lock.json \
+      frontend_vue/yarn.lock \
+      frontend_vue/package-lock.json \
+      2>/dev/null || true
+    # Commit with templating
+    git commit -m "${COMMIT_PREFIX}$(lock_type="frontend" tmpl "${COMMIT_MSG_LOCK}")"
     echo "  Done"
 else
     echo -e "${YELLOW}No frontend lock file changes to commit${NC}"
@@ -90,7 +96,8 @@ fi
 if git diff --name-only | grep -qE '^uv.lock$' || git ls-files --others --exclude-standard | grep -qE '^uv.lock$'; then
     echo -e "${GREEN}Committing uv.lock...${NC}"
     git add uv.lock
-    git commit -m "${COMMIT_PREFIX}🔏 Updated package version lock for backend." || true
+    # Commit with templating
+    git commit -m "${COMMIT_PREFIX}$(lock_type="frontend" tmpl "${COMMIT_MSG_LOCK}")"
     echo "  Done"
 else
     echo -e "${YELLOW}No uv.lock changes to commit${NC}"
