@@ -739,3 +739,6 @@ My GitHub workflow(s) has/have the problem:
 ```txt
 error This project's package.json defines "packageManager": "yarn@4.12.0". However the current global version of Yarn is 1.22.22.
 ```
+———
+Why is `make setup-frontend` using `npm` instead of `yarn`?
+Also fix it to be named `setup-ts` and the backend `-py` like the other options.
