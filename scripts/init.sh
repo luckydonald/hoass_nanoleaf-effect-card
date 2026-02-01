@@ -948,7 +948,11 @@ cat > "scripts/init.json" << EOF
   "github_url": "$GITHUB_URL",
   "keep_backend": $KEEP_BACKEND,
   "frontend_choice": "$FRONTEND_CHOICE",
-  "current_year": $(date +%Y)
+  "current_year": $(date +%Y),
+  "replacements": {
+    "": ""
+  },
+  "": ""
 }
 EOF
 print_success "Project settings saved"
