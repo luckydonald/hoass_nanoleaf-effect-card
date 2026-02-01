@@ -76,6 +76,67 @@ elif [ -d "frontend_vue" ]; then
     FRONTEND_DIR="frontend_vue"
 fi
 
+# Ensure Corepack/package manager is prepared for the frontend (use reusable script if available)
+FRONTEND_PM=""
+if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
+    if [ -x "${SCRIPT_DIR}/ensure_yarn.sh" ]; then
+        "${SCRIPT_DIR}/ensure_yarn.sh" "${FRONTEND_DIR}" || true
+    fi
+    # Read packageManager field from package.json if present
+    FRONTEND_PM=$(node -e "try{console.log(require('./${FRONTEND_DIR}/package.json').packageManager||'')}catch(e){console.log('')}") || true
+    FRONTEND_PM=$(echo "${FRONTEND_PM}" | tr -d '\r')
+fi
+
+# Helper to run frontend package manager 'install'
+pm_install() {
+    if [ -z "${FRONTEND_DIR}" ]; then
+        echo "No frontend dir set for install"
+        return 1
+    fi
+    if echo "${FRONTEND_PM}" | grep -q '^yarn' >/dev/null 2>&1; then
+        (cd "${FRONTEND_DIR}" && if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then yarn install --silent --immutable || yarn install --silent; else yarn install --silent; fi)
+    elif echo "${FRONTEND_PM}" | grep -q '^pnpm' >/dev/null 2>&1; then
+        (cd "${FRONTEND_DIR}" && pnpm install --silent)
+    else
+        # No explicit PM declared or unknown: prefer yarn if available
+        if command -v yarn >/dev/null 2>&1; then
+            (cd "${FRONTEND_DIR}" && if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then yarn install --silent --immutable || yarn install --silent; else yarn install --silent; fi)
+        elif command -v npm >/dev/null 2>&1; then
+            # Warn when falling back to npm
+            echo "Warning: falling back to npm for frontend install (no packageManager declared and yarn not found)"
+            (cd "${FRONTEND_DIR}" && npm install --silent)
+        else
+            echo "No npm/yarn/pnpm found for frontend install"
+            return 1
+        fi
+    fi
+}
+
+# Helper to run a script (like 'build', 'lint', 'type-check') with the appropriate package manager
+pm_run_script() {
+    script_name="$1"
+    shift || true
+    if [ -z "${FRONTEND_DIR}" ]; then
+        echo "No frontend dir set for running script ${script_name}"
+        return 1
+    fi
+    if echo "${FRONTEND_PM}" | grep -q '^yarn' >/dev/null 2>&1; then
+        (cd "${FRONTEND_DIR}" && yarn "${script_name}" "$@")
+    elif echo "${FRONTEND_PM}" | grep -q '^pnpm' >/dev/null 2>&1; then
+        (cd "${FRONTEND_DIR}" && pnpm run "${script_name}" "$@")
+    else
+        if command -v yarn >/dev/null 2>&1; then
+            (cd "${FRONTEND_DIR}" && yarn "${script_name}" "$@")
+        elif command -v npm >/dev/null 2>&1; then
+            # Use npm run for scripts
+            (cd "${FRONTEND_DIR}" && npm run "${script_name}" -- "$@")
+        else
+            echo "No npm/yarn/pnpm found for running script ${script_name}"
+            return 1
+        fi
+    fi
+}
+
 # Check for uncommitted changes (only tracked files, respects .gitignore)
 if ! git diff --quiet HEAD -- || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     echo -e "${YELLOW}Warning: You have uncommitted changes${NC}"
@@ -128,7 +189,8 @@ if ! command -v uv &> /dev/null; then
 fi
 echo "  Running frontend type-check..."
 if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
-    (cd "${FRONTEND_DIR}" && if command -v npm >/dev/null 2>&1; then npm run type-check || true; elif command -v yarn >/dev/null 2>&1; then yarn type-check || true; fi)
+    # Use the package-manager aware helper to run the type-check script
+    pm_run_script type-check || true
 else
     echo "  No frontend detected or no package.json - skipping frontend type-check"
 fi
@@ -168,12 +230,14 @@ if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
     fi
     echo "  Running frontend eslint autofix..."
     if grep -q '"lint:fix"' "${FRONTEND_DIR}/package.json" || grep -q '"lint"' "${FRONTEND_DIR}/package.json"; then
-        if command -v npm >/dev/null 2>&1; then
-            (cd "${FRONTEND_DIR}" && if grep -q '"lint:fix"' package.json; then npm run lint:fix || true; elif grep -q '"lint"' package.json; then npm run lint || true; fi)
-        elif command -v yarn >/dev/null 2>&1; then
-            (cd "${FRONTEND_DIR}" && if grep -q '"lint:fix"' package.json; then yarn lint:fix || true; elif grep -q '"lint"' package.json; then yarn lint || true; fi)
+        if command -v node >/dev/null 2>&1; then
+            if grep -q '"lint:fix"' "${FRONTEND_DIR}/package.json"; then
+                pm_run_script lint:fix || true
+            elif grep -q '"lint"' "${FRONTEND_DIR}/package.json"; then
+                pm_run_script lint || true
+            fi
         else
-            echo "  No npm/yarn found - skipping frontend lint autofix"
+            echo "  Node.js not found - skipping frontend lint autofix"
         fi
     else
         echo "  No lint scripts defined in ${FRONTEND_DIR}/package.json - skipping frontend lint autofix"
@@ -189,11 +253,8 @@ if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
 
     # Verify no lint errors remain
     echo "  Verifying frontend lint results..."
-    if command -v npm >/dev/null 2>&1; then
-        (cd "${FRONTEND_DIR}" && if grep -q '"lint"' package.json; then npm run lint; fi)
-        LINT_STATUS=$?
-    elif command -v yarn >/dev/null 2>&1; then
-        (cd "${FRONTEND_DIR}" && if grep -q '"lint"' package.json; then yarn lint; fi)
+    if grep -q '"lint"' "${FRONTEND_DIR}/package.json"; then
+        pm_run_script lint
         LINT_STATUS=$?
     else
         LINT_STATUS=0
@@ -231,25 +292,19 @@ fi
 echo ""
 echo -e "${GREEN}📘 Step 5: Format TypeScript code${NC}"
 if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
-    (cd "${FRONTEND_DIR}" && if command -v npm >/dev/null 2>&1; then npm run format || true; elif command -v yarn >/dev/null 2>&1; then yarn format || true; fi)
+    pm_run_script format || true
 else
     echo "  No frontend detected - skipping TypeScript format"
-fi
-
-if ! git diff --quiet -- "${FRONTEND_DIR}/"; then
-    git add -u "${FRONTEND_DIR}/"
-    git commit -m "$(reason="ts autoformat" emoji="📘" tmpl "${COMMIT_MSG_LINT}")"
-    echo "  Committed TypeScript formatting changes"
-else
-    echo "  No TypeScript formatting changes needed"
 fi
 
 # Step 6: Build frontend to confirm it works
 echo ""
 echo -e "${GREEN}📦 Step 6: Build frontend${NC}"
 if [ -n "${FRONTEND_DIR}" ] && [ -f "${FRONTEND_DIR}/package.json" ]; then
-    (cd "${FRONTEND_DIR}" && echo "  Installing dependencies..." && if command -v npm >/dev/null 2>&1; then npm install --silent; elif command -v yarn >/dev/null 2>&1; then yarn install --silent; fi)
-    (cd "${FRONTEND_DIR}" && echo "  Building..." && if command -v npm >/dev/null 2>&1; then npm run build; elif command -v yarn >/dev/null 2>&1; then yarn build; fi)
+    echo "  Installing dependencies..."
+    pm_install
+    echo "  Building..."
+    pm_run_script build
     echo "  Frontend built successfully!"
 else
     echo "  No frontend detected - skipping build"
