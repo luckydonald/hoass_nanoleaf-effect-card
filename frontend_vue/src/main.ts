@@ -7,7 +7,12 @@ import PluginTemplateCard from './PluginTemplateCard.vue';
 
 import type { App, ComponentPublicInstance } from 'vue';
 
-import {CardConfig, HomeAssistant, MountedWrapperExtras, Wrapper} from './types';
+import type {
+  CardConfig,
+  HomeAssistant,
+  MountedWrapperExtras,
+  Wrapper,
+} from './types';
 
 interface PluginTemplateCardConfig extends CardConfig {
   type?: string;
