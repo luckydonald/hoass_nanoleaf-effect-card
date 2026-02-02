@@ -770,3 +770,6 @@ Run yarn install
 ➤ YN0028: · The lockfile would have been created by this install, which is explicitly forbidden.
 ➤ YN0000: · Failed with errors in 0s 15ms
 Error: Process completed with exit code 1.
+———
+`yarn install` inside `release.sh` uses the wrong yarn version (1 instead of 4 / package.json)
+Also check that `npm` isn't used.
