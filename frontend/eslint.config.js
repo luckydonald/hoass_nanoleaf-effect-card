@@ -13,15 +13,13 @@ import importPlugin from 'eslint-plugin-import';
 const OPTIONAL_CONFIGS = [];
 
 const optionals = await Promise.allSettled(
-  OPTIONAL_CONFIGS.map(
-    async (configName) => {
-      try {
-        return await import((`./eslint.${configName}.js`)).then(m => m.default ?? []);
-      } catch {
-        return [];
-      }
-    },
-  ),
+    OPTIONAL_CONFIGS.map(async (configName) => {
+        try {
+            return await import(`./eslint.${configName}.js`).then((m) => m.default ?? []);
+        } catch {
+            return [];
+        }
+    })
 );
 
 // Read the repository root .gitignore (frontend is one level deeper)
@@ -29,86 +27,86 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoGitignore = path.resolve(__dirname, '..', '.gitignore');
 let gitignoreEntries = [];
 if (fs.existsSync(repoGitignore)) {
-  gitignoreEntries = fs.readFileSync(repoGitignore, 'utf8')
-    .split(/\r?\n/)
-    .map(l => l.trim())
-    .filter(Boolean)
-    // Ignore comments and negations for the flat config; keep simple patterns
-    .filter(l => !l.startsWith('#') && !l.startsWith('!'))
-    // Remove leading slash which is repo-root relative, flat-config expects glob-like patterns
-    .map(l => l.replace(/^\//, ''));
+    gitignoreEntries = fs
+        .readFileSync(repoGitignore, 'utf8')
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean)
+        // Ignore comments and negations for the flat config; keep simple patterns
+        .filter((l) => !l.startsWith('#') && !l.startsWith('!'))
+        // Remove leading slash which is repo-root relative, flat-config expects glob-like patterns
+        .map((l) => l.replace(/^\//, ''));
 }
 
 // Also ignore our own ESLint flat-config module files to avoid eslint trying to lint them
 const localEslintConfigFiles = [
-  'eslint.config.js',
-  'eslint.init.js',
-  'eslint.base.js',
-  'eslint.ts.js',
-  'eslint.airbnb.mjs',
-  'eslint.*.js',
-  'eslint.*.mjs',
+    'eslint.config.js',
+    'eslint.init.js',
+    'eslint.base.js',
+    'eslint.ts.js',
+    'eslint.airbnb.mjs',
+    'eslint.*.js',
+    'eslint.*.mjs',
 ];
 for (const p of localEslintConfigFiles) {
-  if (!gitignoreEntries.includes(p)) gitignoreEntries.push(p);
+    if (!gitignoreEntries.includes(p)) gitignoreEntries.push(p);
 }
 
 // TypeScript parser options: point parser to the package's tsconfig.eslint.json so
 // rules that require type information (like @typescript-eslint/await-thenable) work.
 const tsParserOptions = {
-  tsconfigRootDir: path.resolve(__dirname),
-  // Ensure we do not enable projectService here — that option conflicts with
-  // parserOptions.project in some plugin combinations. Disable it explicitly.
-  projectService: false,
+    tsconfigRootDir: path.resolve(__dirname),
+    // Ensure we do not enable projectService here — that option conflicts with
+    // parserOptions.project in some plugin combinations. Disable it explicitly.
+    projectService: false,
 };
 
 // Explicit absolute project path for parsers that need it
 tsParserOptions.project = [path.resolve(__dirname, 'tsconfig.eslint.json')];
 
-
 export default [
-  // Ensure init config with parser/parserOptions is applied first
-  ...initConfig,
-  // Provide an explicit `ignores` entry so ESLint won't try to use includeIgnoreFile
-  {
-    ignores: gitignoreEntries,
-  },
-  // Also ignore TS declaration files as they're not part of lint type-checking here
-  { ignores: ['**/*.d.ts'] },
-  // Local plugin to auto-mark embedded HTML template literals
-  {
-    plugins: { 'local-mark-html': await import('./eslint.local.mark-html.mjs').then(m => m.default ?? m) },
-    files: ['**/*.{ts,tsx,js,jsx}'],
-    rules: { 'local-mark-html/mark-html': 'warn' },
-  },
-  // JavaScript/TypeScript/HTML configs
-  ...airbnb,
-  ...base,
-  ...html,
-  // Ensure import plugin is available for rules like import/no-unresolved that
-  // may be referenced by presets.
-  { plugins: { import: importPlugin } },
-  // Explicit TypeScript languageOptions override so the parserOptions are applied
-  // For TS/TSX files: use the TypeScript parser directly so type-aware rules can run
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: tsParserOptions,
+    // Ensure init config with parser/parserOptions is applied first
+    ...initConfig,
+    // Provide an explicit `ignores` entry so ESLint won't try to use includeIgnoreFile
+    {
+        ignores: gitignoreEntries,
     },
-  },
-  ...ts,
-  ...optionals.flatMap(r => r.status === 'fulfilled' ? (r.value ?? []) : []),
-  // Final safety override: ensure plain JS files are parsed with espree and
-  // disable specific typed rules that require type information on JS files.
-  {
-    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
-    languageOptions: {
-      parser: 'espree',
-      parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    // Also ignore TS declaration files as they're not part of lint type-checking here
+    { ignores: ['**/*.d.ts'] },
+    // Local plugin to auto-mark embedded HTML template literals
+    {
+        plugins: { 'local-mark-html': await import('./eslint.local.mark-html.mjs').then((m) => m.default ?? m) },
+        files: ['**/*.{ts,tsx,js,jsx}'],
+        rules: { 'local-mark-html/mark-html': 'warn' },
     },
-    rules: {
-      '@typescript-eslint/await-thenable': 'off',
+    // JavaScript/TypeScript/HTML configs
+    ...airbnb,
+    ...base,
+    ...html,
+    // Ensure import plugin is available for rules like import/no-unresolved that
+    // may be referenced by presets.
+    { plugins: { import: importPlugin } },
+    // Explicit TypeScript languageOptions override so the parserOptions are applied
+    // For TS/TSX files: use the TypeScript parser directly so type-aware rules can run
+    {
+        files: ['**/*.ts', '**/*.tsx'],
+        languageOptions: {
+            parser: tsParser,
+            parserOptions: tsParserOptions,
+        },
     },
-  },
+    ...ts,
+    ...optionals.flatMap((r) => (r.status === 'fulfilled' ? r.value ?? [] : [])),
+    // Final safety override: ensure plain JS files are parsed with espree and
+    // disable specific typed rules that require type information on JS files.
+    {
+        files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+        languageOptions: {
+            parser: 'espree',
+            parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
+        },
+        rules: {
+            '@typescript-eslint/await-thenable': 'off',
+        },
+    },
 ];

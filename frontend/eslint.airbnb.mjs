@@ -18,52 +18,52 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const gitignorePath = path.resolve(__dirname, '..', '.gitignore');
 
 const jsConfig = defineConfig([
-  // ESLint recommended config
-  {
-    name: 'js/config',
-    ...js.configs.recommended,
-  },
-  // Stylistic plugin
-  plugins.stylistic,
-  // Import X plugin
-  plugins.importX,
-  // Airbnb base recommended config
-  ...configs.base.recommended,
-  // Strict import rules
-  rules.base.importsStrict,
+    // ESLint recommended config
+    {
+        name: 'js/config',
+        ...js.configs.recommended,
+    },
+    // Stylistic plugin
+    plugins.stylistic,
+    // Import X plugin
+    plugins.importX,
+    // Airbnb base recommended config
+    ...configs.base.recommended,
+    // Strict import rules
+    rules.base.importsStrict,
 ]);
 
 const nodeConfig = defineConfig([
-  // Node plugin
-  plugins.node,
-  // Airbnb Node recommended config
-  ...configs.node.recommended,
+    // Node plugin
+    plugins.node,
+    // Airbnb Node recommended config
+    ...configs.node.recommended,
 ]);
 
 const typescriptConfig = defineConfig([
-  // TypeScript ESLint plugin
-  plugins.typescriptEslint,
-  // Airbnb base TypeScript config
-  ...configs.base.typescript,
-  // Strict TypeScript rules
-  rules.typescript.typescriptEslintStrict,
+    // TypeScript ESLint plugin
+    plugins.typescriptEslint,
+    // Airbnb base TypeScript config
+    ...configs.base.typescript,
+    // Strict TypeScript rules
+    rules.typescript.typescriptEslintStrict,
 ]);
 
 export default defineConfig([
-  // Ignore files and folders listed in repo root .gitignore – includeIgnoreFile
-  // is not suitable for the ESLint flat-config in all environments, so we
-  // read the file and pass the entries explicitly elsewhere (the caller
-  // may still transform these). Keep the comment for future maintainers.
-  // Note: This module intentionally does not call includeIgnoreFile here.
-  {
-    ignores: [
-      // Add the entries from your .gitignore file here
-    ],
-  },
-  // JavaScript config
-  ...jsConfig,
-  // Node config
-  ...nodeConfig,
-  // TypeScript config
-  ...typescriptConfig,
+    // Ignore files and folders listed in repo root .gitignore – includeIgnoreFile
+    // is not suitable for the ESLint flat-config in all environments, so we
+    // read the file and pass the entries explicitly elsewhere (the caller
+    // may still transform these). Keep the comment for future maintainers.
+    // Note: This module intentionally does not call includeIgnoreFile here.
+    {
+        ignores: [
+            // Add the entries from your .gitignore file here
+        ],
+    },
+    // JavaScript config
+    ...jsConfig,
+    // Node config
+    ...nodeConfig,
+    // TypeScript config
+    ...typescriptConfig,
 ]);
