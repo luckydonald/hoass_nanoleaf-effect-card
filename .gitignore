@@ -57,7 +57,7 @@ env/
 
 # Build outputs
 frontend/dist/
-custom_components/calendar_alarm_clock/www/
+custom_components/nanoleaf_effect_card/www/
 
 # Build files
 dist/
