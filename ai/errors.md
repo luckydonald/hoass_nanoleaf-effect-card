@@ -1,1 +1,6 @@
 # A log of errors given to the AI during processing.
+
+———
+
+❯ `make release` does not work...                                                                                                                                                                
+———
