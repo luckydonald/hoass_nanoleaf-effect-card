@@ -71,7 +71,9 @@ describe('NanoleafEffectCard', () => {
 
         it('should handle single color', () => {
             const effect = { name: 'Test', color: '#FF0000' };
-            const colors = (card as unknown as { getEffectColors: (e: Record<string, unknown>) => string[] }).getEffectColors(effect);
+            const colors = (
+                card as unknown as { getEffectColors: (e: Record<string, unknown>) => string[] }
+            ).getEffectColors(effect);
 
             expect(colors).toEqual(['#FF0000']);
         });
@@ -81,14 +83,18 @@ describe('NanoleafEffectCard', () => {
                 name: 'Test',
                 colors: ['#FF0000', '#00FF00', '#0000FF'],
             };
-            const colors = (card as unknown as { getEffectColors: (e: Record<string, unknown>) => string[] }).getEffectColors(effect);
+            const colors = (
+                card as unknown as { getEffectColors: (e: Record<string, unknown>) => string[] }
+            ).getEffectColors(effect);
 
             expect(colors).toEqual(['#FF0000', '#00FF00', '#0000FF']);
         });
 
         it('should default to grey when no color provided', () => {
             const effect = { name: 'Test' };
-            const colors = (card as unknown as { getEffectColors: (e: Record<string, unknown>) => string[] }).getEffectColors(effect);
+            const colors = (
+                card as unknown as { getEffectColors: (e: Record<string, unknown>) => string[] }
+            ).getEffectColors(effect);
 
             // New behavior: editor allows an empty colors array; card renderer falls back visually.
             expect(colors).toEqual([]);
@@ -104,18 +110,26 @@ describe('NanoleafEffectCard', () => {
         });
 
         it('should return white for dark colors', () => {
-            const contrast = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor('#000000');
+            const contrast = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor(
+                '#000000'
+            );
             expect(contrast).toBe('#FFFFFF');
         });
 
         it('should return black for light colors', () => {
-            const contrast = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor('#FFFFFF');
+            const contrast = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor(
+                '#FFFFFF'
+            );
             expect(contrast).toBe('#000000');
         });
 
         it('should handle colors without # prefix', () => {
-            const contrast1 = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor('000000');
-            const contrast2 = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor('#000000');
+            const contrast1 = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor(
+                '000000'
+            );
+            const contrast2 = (card as unknown as { getContrastColor: (c: string) => string }).getContrastColor(
+                '#000000'
+            );
             expect(contrast1).toBe(contrast2);
         });
     });
@@ -159,7 +173,9 @@ describe('NanoleafEffectCard', () => {
                     },
                 },
             };
-            const stub = (card.constructor as unknown as { getStubConfig: (ha: typeof fakeHa) => Record<string, unknown> }).getStubConfig(fakeHa);
+            const stub = (
+                card.constructor as unknown as { getStubConfig: (ha: typeof fakeHa) => Record<string, unknown> }
+            ).getStubConfig(fakeHa);
             expect(stub).toHaveProperty('entity');
             expect(stub).toHaveProperty('display');
             expect(stub).toHaveProperty('effects');
@@ -168,7 +184,12 @@ describe('NanoleafEffectCard', () => {
 
     describe('Special entries (Off / None)', () => {
         it('should render "None" and not "Off" when configured', async () => {
-            (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test_nanoleaf', effects: [], show_off: false, show_none: true });
+            (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+                entity: 'light.test_nanoleaf',
+                effects: [],
+                show_off: false,
+                show_none: true,
+            });
             // setConfig defers render to a microtask
             await Promise.resolve();
 
@@ -178,7 +199,10 @@ describe('NanoleafEffectCard', () => {
         });
 
         it('should default to showing Off when not explicitly disabled', async () => {
-            (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test_nanoleaf', effects: [] /* defaults */ });
+            (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+                entity: 'light.test_nanoleaf',
+                effects: [] /* defaults */,
+            });
             await Promise.resolve();
 
             const html = card.shadowRoot?.innerHTML ?? '';
@@ -195,7 +219,11 @@ describe('NanoleafEffectCard', () => {
             };
 
             // configure card and inject hass
-            (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test_nanoleaf', effects: [], show_none: true });
+            (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+                entity: 'light.test_nanoleaf',
+                effects: [],
+                show_none: true,
+            });
             (card as unknown as { _hass: typeof mockHass })._hass = mockHass;
 
             (card as unknown as { handleEffectSelect: (e: string) => void }).handleEffectSelect('None');
