@@ -230,3 +230,9 @@ Partial updates sounds way better then carret position hacks.
 
 Add a good unittest for the components, checking that the data flow works (init data is selected, clicking changes, data changes are reflected, etc.)
 Add keyboard navigation tests, too.
+
+———
+
+Don't forget to update the changelog, readme or whatever needed documentations when doing changes.
+
+———
