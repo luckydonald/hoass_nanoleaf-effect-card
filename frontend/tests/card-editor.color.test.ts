@@ -45,6 +45,8 @@ describe('Card Editor - color removal', () => {
         await new Promise((r) => setTimeout(r, 0));
 
         // After removing the last color the colors array should be empty (no fallback in editor)
-        expect(editorConfig.effects[0].colors.length).toBe(0);
+        // Re-read _config in case it was replaced with a new object reference on re-render
+        const editorConfig2 = (editor as unknown as { _config: { effects: Array<{ colors: string[] }> } })._config;
+        expect(editorConfig2.effects[0].colors.length).toBe(0);
     });
 });
