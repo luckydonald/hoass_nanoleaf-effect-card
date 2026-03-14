@@ -1,21 +1,26 @@
 // Nanoleaf Effect Card Editor - Button Style Chooser
 
+import type { ButtonStyleColorState, ColorDisplayConfig, StyleKey } from './types';
+
+type BoundElement = Element & { _nanoleaf_bound?: boolean; dataset?: DOMStringMap; _handled?: string };
+
 class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
+    private _value: ColorDisplayConfig = {};
+    private _bound: boolean = false;
+
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this._value = {};
-        this._bound = false;
     }
 
-    set value(v) {
+    set value(v: ColorDisplayConfig | null | undefined) {
         // Merge incoming value with existing internal state to preserve transient flags
-        const incoming = v || {};
-        const keys = ['full_background', 'small_bar', 'text', 'border', 'animated_icon'];
-        const merged = { ...this._value };
+        const incoming = v ?? {};
+        const keys: StyleKey[] = ['full_background', 'small_bar', 'text', 'border', 'animated_icon'];
+        const merged: ColorDisplayConfig = { ...this._value };
         keys.forEach((k) => {
-            const prev = this._value[k] || { active: false, inactive: false, hover: false };
-            const inc = incoming[k] || {};
+            const prev: ButtonStyleColorState = this._value[k] ?? { active: false, inactive: false, hover: false };
+            const inc: ButtonStyleColorState = incoming[k] ?? {};
             merged[k] = {
                 active: typeof inc.active === 'boolean' ? inc.active : prev.active,
                 inactive: typeof inc.inactive === 'boolean' ? inc.inactive : prev.inactive,
@@ -26,31 +31,31 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
         this.render();
     }
 
-    get value() {
+    get value(): ColorDisplayConfig {
         return this._value;
     }
 
-    connectedCallback() {
+    connectedCallback(): void {
         this.render();
         if (this._bound) return;
         this._bound = true;
     }
 
-    _updateKey(key) {
-        const root = this.shadowRoot;
+    private _updateKey(key: StyleKey): void {
+        const root = this.shadowRoot!;
         const item = root.querySelector(`.item[data-key="${key}"]`);
         if (!item) return;
-        const btnActive = item.querySelector('.btn-active');
-        const btnInactive = item.querySelector('.btn-inactive');
+        const btnActive = item.querySelector('.btn-active')!;
+        const btnInactive = item.querySelector('.btn-inactive')!;
         const btnHover = item.querySelector('.btn-hover');
-        const current = this._value[key] || { active: false, inactive: false, hover: false };
+        const current: ButtonStyleColorState = this._value[key] ?? { active: false, inactive: false, hover: false };
         current.active = btnActive.classList.contains('active');
         current.inactive = btnInactive.classList.contains('active');
         current.hover = btnHover ? btnHover.classList.contains('active') : false;
         this._value = { ...this._value, [key]: current };
-        let out;
+        let out: ColorDisplayConfig;
         try {
-            out = JSON.parse(JSON.stringify(this._value));
+            out = JSON.parse(JSON.stringify(this._value)) as ColorDisplayConfig;
         } catch (e) {
             out = { ...this._value };
         }
@@ -62,12 +67,14 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
                     new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true })
                 );
             });
-        } catch (e) {}
+        } catch (e) {
+            // ignore
+        }
     }
 
-    render() {
-        const v = this._value || {};
-        const styles = [
+    render(): void {
+        const v = this._value;
+        const styles: { key: StyleKey; label: string }[] = [
             { key: 'full_background', label: 'Full Background' },
             { key: 'small_bar', label: 'Small Bar' },
             { key: 'text', label: 'Text' },
@@ -75,7 +82,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
             { key: 'animated_icon', label: 'Animated Icon' },
         ];
 
-        this.shadowRoot.innerHTML = `
+        this.shadowRoot!.innerHTML = /* html */ `
       <style>
         .group { display:flex; flex-direction:column; gap:6px; }
         .group.compact { flex-direction:row; flex-wrap:wrap; gap:12px; }
@@ -89,7 +96,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
       <div class="group ${this.hasAttribute('compact') ? 'compact' : ''}">
         ${styles
             .map((s) => {
-                const cfg = v[s.key] || { active: false, inactive: false, hover: false };
+                const cfg = v[s.key] ?? { active: false, inactive: false, hover: false };
                 return `
             <div class="item ${this.hasAttribute('compact') ? 'compact' : ''}" data-key="${s.key}">
               <div class="label">${s.label}</div>
@@ -112,31 +119,33 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
      `;
 
         // After injecting HTML, attach per-button listeners (guarded) to ensure reliable events
-        this.shadowRoot.querySelectorAll('.toggle-btn').forEach((btn) => {
-            if (btn._nanoleaf_bound) return;
-            btn._nanoleaf_bound = true;
-            btn.addEventListener('click', (e) => {
+        this.shadowRoot!.querySelectorAll('.toggle-btn').forEach((btn) => {
+            const b = btn as BoundElement;
+            if (b._nanoleaf_bound) return;
+            b._nanoleaf_bound = true;
+            btn.addEventListener('click', () => {
                 // Toggle active class (click doesn't change classes automatically)
                 // If a prior keyboard event handled activation, ignore this click
-                if (btn.dataset._handled) {
-                    delete btn.dataset._handled;
+                if (b.dataset && b.dataset['_handled']) {
+                    delete b.dataset['_handled'];
                     return;
                 }
                 btn.classList.toggle('active');
                 const item = btn.closest('.item');
                 if (!item) return;
-                const key = item.dataset.key;
+                const key = (item as HTMLElement).dataset['key'] as StyleKey;
                 this._updateKey(key);
             });
-            btn.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
+            btn.addEventListener('keydown', (e: Event) => {
+                const ke = e as KeyboardEvent;
+                if (ke.key === 'Enter' || ke.key === ' ') {
+                    ke.preventDefault();
                     // mark this interaction as handled so click won't toggle again
-                    btn.dataset._handled = '1';
+                    if (b.dataset) b.dataset['_handled'] = '1';
                     btn.classList.toggle('active');
                     const item = btn.closest('.item');
                     if (!item) return;
-                    const key = item.dataset.key;
+                    const key = (item as HTMLElement).dataset['key'] as StyleKey;
                     this._updateKey(key);
                 }
             });

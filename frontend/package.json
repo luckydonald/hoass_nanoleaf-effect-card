@@ -1,0 +1,50 @@
+{
+    "name": "nanoleaf-effect-card",
+    "version": "0.0.0-dev0",
+    "description": "Lovelace card for Nanoleaf Effect Card for Home Assistant",
+    "main": "dist/nanoleaf-effect-card.js",
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/luckydonald/hoass_nanoleaf-effect-card.git"
+    },
+    "author": "luckydonald",
+    "license": "MIT",
+    "engines": {
+        "node": ">=24.0.0 <25.0.0"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "type-check": "tsc --noEmit",
+        "format": "dprint fmt",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:coverage": "vitest --coverage",
+        "lint": "eslint \"**/*.{ts,js}\" --quiet",
+        "lint:fix": "eslint \"**/*.{ts,js}\" --fix"
+    },
+    "devDependencies": {
+        "@eslint/compat": "^2.0.1",
+        "@eslint/js": "^9.39.2",
+        "@html-eslint/eslint-plugin": "^0.54.0",
+        "@html-eslint/parser": "^0.54.0",
+        "@tsconfig/node22": "^22.0.0",
+        "@types/jsdom": "^21.1.7",
+        "@types/node": "^25.1.0",
+        "@typescript-eslint/eslint-plugin": "^8.54.0",
+        "@typescript-eslint/parser": "^8.54.0",
+        "@vitest/coverage-v8": "^4.0.18",
+        "@vitest/ui": "^4.0.18",
+        "dprint": "^0.51.1",
+        "eslint": "^9.39.2",
+        "eslint-config-airbnb-extended": "^3.0.1",
+        "eslint-plugin-import": "^2.29.1",
+        "jsdom": "^27.4.0",
+        "typescript": "~5.9.3",
+        "vite": "^7.3.1",
+        "vitest": "^4.0.18"
+    },
+    "packageManager": "yarn@4.12.0"
+}

@@ -9,14 +9,14 @@ beforeEach(() => {
 // Setup a minimal DOM so document.createElement works and customElements is available
 const dom = new JSDOM('<!DOCTYPE html><html lang="en"><body></body></html>');
 global.document = dom.window.document;
-global.window = dom.window;
+global.window = dom.window as unknown as Window & typeof globalThis;
 global.HTMLElement = dom.window.HTMLElement;
 global.customElements = dom.window.customElements;
 
 describe('Visual editor crash (getConfigElement)', () => {
     it('getConfigElement returns a fallback element when editor module does not implement setConfig', async () => {
         // Mock a broken editor module: it defines the custom element but doesn't implement setConfig
-        vi.doMock('./card-editor.js', () => {
+        vi.doMock('../src/card-editor', () => {
             class BrokenEditor extends HTMLElement {
                 constructor() {
                     super();
@@ -37,10 +37,14 @@ describe('Visual editor crash (getConfigElement)', () => {
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
         // Import the card module (which will register the custom element and may dynamically import the mocked editor)
-        await import('./card.js');
+        await import('../src/card');
 
         // The card registers itself as a custom element; get the constructor from customElements
-        const Card = customElements.get('nanoleaf-effect-card');
+        const Card = customElements.get('nanoleaf-effect-card') as unknown as {
+            getConfigElement: () => Promise<
+                HTMLElement & { setConfig?: (c: Record<string, unknown>) => void; _config?: Record<string, unknown> }
+            >;
+        };
         expect(Card).toBeTruthy();
 
         // Call the async method to create editor
@@ -51,7 +55,7 @@ describe('Visual editor crash (getConfigElement)', () => {
 
         // Calling setConfig should store the config on the element and log a warning
         const cfg = { entity: 'light.test' };
-        el.setConfig(cfg);
+        el.setConfig!(cfg);
         expect(el._config).toEqual(cfg);
         expect(warnSpy).toHaveBeenCalled();
 

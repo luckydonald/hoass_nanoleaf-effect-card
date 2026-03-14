@@ -6,7 +6,7 @@
     "github_user": "luckydonald",
     "github_url": "https://github.com/luckydonald/hoass_nanoleaf-effect-card.git",
     "keep_backend": false,
-    "frontend_choice": "none",
+    "frontend_choice": "ts",
     "current_year": 2026,
     "replacements": {
         "": ""
