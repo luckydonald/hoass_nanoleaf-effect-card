@@ -4,111 +4,116 @@
  * A custom Home Assistant Lovelace card for controlling Nanoleaf light effects.
  */
 
-import type { HomeAssistant, CardConfig, Effect, ButtonStyle, ColorDisplayConfig, StyleKey } from './types';
+import type {
+  ButtonStyle, CardConfig, ColorDisplayConfig,
+  Effect,
+  HomeAssistant, StyleKey,
+} from './types';
 
 type BoundElement = Element & { _nanoleaf_bound?: boolean };
 
 class NanoleafEffectCard extends HTMLElement {
-    protected _config: CardConfig = {};
-    protected _hass: HomeAssistant | null = null;
+  protected _config: CardConfig = {};
 
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  protected _hass: HomeAssistant | null = null;
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  setConfig(config: Partial<CardConfig>): void {
+    if (!config?.entity) {
+      throw new Error('You need to define an entity');
     }
 
-    setConfig(config: Partial<CardConfig>): void {
-        if (!config || !config.entity) {
-            throw new Error('You need to define an entity');
-        }
+    const defaultColorDisplays: ColorDisplayConfig = {
+      full_background: { active: true, inactive: false },
+      small_bar: { active: false, inactive: true },
+      text: { active: false, inactive: false },
+      border: { active: false, inactive: false },
+      animated_icon: { active: true, inactive: false },
+    };
 
-        const defaultColorDisplays: ColorDisplayConfig = {
-            full_background: { active: true, inactive: false },
-            small_bar: { active: false, inactive: true },
-            text: { active: false, inactive: false },
-            border: { active: false, inactive: false },
-            animated_icon: { active: true, inactive: false },
-        };
+    this._config = {
+      entity: config.entity,
+      display: config.display ?? 'buttons',
+      button_style: {
+        inactive_color: config.button_style?.inactive_color ?? '#CCCCCC',
+        icon: config.button_style?.icon !== false,
+        name: config.button_style?.name !== false,
+        compact: config.button_style?.compact === true,
+        color_display: { ...defaultColorDisplays, ...(config.button_style?.color_display ?? {}) },
+      },
+      effects: (config.effects ?? []).map((ef) => ({
+        ...ef,
+        button_style: {
+          ...(ef.button_style ?? {}),
+          color_display: { ...defaultColorDisplays, ...((ef.button_style ?? {}).color_display ?? {}) },
+        },
+      })),
+      show_off: config.show_off !== false, // default true
+      show_none: config.show_none === true, // default false
+    };
 
-        this._config = {
-            entity: config.entity,
-            display: config.display ?? 'buttons',
-            button_style: {
-                inactive_color: config.button_style?.inactive_color ?? '#CCCCCC',
-                icon: config.button_style?.icon !== false,
-                name: config.button_style?.name !== false,
-                compact: config.button_style?.compact === true,
-                color_display: { ...defaultColorDisplays, ...(config.button_style?.color_display ?? {}) },
-            },
-            effects: (config.effects ?? []).map((ef) => ({
-                ...ef,
-                button_style: {
-                    ...(ef.button_style ?? {}),
-                    color_display: { ...defaultColorDisplays, ...((ef.button_style ?? {}).color_display ?? {}) },
-                },
-            })),
-            show_off: config.show_off !== false, // default true
-            show_none: config.show_none === true, // default false
-        };
+    this.render();
+  }
 
-        this.render();
-    }
+  set hass(hass: HomeAssistant) {
+    this._hass = hass;
+    this.render();
+  }
 
-    set hass(hass: HomeAssistant) {
-        this._hass = hass;
-        this.render();
-    }
+  getCardSize(): number {
+    return this._config.display === 'dropdown' ? 1 : Math.ceil((this._config.effects!.length + 1) / 3);
+  }
 
-    getCardSize(): number {
-        return this._config.display === 'dropdown' ? 1 : Math.ceil((this._config.effects!.length + 1) / 3);
-    }
+  render(): void {
+    // Basic guards
+    if (!this._config?.entity) return;
 
-    render(): void {
-        // Basic guards
-        if (!this._config || !this._config.entity) return;
+    // Use safe defaults if hass or the entity isn't available (allow tests without hass)
+    const entity = this._hass?.states?.[this._config.entity] ?? null;
+    const currentEffect = (entity?.attributes?.effect as string | undefined) ?? null;
+    const isOn = Boolean(entity?.state === 'on');
 
-        // Use safe defaults if hass or the entity isn't available (allow tests without hass)
-        const entity = this._hass?.states?.[this._config.entity] ?? null;
-        const currentEffect = (entity?.attributes?.['effect'] as string | undefined) ?? null;
-        const isOn = Boolean(entity && entity.state === 'on');
-
-        this.shadowRoot!.innerHTML = /* html */ `
+    this.shadowRoot!.innerHTML = /* html */ `
       <style>
         ${this.getStyles()}
       </style>
       ${
-          this._config.display === 'dropdown'
-              ? this.renderDropdown(currentEffect, isOn)
-              : this.renderButtons(currentEffect, isOn)
+        this._config.display === 'dropdown'
+          ? this.renderDropdown(currentEffect, isOn)
+          : this.renderButtons(currentEffect, isOn)
       }
     `;
 
-        this.attachEventListeners();
+    this.attachEventListeners();
 
-        // Ensure compact classes are applied in the DOM (helps tests and dynamic updates)
-        const containerEl = this.shadowRoot!.querySelector('.buttons-container');
-        if (containerEl) {
-            if (this._config.button_style?.compact) {
-                containerEl.classList.add('compact-grid');
-            } else {
-                containerEl.classList.remove('compact-grid');
-            }
-            // Apply compact class to each button as needed (global fallback)
-            this.shadowRoot!.querySelectorAll('.effect-button').forEach((btn) => {
-                const effectName = btn.getAttribute('data-effect');
-                const effect = (this._config.effects ?? []).find((e) => e.name === effectName) ?? null;
-                const perEffectCompact = effect?.button_style?.compact === true;
-                if (perEffectCompact || this._config.button_style?.compact) {
-                    btn.classList.add('compact');
-                } else {
-                    btn.classList.remove('compact');
-                }
-            });
+    // Ensure compact classes are applied in the DOM (helps tests and dynamic updates)
+    const containerEl = this.shadowRoot!.querySelector('.buttons-container');
+    if (containerEl) {
+      if (this._config.button_style?.compact) {
+        containerEl.classList.add('compact-grid');
+      } else {
+        containerEl.classList.remove('compact-grid');
+      }
+      // Apply compact class to each button as needed (global fallback)
+      this.shadowRoot!.querySelectorAll('.effect-button').forEach((btn) => {
+        const effectName = btn.getAttribute('data-effect');
+        const effect = (this._config.effects ?? []).find((e) => e.name === effectName) ?? null;
+        const perEffectCompact = effect?.button_style?.compact === true;
+        if (perEffectCompact || this._config.button_style?.compact) {
+          btn.classList.add('compact');
+        } else {
+          btn.classList.remove('compact');
         }
+      });
     }
+  }
 
-    getStyles(): string {
-        return `
+  getStyles(): string {
+    return `
       :host { display: block; }
       .effect-card { padding: 16px; }
 
@@ -163,442 +168,482 @@ class NanoleafEffectCard extends HTMLElement {
 
       ha-icon { --mdc-icon-size: 24px; }
     `;
-    }
+  }
 
-    renderDropdown(currentEffect: string | null, isOn: boolean): string {
-        const effects: Effect[] = [
-            ...(this._config.show_off === false ? [] : [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'] }]),
-            ...(this._config.show_none ? [{ name: 'None', icon: 'mdi:cancel', colors: ['#888888'] }] : []),
-            ...(this._config.effects ?? []),
-        ];
+  renderDropdown(currentEffect: string | null, isOn: boolean): string {
+    const effects: Effect[] = [
+      ...(this._config.show_off === false ? [] : [
+        {
+          name: 'Off',
+          icon: 'mdi:power',
+          colors: [
+            '#666666',
+          ],
+        },
+      ]),
+      ...(this._config.show_none ? [
+        {
+          name: 'None',
+          icon: 'mdi:cancel',
+          colors: [
+            '#888888',
+          ],
+        },
+      ] : []),
+      ...(this._config.effects ?? []),
+    ];
 
-        return /* html */ `
+    return /* html */ `
       <div class="effect-card">
         <div class="dropdown-container">
-          <select class="effect-dropdown" data-effect="${isOn ? currentEffect : 'Off'}">
+          <select
+class="effect-dropdown"
+data-effect="${isOn ? currentEffect : 'Off'}"
+>
             ${effects
-                .map((effect) => {
-                    const selected = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
-                    return `
+              .map((effect) => {
+                const selected = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
+                return `
                 <option value="${effect.name}" ${selected ? 'selected' : ''}>
                   ${effect.name}
                 </option>
               `;
-                })
-                .join('')}
+              })
+              .join('')}
           </select>
         </div>
       </div>
     `;
-    }
+  }
 
-    renderButtons(currentEffect: string | null, isOn: boolean): string {
-        const effects: Effect[] = [
-            // Conditionally include Off / None special items
-            ...(this._config.show_off === false
-                ? []
-                : [{ name: 'Off', icon: 'mdi:power', colors: ['#666666'], button_style: { color_display: {} } }]),
-            ...(this._config.show_none
-                ? [{ name: 'None', icon: 'mdi:cancel', colors: ['#888888'], button_style: { color_display: {} } }]
-                : []),
-            ...(this._config.effects ?? []),
-        ];
+  renderButtons(currentEffect: string | null, isOn: boolean): string {
+    const effects: Effect[] = [
+      // Conditionally include Off / None special items
+      ...(this._config.show_off === false
+        ? []
+        : [
+          {
+            name: 'Off',
+            icon: 'mdi:power',
+            colors: [
+              '#666666',
+            ],
+            button_style: { color_display: {} },
+          },
+        ]),
+      ...(this._config.show_none
+        ? [
+          {
+            name: 'None',
+            icon: 'mdi:cancel',
+            colors: [
+              '#888888',
+            ],
+            button_style: { color_display: {} },
+          },
+        ]
+        : []),
+      ...(this._config.effects ?? []),
+    ];
 
-        // Determine whether any configuration (global or per-effect) enables border or small_bar
-        const anyBorderConfigured = (() => {
-            try {
-                const globalCfg = this._config.button_style?.color_display?.border ?? {};
-                if (globalCfg.active || globalCfg.inactive) return true;
-                for (const ef of this._config.effects ?? []) {
-                    const cfg = ef?.button_style?.color_display?.border ?? {};
-                    if (cfg.active || cfg.inactive) return true;
-                }
-            } catch (e) {
-                // ignore
-            }
-            return false;
-        })();
+    // Determine whether any configuration (global or per-effect) enables border or small_bar
+    const anyBorderConfigured = (() => {
+      try {
+        const globalCfg = this._config.button_style?.color_display?.border ?? {};
+        if (globalCfg.active || globalCfg.inactive) return true;
+        for (const ef of this._config.effects ?? []) {
+          const cfg = ef?.button_style?.color_display?.border ?? {};
+          if (cfg.active || cfg.inactive) return true;
+        }
+      } catch (e) {
+        // ignore
+      }
+      return false;
+    })();
 
-        const anySmallBarConfigured = (() => {
-            try {
-                const globalCfg = this._config.button_style?.color_display?.small_bar ?? {};
-                if (globalCfg.active || globalCfg.inactive) return true;
-                for (const ef of this._config.effects ?? []) {
-                    const cfg = ef?.button_style?.color_display?.small_bar ?? {};
-                    if (cfg.active || cfg.inactive) return true;
-                }
-            } catch (e) {
-                // ignore
-            }
-            return false;
-        })();
+    const anySmallBarConfigured = (() => {
+      try {
+        const globalCfg = this._config.button_style?.color_display?.small_bar ?? {};
+        if (globalCfg.active || globalCfg.inactive) return true;
+        for (const ef of this._config.effects ?? []) {
+          const cfg = ef?.button_style?.color_display?.small_bar ?? {};
+          if (cfg.active || cfg.inactive) return true;
+        }
+      } catch (e) {
+        // ignore
+      }
+      return false;
+    })();
 
-        return /* html */ `
+    return /* html */ `
        <div class="effect-card">
          <div class="buttons-container ${this._config.button_style?.compact ? 'compact-grid' : ''}">
            ${effects
-               .map((effect) => {
-                   const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
-                   // getEffectColors may return an empty array if the user removed all colors
-                   const colors = this.getEffectColors(effect);
-                   const buttonStyle: ButtonStyle = {
-                       ...(this._config.button_style ?? {}),
-                       ...(effect.button_style ?? {}),
-                   };
-                   const inactiveColor = buttonStyle.inactive_color ?? '#CCCCCC';
-                   const showIcon = buttonStyle.icon !== false;
-                   const showName = buttonStyle.name !== false;
+              .map((effect) => {
+                const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
+                // getEffectColors may return an empty array if the user removed all colors
+                const colors = this.getEffectColors(effect);
+                const buttonStyle: ButtonStyle = {
+                  ...(this._config.button_style ?? {}),
+                  ...(effect.button_style ?? {}),
+                };
+                const inactiveColor = buttonStyle.inactive_color ?? '#CCCCCC';
+                const showIcon = buttonStyle.icon !== false;
+                const showName = buttonStyle.name !== false;
 
-                   // Decide which styles apply depending on active/inactive flags
-                   const colorDisplay: ColorDisplayConfig = buttonStyle.color_display ?? {};
+                // Decide which styles apply depending on active/inactive flags
+                const colorDisplay: ColorDisplayConfig = buttonStyle.color_display ?? {};
 
-                   const applyStyle = (styleKey: StyleKey): boolean => {
-                       const cfg = colorDisplay[styleKey] ?? {};
-                       return (isActive && (cfg.active ?? false)) || (!isActive && (cfg.inactive ?? false));
-                   };
+                const applyStyle = (styleKey: StyleKey): boolean => {
+                  const cfg = colorDisplay[styleKey] ?? {};
+                  return (isActive && (cfg.active ?? false)) || (!isActive && (cfg.inactive ?? false));
+                };
 
-                   const applyHover = (styleKey: StyleKey): boolean => {
-                       const cfg = colorDisplay[styleKey] ?? {};
-                       return cfg.hover === true;
-                   };
+                const applyHover = (styleKey: StyleKey): boolean => {
+                  const cfg = colorDisplay[styleKey] ?? {};
+                  return cfg.hover === true;
+                };
 
-                   // If colors array is empty, use inactiveColor as fallback for rendering styles
-                   const colorsForStyle = colors && colors.length > 0 ? colors : [inactiveColor];
-                   const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
-                   const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
+                // If colors array is empty, use inactiveColor as fallback for rendering styles
+                const colorsForStyle = colors && colors.length > 0 ? colors : [
+                  inactiveColor,
+                ];
+                const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
+                const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
 
-                   // prepare inline styles
-                   // Full background or flat background
-                   const fullBg = applyStyle('full_background')
-                       ? `background: ${bgGradient};`
-                       : `background: ${bgColor};`;
+                // prepare inline styles
+                // Full background or flat background
+                const fullBg = applyStyle('full_background')
+                  ? `background: ${bgGradient};`
+                  : `background: ${bgColor};`;
 
-                   // Determine text/icon gradient class and inline style when 'text' style applies
-                   const textEnabled = applyStyle('text');
-                   const textClass = textEnabled ? 'text-gradient' : '';
-                   const textStyleInline = textEnabled
-                       ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`
-                       : '';
-                   const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
+                // Determine text/icon gradient class and inline style when 'text' style applies
+                const textEnabled = applyStyle('text');
+                const textClass = textEnabled ? 'text-gradient' : '';
+                const textStyleInline = textEnabled
+                  ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`
+                  : '';
+                const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
-                   // compact class if globally compact or per-effect override
-                   const compactClass =
-                       (effect.button_style && effect.button_style.compact) || this._config.button_style?.compact
-                           ? 'compact'
-                           : '';
+                // compact class if globally compact or per-effect override
+                const compactClass = (effect.button_style?.compact) || this._config.button_style?.compact
+                  ? 'compact'
+                  : '';
 
-                   // hover data attrs
-                   const hoverAttrs: string[] = [];
-                   if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
-                   if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
-                   if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
-                   if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
+                // hover data attrs
+                const hoverAttrs: string[] = [];
+                if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
+                if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
+                if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
+                if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
 
-                   // Small bar rendering: if anySmallBarConfigured is true, reserve the bar space for all buttons
-                   const smallBarHtml = (() => {
-                       const barStyle = applyStyle('small_bar')
-                           ? `background: ${bgGradient};`
-                           : `background: transparent;`;
-                       // When not active, make it less visible but reserve space; if globally no small bar configured, omit entirely
-                       if (!anySmallBarConfigured) return '';
-                       return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${
-                           applyStyle('small_bar') ? (applyHover('small_bar') ? 0.6 : 1) : 0
-                       };"></div>`;
-                   })();
+                // Small bar rendering: if anySmallBarConfigured is true, reserve the bar space for all buttons
+                const smallBarHtml = (() => {
+                  const barStyle = applyStyle('small_bar')
+                    ? `background: ${bgGradient};`
+                    : 'background: transparent;';
+                  // When not active, make it less visible but reserve space; if globally no small bar configured, omit entirely
+                  if (!anySmallBarConfigured) return '';
+                  return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${
+                    applyStyle('small_bar') ? (applyHover('small_bar') ? 0.6 : 1) : 0
+                  };"></div>`;
+                })();
 
-                   // Border: reserve spacing only if anyBorderConfigured
-                   let borderStyleFinal = '';
-                   if (anyBorderConfigured) {
-                       borderStyleFinal = 'border: 2px solid transparent;';
-                       if (applyStyle('border')) {
-                           borderStyleFinal += ` border-image: linear-gradient(135deg, ${colorsForStyle.join(
-                               ', '
-                           )}) 1;`;
-                       }
-                   }
+                // Border: reserve spacing only if anyBorderConfigured
+                let borderStyleFinal = '';
+                if (anyBorderConfigured) {
+                  borderStyleFinal = 'border: 2px solid transparent;';
+                  if (applyStyle('border')) {
+                    borderStyleFinal += ` border-image: linear-gradient(135deg, ${colorsForStyle.join(', ')}) 1;`;
+                  }
+                }
 
-                   return `
+                return `
                  <button
                   class="effect-button ${isActive ? 'active' : 'inactive'} ${compactClass}"
                    data-effect="${effect.name}"
                    ${hoverAttrs.join(' ')}
-                   style="${fullBg} ${borderStyleFinal} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(
-                       colorsForStyle[0]
-                   )};"
+                   style="${fullBg} ${borderStyleFinal} --hover-bg: ${bgGradient}; color: ${this.getContrastColor(colorsForStyle[0])};"
                  >
                    <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
                    ${
-                       showIcon
-                           ? `
+                      showIcon
+                        ? `
                     <div class="button-icon ${iconAnimatedClass} ${textClass}" ${
-                                 textEnabled ? `style="${textStyleInline}"` : ''
-                             }>
+                      textEnabled ? `style="${textStyleInline}"` : ''
+                    }>
                       <ha-icon icon="${effect.icon ?? 'mdi:lightbulb'}"></ha-icon>
                     </div>
                    `
-                           : ''
-                   }
+                        : ''
+                    }
                    ${
-                       showName
-                           ? `
+                      showName
+                        ? `
                     <div class="button-name ${textClass}" ${textEnabled ? `style="${textStyleInline}"` : ''}>${
-                                 effect.name
-                             }</div>
+                      effect.name
+                    }</div>
                    `
-                           : ''
-                   }
+                        : ''
+                    }
                    ${smallBarHtml}
                    </div>
                  </button>
                `;
-               })
-               .join('')}
+              })
+              .join('')}
            </div>
          </div>
        `;
+  }
+
+  getEffectColors(effect: Effect): string[] {
+    // Return the raw colors array if present and non-empty. If a single `color` is set, return it.
+    // If no color is provided, return an empty array — the renderer will visually fall back to the inactive color.
+    if (effect.colors && Array.isArray(effect.colors) && effect.colors.length > 0) return effect.colors;
+    if (effect.color) {
+      return [
+        effect.color,
+      ];
     }
+    return [];
+  }
 
-    getEffectColors(effect: Effect): string[] {
-        // Return the raw colors array if present and non-empty. If a single `color` is set, return it.
-        // If no color is provided, return an empty array — the renderer will visually fall back to the inactive color.
-        if (effect.colors && Array.isArray(effect.colors) && effect.colors.length > 0) return effect.colors;
-        if (effect.color) return [effect.color];
-        return [];
+  getContrastColor(hexColor: string): string {
+    const hex = (hexColor ?? '#FFFFFF').replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  }
+
+  attachEventListeners(): void {
+    if (this._config.display === 'dropdown') {
+      const dropdown = this.shadowRoot!.querySelector('.effect-dropdown');
+      if (dropdown) {
+        dropdown.addEventListener('change', (e: Event) => {
+          this.handleEffectSelect((e.target as HTMLSelectElement).value);
+        });
+      }
+    } else {
+      const buttons = this.shadowRoot!.querySelectorAll('.effect-button');
+      buttons.forEach((button) => {
+        button.addEventListener('click', (e: Event) => {
+          const effectName = (e.currentTarget as HTMLElement).getAttribute('data-effect');
+          this.handleEffectSelect(effectName);
+        });
+      });
     }
+  }
 
-    getContrastColor(hexColor: string): string {
-        const hex = (hexColor ?? '#FFFFFF').replace('#', '');
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        return luminance > 0.5 ? '#000000' : '#FFFFFF';
-    }
+  handleEffectSelect(effectName: string | null): void {
+    if (!this._hass) return;
 
-    attachEventListeners(): void {
-        if (this._config.display === 'dropdown') {
-            const dropdown = this.shadowRoot!.querySelector('.effect-dropdown');
-            if (dropdown) {
-                dropdown.addEventListener('change', (e: Event) => {
-                    this.handleEffectSelect((e.target as HTMLSelectElement).value);
-                });
-            }
-        } else {
-            const buttons = this.shadowRoot!.querySelectorAll('.effect-button');
-            buttons.forEach((button) => {
-                button.addEventListener('click', (e: Event) => {
-                    const effectName = (e.currentTarget as HTMLElement).getAttribute('data-effect');
-                    this.handleEffectSelect(effectName);
-                });
-            });
-        }
-    }
+    const entity = this._hass.states[this._config.entity!];
+    if (!entity) return;
 
-    handleEffectSelect(effectName: string | null): void {
-        if (!this._hass) return;
+    const serviceData: Record<string, unknown> = { entity_id: this._config.entity };
+    let turnOn = true;
 
-        const entity = this._hass.states[this._config.entity!];
-        if (!entity) return;
+    if (effectName === 'Off') {
+      turnOn = false;
+    } else if (effectName === 'None') {
+      // 'None' clears the active effect while leaving the light on (revert to previous color mode)
+      const colorMode = (entity.attributes.color_mode as string | undefined) ?? 'unknown';
 
-        const serviceData: Record<string, unknown> = { entity_id: this._config.entity };
-        let turnOn = true;
-
-        if (effectName === 'Off') {
-            turnOn = false;
-        } else if (effectName === 'None') {
-            // 'None' clears the active effect while leaving the light on (revert to previous color mode)
-            const colorMode = (entity.attributes['color_mode'] as string | undefined) ?? 'unknown';
-
-            if (colorMode === 'hs') {
-                serviceData['hs_color'] = entity.attributes['hs_color'];
-            } else if (colorMode === 'xy') {
-                serviceData['xy_color'] = entity.attributes['xy_color'];
-            } else if (colorMode === 'rgb') {
-                serviceData['rgb_color'] = entity.attributes['rgb_color'];
-            } else if (colorMode === 'color_temp') {
-                serviceData['color_temp'] = entity.attributes['color_temp'];
-            } else if (colorMode === 'brightness') {
-                serviceData['brightness'] = entity.attributes['brightness'];
-            }
-        } else {
-            const effectList = (entity.attributes['effect_list'] as string[] | undefined) ?? [];
-            if (effectList.includes(effectName!)) {
-                this._hass.callService('light', 'turn_on', { entity_id: this._config.entity, effect: effectName });
-            } else {
-                // eslint-disable-next-line no-console
-                console.warn(`Effect "${effectName}" is not available for ${this._config.entity}`);
-                const message = `Effect "${effectName}" is not available for ${this._config.entity}`;
-                try {
-                    this._hass.callService('system_log', 'write', {
-                        message,
-                        level: 'warning',
-                    });
-                } catch (e) {
-                    // eslint-disable-next-line no-console
-                    console.warn(message, e);
-                }
-            }
-            return;
-        }
-        this._hass.callService('light', turnOn ? 'turn_on' : 'turn_off', serviceData);
-    }
-
-    static async getConfigElement(): Promise<HTMLElement> {
-        // Dynamically import the editor module so the custom element is defined
+      if (colorMode === 'hs') {
+        serviceData.hs_color = entity.attributes.hs_color;
+      } else if (colorMode === 'xy') {
+        serviceData.xy_color = entity.attributes.xy_color;
+      } else if (colorMode === 'rgb') {
+        serviceData.rgb_color = entity.attributes.rgb_color;
+      } else if (colorMode === 'color_temp') {
+        serviceData.color_temp = entity.attributes.color_temp;
+      } else if (colorMode === 'brightness') {
+        serviceData.brightness = entity.attributes.brightness;
+      }
+    } else {
+      const effectList = (entity.attributes.effect_list as string[] | undefined) ?? [];
+      if (effectList.includes(effectName!)) {
+        this._hass.callService('light', 'turn_on', { entity_id: this._config.entity, effect: effectName });
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn(`Effect "${effectName}" is not available for ${this._config.entity}`);
+        const message = `Effect "${effectName}" is not available for ${this._config.entity}`;
         try {
-            await import('./card-editor');
+          this._hass.callService('system_log', 'write', {
+            message,
+            level: 'warning',
+          });
         } catch (e) {
-            // If import fails, still return an element so callers can handle it; setConfig may be undefined
+          // eslint-disable-next-line no-console
+          console.warn(message, e);
         }
-        const el = document.createElement('nanoleaf-effect-card-editor') as HTMLElement & {
-            setConfig?: (cfg: CardConfig) => void;
-            _config?: CardConfig;
-        };
-        // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op fallback
-        if (typeof el.setConfig !== 'function') {
-            el.setConfig = function (cfg: CardConfig) {
-                // Minimal fallback: store the config so callers that inspect the element don't crash
-                this._config = cfg;
-                // Log a warning so integrators can detect missing editor behavior in the frontend
-                try {
-                    // eslint-disable-next-line no-console
-                    console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
-                } catch (e) {
-                    // ignore in environments without console
-                }
-                // Render a minimal visible UI informing the user the visual editor is unavailable
-                try {
-                    const msg = /* html */ `
-                        <div class="nanoleaf-editor-fallback" style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;">
+      }
+      return;
+    }
+    this._hass.callService('light', turnOn ? 'turn_on' : 'turn_off', serviceData);
+  }
+
+  static async getConfigElement(): Promise<HTMLElement> {
+    // Dynamically import the editor module so the custom element is defined
+    try {
+      await import('./card-editor');
+    } catch (e) {
+      // If import fails, still return an element so callers can handle it; setConfig may be undefined
+    }
+    const el = document.createElement('nanoleaf-effect-card-editor') as HTMLElement & {
+      setConfig?: (cfg: CardConfig) => void;
+      _config?: CardConfig;
+    };
+    // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op fallback
+    if (typeof el.setConfig !== 'function') {
+      el.setConfig = function (cfg: CardConfig) {
+        // Minimal fallback: store the config so callers that inspect the element don't crash
+        this._config = cfg;
+        // Log a warning so integrators can detect missing editor behavior in the frontend
+        try {
+          // eslint-disable-next-line no-console
+          console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
+        } catch (e) {
+          // ignore in environments without console
+        }
+        // Render a minimal visible UI informing the user the visual editor is unavailable
+        try {
+          const msg = /* html */ `
+                        <div
+class="nanoleaf-editor-fallback"
+style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;border-radius:6px;font-family:Arial, sans-serif;"
+>
                           <div style="font-weight:600;color:#d9534f;">Editor unavailable</div>
                           <div style="margin-top:6px;font-size:13px;">The visual editor failed to load. You can edit the configuration manually.</div>
                         </div>
                     `;
-                    // Prefer shadow DOM if available, but fall back to light DOM
-                    const self = this as HTMLElement & {
-                        attachShadow?: (opts: ShadowRootInit) => ShadowRoot;
-                        shadowRoot?: ShadowRoot | null;
-                    };
-                    if (self.attachShadow && self.shadowRoot) {
-                        self.shadowRoot.innerHTML = msg;
-                    } else if (self.attachShadow) {
-                        self.attachShadow({ mode: 'open' });
-                        self.shadowRoot!.innerHTML = msg;
-                    } else {
-                        this.innerHTML = msg;
-                    }
-                } catch (e) {
-                    // swallow any rendering errors in fallback
-                }
-            };
+          // Prefer shadow DOM if available, but fall back to light DOM
+          const self = this as HTMLElement & {
+            attachShadow?: (opts: ShadowRootInit) => ShadowRoot;
+            shadowRoot?: ShadowRoot | null;
+          };
+          if (self.attachShadow && self.shadowRoot) {
+            self.shadowRoot.innerHTML = msg;
+          } else if (self.attachShadow) {
+            self.attachShadow({ mode: 'open' });
+            self.shadowRoot!.innerHTML = msg;
+          } else {
+            this.innerHTML = msg;
+          }
+        } catch (e) {
+          // swallow any rendering errors in fallback
         }
-        return el;
+      };
     }
+    return el;
+  }
 
-    static getSupportedEntityIds(ha: HomeAssistant): string[] {
-        return Object.values(ha.states)
-            .filter(
-                (entity) =>
-                    entity.entity_id.startsWith('light.') &&
-                    entity.attributes &&
-                    (entity.attributes['supported_color_modes'] as string[] | undefined) &&
-                    (entity.attributes['supported_color_modes'] as string[]).find(
-                        (mode) => ['hs', 'rgb', 'xy'].indexOf(mode) !== -1
-                    )
-            )
-            .filter((entity) => {
-                const attrs = entity.attributes;
+  static getSupportedEntityIds(ha: HomeAssistant): string[] {
+    return Object.values(ha.states)
+      .filter((entity) => entity.entity_id.startsWith('light.')
+                    && entity.attributes
+                    && (entity.attributes.supported_color_modes as string[] | undefined)
+                    && (entity.attributes.supported_color_modes as string[]).find((mode) => [
+                      'hs',
+                      'rgb',
+                      'xy',
+                    ].includes(mode)))
+      .filter((entity) => {
+        const attrs = entity.attributes;
 
-                // required effect fields
-                if (!Array.isArray(attrs['effect_list'])) return false;
-                if (!('effect' in attrs)) return false; // may be null
+        // required effect fields
+        if (!Array.isArray(attrs.effect_list)) return false;
+        if (!('effect' in attrs)) return false; // may be null
 
-                // colour‑mode specific validation
-                const mode = attrs['color_mode'] as string | undefined;
-                if (mode === 'color_temp') {
-                    if (
-                        !Array.isArray(attrs['supported_color_modes']) ||
-                        !(attrs['supported_color_modes'] as string[]).includes('color_temp')
-                    ) {
-                        return false;
-                    }
-                    if (typeof attrs['color_temp'] !== 'number') return false;
-                } else if (mode === 'hs') {
-                    if (
-                        !Array.isArray(attrs['supported_color_modes']) ||
-                        !(attrs['supported_color_modes'] as string[]).includes('hs')
-                    ) {
-                        return false;
-                    }
-                    if (
-                        !Array.isArray(attrs['hs_color']) ||
-                        (attrs['hs_color'] as unknown[]).length !== 2 ||
-                        typeof (attrs['hs_color'] as unknown[])[0] !== 'number' ||
-                        typeof (attrs['hs_color'] as unknown[])[1] !== 'number'
-                    ) {
-                        return false;
-                    }
-                } else {
-                    return false; // other modes are not relevant here
-                }
+        // colour‑mode specific validation
+        const mode = attrs.color_mode as string | undefined;
+        if (mode === 'color_temp') {
+          if (
+            !Array.isArray(attrs.supported_color_modes)
+                        || !(attrs.supported_color_modes as string[]).includes('color_temp')
+          ) {
+            return false;
+          }
+          if (typeof attrs.color_temp !== 'number') return false;
+        } else if (mode === 'hs') {
+          if (
+            !Array.isArray(attrs.supported_color_modes)
+                        || !(attrs.supported_color_modes as string[]).includes('hs')
+          ) {
+            return false;
+          }
+          if (
+            !Array.isArray(attrs.hs_color)
+                        || (attrs.hs_color as unknown[]).length !== 2
+                        || typeof (attrs.hs_color as unknown[])[0] !== 'number'
+                        || typeof (attrs.hs_color as unknown[])[1] !== 'number'
+          ) {
+            return false;
+          }
+        } else {
+          return false; // other modes are not relevant here
+        }
 
-                return true;
-            })
-            .map((entity) => entity.entity_id);
-    }
+        return true;
+      })
+      .map((entity) => entity.entity_id);
+  }
 
-    static getExampleEntityId(ha: HomeAssistant): string {
-        const supportedEntityIds = this.getSupportedEntityIds(ha);
-        return supportedEntityIds[0] ?? 'light.example_nanoleaf_shapes';
-    }
+  static getExampleEntityId(ha: HomeAssistant): string {
+    const supportedEntityIds = this.getSupportedEntityIds(ha);
+    return supportedEntityIds[0] ?? 'light.example_nanoleaf_shapes';
+  }
 
-    static getStubConfig(ha: HomeAssistant, _stateObj?: unknown): CardConfig {
-        const entity = this.getExampleEntityId(ha);
-        return {
-            type: 'custom:nanoleaf-effect-card',
-            entity,
-            display: 'buttons',
-            effects: [],
-            show_off: true,
-            show_none: false,
-        };
-    }
+  static getStubConfig(ha: HomeAssistant, _stateObj?: unknown): CardConfig {
+    const entity = this.getExampleEntityId(ha);
+    return {
+      type: 'custom:nanoleaf-effect-card',
+      entity,
+      display: 'buttons',
+      effects: [],
+      show_off: true,
+      show_none: false,
+    };
+  }
 }
 
 class NanoleafEffectEntity extends NanoleafEffectCard {
-    static override getStubConfig(ha: HomeAssistant, stateObj?: unknown): Record<string, unknown> {
-        const baseConfig = super.getStubConfig(ha, stateObj);
-        const entity = baseConfig.entity;
-        return {
-            type: 'entities',
-            show_header_toggle: false,
-            entities: [
-                { entity: entity },
-                {
-                    // make sure the type is up top:
-                    type: 'custom:nanoleaf-effect-entity',
-                    // inherit the actual config stuff:
-                    ...baseConfig,
-                    // make sure `baseConfig` does not overwrite it:
-                    ...{ type: 'custom:nanoleaf-effect-entity' },
-                },
-            ],
-        };
-    }
+  static override getStubConfig(ha: HomeAssistant, stateObj?: unknown): Record<string, unknown> {
+    const baseConfig = super.getStubConfig(ha, stateObj);
+    const { entity } = baseConfig;
+    return {
+      type: 'entities',
+      show_header_toggle: false,
+      entities: [
+        { entity },
+        {
+          // make sure the type is up top:
+          type: 'custom:nanoleaf-effect-entity',
+          // inherit the actual config stuff:
+          ...baseConfig,
+          // make sure `baseConfig` does not overwrite it:
+          ...{ type: 'custom:nanoleaf-effect-entity' },
+        },
+      ],
+    };
+  }
 }
 
 class NanoleafEffectFeature extends NanoleafEffectCard {
-    static override getStubConfig(ha: HomeAssistant, stateObj?: unknown): Record<string, unknown> {
-        const baseConfig = super.getStubConfig(ha, stateObj);
-        return {
-            // make sure the type is up top:
-            type: 'custom:nanoleaf-effect-feature',
-            // inherit the actual config stuff:
-            ...baseConfig,
-            // make sure `baseConfig` does not overwrite it:
-            ...{ type: 'custom:nanoleaf-effect-feature' },
-        };
-    }
+  static override getStubConfig(ha: HomeAssistant, stateObj?: unknown): Record<string, unknown> {
+    const baseConfig = super.getStubConfig(ha, stateObj);
+    return {
+      // make sure the type is up top:
+      type: 'custom:nanoleaf-effect-feature',
+      // inherit the actual config stuff:
+      ...baseConfig,
+      // make sure `baseConfig` does not overwrite it:
+      ...{ type: 'custom:nanoleaf-effect-feature' },
+    };
+  }
 }
 
 window.customElements.define('nanoleaf-effect-card', NanoleafEffectCard);
@@ -607,35 +652,35 @@ window.customElements.define('nanoleaf-effect-feature', NanoleafEffectFeature);
 
 window.customCards = window.customCards ?? [];
 window.customCards.push({
-    type: 'nanoleaf-effect-card',
-    name: '(Nanoleaf) Effect Chooser (Card)',
-    description: 'A custom card for lights with effects, such as Nanoleaf panels and shapes.',
-    preview: true,
+  type: 'nanoleaf-effect-card',
+  name: '(Nanoleaf) Effect Chooser (Card)',
+  description: 'A custom card for lights with effects, such as Nanoleaf panels and shapes.',
+  preview: true,
 });
 window.customCards.push({
-    type: 'nanoleaf-effect-entity',
-    name: '(Nanoleaf) Effect Chooser (Wrapped in entity display)',
-    description: 'Part of an Entity display: for lights with effects, such as Nanoleaf panels and shapes.',
-    preview: true,
+  type: 'nanoleaf-effect-entity',
+  name: '(Nanoleaf) Effect Chooser (Wrapped in entity display)',
+  description: 'Part of an Entity display: for lights with effects, such as Nanoleaf panels and shapes.',
+  preview: true,
 });
 
 window.customCardFeatures = window.customCardFeatures ?? [];
 window.customCardFeatures.push({
-    type: 'nanoleaf-effect-feature',
-    name: "(Nanoleaf) Effect Chooser (as a tile's feature)",
-    configurable: true,
+  type: 'nanoleaf-effect-feature',
+  name: "(Nanoleaf) Effect Chooser (as a tile's feature)",
+  configurable: true,
 });
 
 // eslint-disable-next-line no-console
 console.info(
-    '\n %c (Nanoleaf) Effect Chooser %c v0.0.0 %c \n',
-    // left label – deep violet background, white text
-    'background-color:#4b0082;color:#fff;padding:3px 2px 3px 3px;border-radius:3px 0 0 3px;' +
-        'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
-    // main label – pink‑violet gradient, white text
-    'background-color:#c71585;background-image:linear-gradient(90deg,#ff69b4,#8a2be2);color:#fff;' +
-        'padding:3px 3px 3px 2px;border-radius:0 3px 3px 0;' +
-        'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
-    // trailing space – transparent (no background)
-    'background-color:transparent'
+  '\n %c (Nanoleaf) Effect Chooser %c v0.0.0 %c \n',
+  // left label – deep violet background, white text
+  'background-color:#4b0082;color:#fff;padding:3px 2px 3px 3px;border-radius:3px 0 0 3px;'
+        + 'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
+  // main label – pink‑violet gradient, white text
+  'background-color:#c71585;background-image:linear-gradient(90deg,#ff69b4,#8a2be2);color:#fff;'
+        + 'padding:3px 3px 3px 2px;border-radius:0 3px 3px 0;'
+        + 'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
+  // trailing space – transparent (no background)
+  'background-color:transparent',
 );
