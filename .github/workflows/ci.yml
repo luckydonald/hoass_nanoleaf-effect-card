@@ -28,17 +28,17 @@ jobs:
                   chmod +x ./scripts/ensure_yarn.sh || true
                   ./scripts/ensure_yarn.sh
 
-            - name: Install dependencies
-              working-directory: frontend
-              run: |
-                  # If a lockfile exists, use immutable install (Yarn v4 expects this)
-                  if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
-                    echo "Lockfile found, running immutable install"
-                    yarn install --immutable
-                  else
-                    echo "No lockfile found, running regular install (will create lockfile)"
-                    yarn install
-                  fi
+            # - name: Install dependencies
+            #   working-directory: frontend
+            #   run: |
+            #       # If a lockfile exists, use immutable install (Yarn v4 expects this)
+            #       if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
+            #         echo "Lockfile found, running immutable install"
+            #         yarn install --immutable
+            #       else
+            #         echo "No lockfile found, running regular install (will create lockfile)"
+            #         yarn install
+            #       fi
 
             - name: Install dependencies (legacy)
               run: npm ci
