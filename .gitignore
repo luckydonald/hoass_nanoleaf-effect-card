@@ -63,6 +63,7 @@ custom_components/nanoleaf_effect_card/www/
 dist/
 build/
 *.egg-info/
+nanoleaf-effect-card.js
 
 # Test coverage
 coverage/
