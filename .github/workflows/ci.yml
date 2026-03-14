@@ -2,24 +2,45 @@ name: CI
 
 on:
     push:
-        branches: [main, develop]
+        branches: [main, mane, develop]
     pull_request:
-        branches: [main, develop]
+        branches: [main, mane, develop]
+    schedule:
+        - cron: '0 0 * * *'
+    workflow_dispatch:
 
 jobs:
     test:
+        name: Frontend Test
         runs-on: ubuntu-latest
-
         steps:
-            - uses: actions/checkout@v4
+            - name: Checkout
+              uses: actions/checkout@v4
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: '20'
+                  node-version: '22'
                   cache: 'npm'
 
+            - name: Enable Corepack and activate package manager (from package.json)
+              run: |
+                  chmod +x ./scripts/ensure_yarn.sh || true
+                  ./scripts/ensure_yarn.sh
+
             - name: Install dependencies
+              working-directory: frontend
+              run: |
+                  # If a lockfile exists, use immutable install (Yarn v4 expects this)
+                  if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
+                    echo "Lockfile found, running immutable install"
+                    yarn install --immutable
+                  else
+                    echo "No lockfile found, running regular install (will create lockfile)"
+                    yarn install
+                  fi
+
+            - name: Install dependencies (legacy)
               run: npm ci
 
             - name: Check code formatting
@@ -38,13 +59,24 @@ jobs:
                   flags: unittests
                   name: codecov-umbrella
 
-    validate:
+    hacs-validate:
+        name: HACS Validation
         runs-on: ubuntu-latest
-
         steps:
-            - uses: actions/checkout@v4
-
-            - name: Validate HACS
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: HACS Validation
               uses: hacs/action@main
               with:
                   category: plugin
+                  ignore: brands
+
+    hassfest:
+        name: Hassfest Validation
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Hassfest
+              uses: home-assistant/actions/hassfest@master

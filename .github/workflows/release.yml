@@ -1,0 +1,100 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - 'v*'
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        name: Build Frontend
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+
+            - name: Enable Corepack and activate package manager (from package.json)
+              run: |
+                  chmod +x ./scripts/ensure_yarn.sh || true
+                  ./scripts/ensure_yarn.sh
+
+            - name: Install dependencies
+              working-directory: frontend
+              run: |
+                  if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
+                    echo "Lockfile found, running yarn install --immutable"
+                    yarn install --immutable
+                  else
+                    echo "No lockfile present, running regular yarn install"
+                    yarn install
+                  fi
+
+            - name: Build frontend
+              working-directory: frontend
+              run: yarn build
+
+            - name: Upload frontend artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: frontend-build
+                  path: custom_components/nanoleaf_effect_card/www/nanoleaf-effect-card-card.js
+
+    release:
+        name: Create Release
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Download frontend artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: frontend-build
+                  path: custom_components/nanoleaf_effect_card/www/
+
+            - name: Get version from tag
+              id: version
+              run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+            - name: Update manifest version
+              run: |
+                  sed -i 's/"version": ".*"/"version": "${{ steps.version.outputs.version }}"/' custom_components/nanoleaf_effect_card/manifest.json
+
+            - name: Create release zip
+              run: |
+                  # HACS expects zip contents to be extracted directly into custom_components/nanoleaf_effect_card/
+                  # So we zip the contents, not the folder itself
+                  cd custom_components/nanoleaf_effect_card
+                  zip -r ../../nanoleaf-effect-card.zip .
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: nanoleaf-effect-card.zip
+                  generate_release_notes: true
+                  draft: false
+                  prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-alpha') || contains(github.ref, '-rc') }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    hacs-validate:
+        name: HACS Validation
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: HACS Validation
+              uses: hacs/action@main
+              with:
+                  category: integration
+                  ignore: brands
