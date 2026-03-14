@@ -2,21 +2,23 @@ name: CI
 
 on:
     push:
-        branches: [main, develop]
+        branches: [main, mane, develop]
     pull_request:
-        branches: [main, develop]
+        branches: [main, mane, develop]
+    schedule:
+        - cron: '0 0 * * *'
 
 jobs:
     test:
+        name: Frontend Tests
         runs-on: ubuntu-latest
-
         steps:
-            - uses: actions/checkout@v4
-
+            - name: Checkout
+              uses: actions/checkout@v4
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: '20'
+                  node-version: '22'
                   cache: 'npm'
 
             - name: Install dependencies
@@ -38,13 +40,25 @@ jobs:
                   flags: unittests
                   name: codecov-umbrella
 
-    validate:
+    hacs-validate:
+        name: HACS Validation
         runs-on: ubuntu-latest
-
         steps:
-            - uses: actions/checkout@v4
+            - name: Checkout
+              uses: actions/checkout@v4
 
             - name: Validate HACS
               uses: hacs/action@main
               with:
                   category: plugin
+                  ignore: brands
+
+    hassfest:
+        name: Hassfest Validation
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Hassfest
+              uses: home-assistant/actions/hassfest@master
