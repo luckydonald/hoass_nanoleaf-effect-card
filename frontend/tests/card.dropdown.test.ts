@@ -17,7 +17,13 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
         const card = document.createElement('nanoleaf-effect-card') as HTMLElement & Record<string, unknown>;
         document.body.appendChild(card);
 
-        (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test', display: 'dropdown', effects: [], show_off: false, show_none: true });
+        (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+            entity: 'light.test',
+            display: 'dropdown',
+            effects: [],
+            show_off: false,
+            show_none: true,
+        });
         // wait for deferred render
         await Promise.resolve();
 
@@ -32,7 +38,11 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
         const card = document.createElement('nanoleaf-effect-card') as HTMLElement & Record<string, unknown>;
         document.body.appendChild(card);
 
-        (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test', display: 'dropdown', effects: [] });
+        (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+            entity: 'light.test',
+            display: 'dropdown',
+            effects: [],
+        });
         await Promise.resolve();
 
         const select = card.shadowRoot!.querySelector('.effect-dropdown') as HTMLSelectElement;
@@ -52,7 +62,12 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
             callService: vi.fn(),
         };
 
-        (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test', display: 'dropdown', effects: [], show_none: true });
+        (card as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+            entity: 'light.test',
+            display: 'dropdown',
+            effects: [],
+            show_none: true,
+        });
         await Promise.resolve();
 
         // Inject hass mock

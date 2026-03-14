@@ -23,7 +23,12 @@ describe('Nanoleaf Effect Card Editor - UI toggles', () => {
         document.body.appendChild(editor);
 
         // initial config with show_off true
-        (editor as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test', effects: [], show_off: true, show_none: false });
+        (editor as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+            entity: 'light.test',
+            effects: [],
+            show_off: true,
+            show_none: false,
+        });
         // wait for deferred render
         await Promise.resolve();
 
@@ -51,7 +56,12 @@ describe('Nanoleaf Effect Card Editor - UI toggles', () => {
         document.body.appendChild(editor);
 
         // initial config with show_none false
-        (editor as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({ entity: 'light.test', effects: [], show_off: true, show_none: false });
+        (editor as unknown as { setConfig: (c: Record<string, unknown>) => void }).setConfig({
+            entity: 'light.test',
+            effects: [],
+            show_off: true,
+            show_none: false,
+        });
         await Promise.resolve();
 
         const switchEl = editor.shadowRoot!.querySelector('#show-none') as HTMLInputElement;

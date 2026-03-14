@@ -41,7 +41,9 @@ describe('Visual editor crash (getConfigElement)', () => {
 
         // The card registers itself as a custom element; get the constructor from customElements
         const Card = customElements.get('nanoleaf-effect-card') as unknown as {
-            getConfigElement: () => Promise<HTMLElement & { setConfig?: (c: Record<string, unknown>) => void; _config?: Record<string, unknown> }>;
+            getConfigElement: () => Promise<
+                HTMLElement & { setConfig?: (c: Record<string, unknown>) => void; _config?: Record<string, unknown> }
+            >;
         };
         expect(Card).toBeTruthy();
 

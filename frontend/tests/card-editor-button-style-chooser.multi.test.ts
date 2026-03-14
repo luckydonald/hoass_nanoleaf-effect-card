@@ -19,8 +19,12 @@ type ChooserElement = HTMLElement & {
 
 describe('Nanoleaf Effect Card Editor - Button Style Chooser multiple instances', () => {
     it('toggling one chooser does not reset others', async () => {
-        const chooser1 = document.createElement('nanoleaf-effect-card-card-editor-button-style-chooser') as ChooserElement;
-        const chooser2 = document.createElement('nanoleaf-effect-card-card-editor-button-style-chooser') as ChooserElement;
+        const chooser1 = document.createElement(
+            'nanoleaf-effect-card-card-editor-button-style-chooser'
+        ) as ChooserElement;
+        const chooser2 = document.createElement(
+            'nanoleaf-effect-card-card-editor-button-style-chooser'
+        ) as ChooserElement;
         document.body.appendChild(chooser1);
         document.body.appendChild(chooser2);
 

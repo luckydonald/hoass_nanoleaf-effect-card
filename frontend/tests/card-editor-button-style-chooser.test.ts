@@ -20,7 +20,9 @@ type ChooserElement = HTMLElement & {
 
 describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     it('reflects initial value in the UI', async () => {
-        const chooser = document.createElement('nanoleaf-effect-card-card-editor-button-style-chooser') as ChooserElement;
+        const chooser = document.createElement(
+            'nanoleaf-effect-card-card-editor-button-style-chooser'
+        ) as ChooserElement;
         document.body.appendChild(chooser);
 
         // initial value: full_background active and hover true, small_bar inactive true
@@ -57,7 +59,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     });
 
     it('emits value-changed and updates value when toggles are clicked', async () => {
-        const chooser = document.createElement('nanoleaf-effect-card-card-editor-button-style-chooser') as ChooserElement;
+        const chooser = document.createElement(
+            'nanoleaf-effect-card-card-editor-button-style-chooser'
+        ) as ChooserElement;
         document.body.appendChild(chooser);
 
         const initial: ColorDisplayConfig = {
@@ -97,7 +101,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     });
 
     it('supports keyboard navigation (focus order and activation)', async () => {
-        const chooser = document.createElement('nanoleaf-effect-card-card-editor-button-style-chooser') as ChooserElement;
+        const chooser = document.createElement(
+            'nanoleaf-effect-card-card-editor-button-style-chooser'
+        ) as ChooserElement;
         document.body.appendChild(chooser);
 
         const initial: ColorDisplayConfig = {
