@@ -1,0 +1,15 @@
+{
+  "display_name": "Nanoleaf Effect Card",
+  "dash_name": "nanoleaf-effect-card",
+  "snake_name": "nanoleaf_effect_card",
+  "pascal_name": "NanoleafEffectCard",
+  "github_user": "luckydonald",
+  "github_url": "https://github.com/luckydonald/hoass_nanoleaf-effect-card.git",
+  "keep_backend": false,
+  "frontend_choice": "none",
+  "current_year": 2026,
+  "replacements": {
+    "": ""
+  },
+  "": ""
+}

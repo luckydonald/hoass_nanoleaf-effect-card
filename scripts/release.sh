@@ -33,7 +33,7 @@ COMMIT_MSG_LINT="🧹{emoji} lint: {reason}"
 # -------------------------------------------------
 . "${SCRIPT_DIR}/tmpl.sh"
 
-echo -e "${GREEN}🚀 Plugin Template - Release Script${NC}"
+echo -e "${GREEN}🚀 Nanoleaf Effect Card - Release Script${NC}"
 echo ""
 
 # Load project settings
