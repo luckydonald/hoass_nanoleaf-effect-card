@@ -1,0 +1,13 @@
+{
+    "domain": "nanoleaf_effect_card",
+    "name": "Nanoleaf Effects Card",
+    "codeowners": ["@luckydonald", "@luckylucy"],
+    "config_flow": true,
+    "dependencies": ["lovelace"],
+    "documentation": "https://github.com/luckydonald/hoass_nanoleaf-effect-card",
+    "integration_type": "service",
+    "iot_class": "local_polling",
+    "issue_tracker": "https://github.com/luckydonald/hoass_nanoleaf-effect-card/issues",
+    "requirements": [],
+    "version": "0.0.0-dev0"
+}
