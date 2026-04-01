@@ -67,14 +67,16 @@ jobs:
 
             - name: Update manifest version
               run: |
-                  sed -i 's/"version": ".*"/"version": "${{ steps.version.outputs.version }}"/' custom_components/nanoleaf_effect_card/manifest.json
+                  sed -i 's/"version": ".*"/"version": "${{ steps.version.outputs.version }}"/' manifest.json
 
             - name: Create release zip
               run: |
-                  # HACS expects zip contents to be extracted directly into custom_components/nanoleaf_effect_card/
-                  # So we zip the contents, not the folder itself
-                  cd custom_components/nanoleaf_effect_card
-                  zip -r ../../nanoleaf-effect-card.zip .
+                  # hacs.json has content_in_root: true, so HACS expects manifest.json at the zip root
+                  mkdir -p zip_contents/www
+                  cp manifest.json zip_contents/
+                  cp custom_components/nanoleaf_effect_card/www/nanoleaf-effect-card-card.js zip_contents/www/
+                  cd zip_contents
+                  zip -r ../nanoleaf-effect-card.zip .
 
             - name: Create GitHub Release
               uses: softprops/action-gh-release@v2
