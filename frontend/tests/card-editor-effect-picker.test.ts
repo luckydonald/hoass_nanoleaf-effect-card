@@ -31,7 +31,8 @@ describe('card-editor-effect-picker', () => {
 
     const hass = {
       states: {
-        ['light.test']: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'light.test': {
           attributes: {
             effect_list: [
               'A',

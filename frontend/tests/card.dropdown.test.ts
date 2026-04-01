@@ -60,7 +60,8 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
 
     const mockHass = {
       states: {
-        ['light.test']: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'light.test': {
           state: 'on',
           attributes: {
             effect_list: [

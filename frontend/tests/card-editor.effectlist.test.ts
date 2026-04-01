@@ -24,7 +24,8 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     // Fake hass with a light entity that has an effect_list
     const hass = {
       states: {
-        ['light.test_light']: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'light.test_light': {
           attributes: {
             effect_list: [
               'Rainbow',

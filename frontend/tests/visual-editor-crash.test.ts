@@ -25,7 +25,7 @@ describe('Visual editor crash (getConfigElement)', () => {
       // define the element in the mocked module context as well
       try {
         customElements.define('nanoleaf-effect-card-editor', BrokenEditor);
-      } catch (_e) {
+      } catch {
         // ignore if already defined
       }
       return {};
