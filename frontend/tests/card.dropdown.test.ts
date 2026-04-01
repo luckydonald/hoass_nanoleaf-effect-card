@@ -30,7 +30,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
     // wait for deferred render
     await Promise.resolve();
 
-    const select = card.shadowRoot!.querySelector('.effect-dropdown') as HTMLSelectElement;
+    const select = (card.shadowRoot as ShadowRoot).querySelector('.effect-dropdown') as HTMLSelectElement;
     expect(select).toBeTruthy();
     const optionValues = Array.from(select.querySelectorAll('option')).map((o) => o.value);
     expect(optionValues).toContain('None');
@@ -48,7 +48,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
     });
     await Promise.resolve();
 
-    const select = card.shadowRoot!.querySelector('.effect-dropdown') as HTMLSelectElement;
+    const select = (card.shadowRoot as ShadowRoot).querySelector('.effect-dropdown') as HTMLSelectElement;
     expect(select).toBeTruthy();
     const optionValues = Array.from(select.querySelectorAll('option')).map((o) => o.value);
     expect(optionValues).toContain('Off');
@@ -60,7 +60,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
 
     const mockHass = {
       states: {
-        'light.test': {
+        ['light.test']: {
           state: 'on',
           attributes: {
             effect_list: [
@@ -83,7 +83,7 @@ describe('Nanoleaf Effect Card - dropdown behavior', () => {
     // Inject hass mock
     (card as unknown as { _hass: typeof mockHass })._hass = mockHass;
 
-    const select = card.shadowRoot!.querySelector('.effect-dropdown') as HTMLSelectElement;
+    const select = (card.shadowRoot as ShadowRoot).querySelector('.effect-dropdown') as HTMLSelectElement;
     expect(select).toBeTruthy();
 
     // Ensure the 'None' option exists and select it

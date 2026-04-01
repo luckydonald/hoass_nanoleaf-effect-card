@@ -24,7 +24,7 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     // Fake hass with a light entity that has an effect_list
     const hass = {
       states: {
-        'light.test_light': {
+        ['light.test_light']: {
           attributes: {
             effect_list: [
               'Rainbow',
@@ -47,13 +47,13 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     });
 
     // allow render
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // The editor now uses per-effect <card-editor-effect-picker> elements.
-    const pickers = editor.shadowRoot!.querySelectorAll('.effect-picker');
+    const pickers = (editor.shadowRoot as ShadowRoot).querySelectorAll('.effect-picker');
     expect(pickers.length).toBe(2);
     // Each picker contains a shadow ha-generic-picker with an options property
-    const p0 = pickers[0].shadowRoot!.querySelector('ha-generic-picker') as HTMLElement & {
+    const p0 = (pickers[0].shadowRoot as ShadowRoot).querySelector('ha-generic-picker') as HTMLElement & {
       options: { value: string }[];
     };
     expect(p0).toBeTruthy();
@@ -66,7 +66,7 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     ]));
 
     // check inputs and validation: first should be valid, second invalid
-    const inputs = editor.shadowRoot!.querySelectorAll('.effect-name-input');
+    const inputs = (editor.shadowRoot as ShadowRoot).querySelectorAll('.effect-name-input');
     expect(inputs.length).toBe(2);
     const first = inputs[0];
     const second = inputs[1];
@@ -80,12 +80,12 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     // Now update hass to include 'Custom' in effect_list and ensure validation updates
     hass.states['light.test_light'].attributes.effect_list.push('Custom');
     (editor as unknown as { hass: typeof hass }).hass = hass; // setter will call updateEffectListSuggestions
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     expect(second.classList.contains('invalid')).toBe(false);
 
     // Ensure pickers still reflect updated suggestions
-    const p0b = pickers[0].shadowRoot!.querySelector('ha-generic-picker') as HTMLElement & {
+    const p0b = (pickers[0].shadowRoot as ShadowRoot).querySelector('ha-generic-picker') as HTMLElement & {
       options: { value: string }[];
     };
     const valuesAfter = p0b.options.map((o) => o.value);
@@ -99,7 +99,7 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     // Simulate user editing the second input to an unknown name -> becomes invalid
     second.value = 'NotAnEffect';
     second.dispatchEvent(new Event('input', { bubbles: true }));
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
     expect(second.classList.contains('invalid')).toBe(true);
   });
 });

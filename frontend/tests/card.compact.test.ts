@@ -22,7 +22,7 @@ describe('NanoleafEffectCard - compact style', () => {
 
     const hass = {
       states: {
-        'light.test_nanoleaf': {
+        ['light.test_nanoleaf']: {
           state: 'on',
           attributes: {
             effect: 'Rainbow',
@@ -54,12 +54,12 @@ describe('NanoleafEffectCard - compact style', () => {
     });
 
     // allow render
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
-    const container = card.shadowRoot!.querySelector('.buttons-container') as HTMLElement;
+    const container = (card.shadowRoot as ShadowRoot).querySelector('.buttons-container') as HTMLElement;
     expect(container.classList.contains('compact-grid')).toBe(true);
 
-    const button = card.shadowRoot!.querySelector('.effect-button') as HTMLElement;
+    const button = (card.shadowRoot as ShadowRoot).querySelector('.effect-button') as HTMLElement;
     expect(button.classList.contains('compact')).toBe(true);
   });
 });

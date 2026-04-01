@@ -31,7 +31,7 @@ describe('card-editor-effect-picker', () => {
 
     const hass = {
       states: {
-        'light.test': {
+        ['light.test']: {
           attributes: {
             effect_list: [
               'A',
@@ -45,7 +45,7 @@ describe('card-editor-effect-picker', () => {
     picker.entity = 'light.test';
 
     // ensure options updated
-    const internal = picker.shadowRoot!.querySelector('ha-generic-picker') as InternalPicker;
+    const internal = (picker.shadowRoot as ShadowRoot).querySelector('ha-generic-picker') as InternalPicker;
     expect(internal).toBeTruthy();
     // the component maps options to objects; verify the options array exists
     expect(internal.options).toBeTruthy();
@@ -53,7 +53,7 @@ describe('card-editor-effect-picker', () => {
     expect(internal.options[0].value).toBe('A');
 
     let last: string | null = null;
-    picker.addEventListener('value-changed', (e) => (last = (e as CustomEvent<{ value: string }>).detail.value));
+    picker.addEventListener('value-changed', (e) => { last = (e as CustomEvent<{ value: string }>).detail.value; });
 
     // simulate inner picker dispatch
     const ev = new window.CustomEvent('value-changed', { detail: { value: 'B' } });
@@ -71,12 +71,12 @@ describe('card-editor-effect-picker', () => {
     picker.hass = hass;
     picker.entity = undefined;
 
-    const internal = picker.shadowRoot!.querySelector('ha-generic-picker') as InternalPicker;
+    const internal = (picker.shadowRoot as ShadowRoot).querySelector('ha-generic-picker') as InternalPicker;
     expect(internal).toBeTruthy();
     expect(internal.options).toEqual([]);
 
     let last: string | null = null;
-    picker.addEventListener('value-changed', (e) => (last = (e as CustomEvent<{ value: string }>).detail.value));
+    picker.addEventListener('value-changed', (e) => { last = (e as CustomEvent<{ value: string }>).detail.value; });
     const ev = new window.CustomEvent('value-changed', { detail: { value: '' } });
     internal.dispatchEvent(ev);
     expect(last).toBe('');
@@ -86,11 +86,11 @@ describe('card-editor-effect-picker', () => {
     const picker = document.createElement('card-editor-effect-picker') as PickerElement;
     document.body.appendChild(picker);
 
-    const hass = { states: { 'light.test': { attributes: { effect_list: [] } } } };
+    const hass = { states: { ['light.test']: { attributes: { effect_list: [] } } } };
     picker.hass = hass;
     picker.entity = 'light.test';
 
-    const internal = picker.shadowRoot!.querySelector('ha-generic-picker') as InternalPicker;
+    const internal = (picker.shadowRoot as ShadowRoot).querySelector('ha-generic-picker') as InternalPicker;
     expect(internal).toBeTruthy();
     expect(internal.options).toEqual([]);
   });
