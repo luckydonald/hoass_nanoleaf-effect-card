@@ -28,7 +28,7 @@ import type {
   HomeAssistant,
 } from './types';
 
-type BoundElement = Element & { _nanoleaf_bound?: boolean };
+type BoundElement = Element & { _nanoleaf_bound?: boolean; value?: string; hass?: unknown; entity?: string };
 
 interface SavedInputState {
   id: string | null;
@@ -56,6 +56,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+  }
+
+  private get root(): ShadowRoot {
+    return this.shadowRoot as ShadowRoot;
   }
 
   // Save currently focused input state (selector hints, value, caret) to restore after re-render
@@ -142,7 +146,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     if (this._hass && this._config?.entity) {
       try {
         this.updateEffectListSuggestions(this._config.entity);
-      } catch (e) {
+      } catch (_e) {
         // ignore if called before render
       }
     }
@@ -150,15 +154,12 @@ class NanoleafEffectCardEditor extends HTMLElement {
     try {
       this.shadowRoot?.querySelectorAll('.effect-picker').forEach((picker) => {
         try {
-          (picker as Element & { hass: HomeAssistant; entity?: string }).hass = hass;
-          if (this._config?.entity) {
-            (picker as Element & { entity: string }).entity = this._config.entity;
-          }
-        } catch (e) {
+          Object.assign(picker as BoundElement, { hass, ...(this._config?.entity ? { entity: this._config.entity } : {}) });
+        } catch (_e) {
           // ignore
         }
       });
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
   }
@@ -175,7 +176,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     const prev = this._config ?? {};
 
     // Merge top-level simple props
-    const merged: CardConfig = { ...prev, ...incoming };
+    const merged: CardConfig = Object.assign({}, prev, incoming) as CardConfig;
 
     // Merge button_style top-level
     merged.button_style = { ...(prev.button_style ?? {}), ...(incoming.button_style ?? {}) };
@@ -188,13 +189,13 @@ class NanoleafEffectCardEditor extends HTMLElement {
     // Build a map of previous effects by name for quick lookup
     const prevByName: Record<string, { e: Effect; idx: number }> = {};
     prevEffects.forEach((e, idx) => {
-      if (e && e.name) prevByName[e.name] = { e, idx };
+      if (e?.name) prevByName[e.name] = { e, idx };
     });
 
     // Iterate over incoming effects and merge with prev by name if possible
     incomingEffects.forEach((inc, i) => {
       let p: Effect = {};
-      if (inc && inc.name && prevByName[inc.name]) {
+      if (inc?.name && prevByName[inc.name]) {
         p = prevByName[inc.name].e;
       } else if (prevEffects[i]) {
         p = prevEffects[i];
@@ -209,7 +210,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
     // Include any prev effects that were not matched and not present in incoming (appended)
     prevEffects.forEach((p) => {
-      if (p && p.name && !incomingEffects.find((ie) => ie?.name === p.name)) {
+      if (p?.name && !incomingEffects.find((ie) => ie?.name === p.name)) {
         mergedEffects.push(p);
       }
     });
@@ -250,7 +251,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     this._effectList = Array.isArray(list) ? (list as string[]).slice() : [];
 
     // validate existing inputs
-    this.shadowRoot!.querySelectorAll('.effect-name-input').forEach((input) => {
+    this.root.querySelectorAll('.effect-name-input').forEach((input) => {
       const el = input as HTMLInputElement;
       const val = el.value?.trim();
       if (!val) {
@@ -265,12 +266,12 @@ class NanoleafEffectCardEditor extends HTMLElement {
   // Attach listeners for global controls (non-effects area)
   attachEventListeners(): void {
     // Entity picker
-    const entityPicker = this.shadowRoot!.querySelector('#entity-picker');
+    const entityPicker = this.root.querySelector('#entity-picker');
     if (entityPicker && !(entityPicker as BoundElement)._nanoleaf_bound) {
-      (entityPicker as BoundElement)._nanoleaf_bound = true;
+      Object.assign(entityPicker as BoundElement, { _nanoleaf_bound: true });
       try {
-        (entityPicker as Element & { hass: HomeAssistant | null }).hass = this._hass;
-      } catch (e) {
+        Object.assign(entityPicker as BoundElement, { hass: this._hass });
+      } catch (_e) {
         // ignore
       }
       entityPicker.addEventListener('value-changed', (e: Event) => {
@@ -287,9 +288,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
     }
 
     // Display mode radios
-    this.shadowRoot!.querySelectorAll('ha-radio').forEach((radio) => {
+    this.root.querySelectorAll('ha-radio').forEach((radio) => {
       if ((radio as BoundElement)._nanoleaf_bound) return;
-      (radio as BoundElement)._nanoleaf_bound = true;
+      Object.assign(radio as BoundElement, { _nanoleaf_bound: true });
       radio.addEventListener('change', (e: Event) => {
         const target = e.target as HTMLInputElement;
         if (target.checked) {
@@ -302,9 +303,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
     });
 
     // Inactive color
-    const inactiveColorInput = this.shadowRoot!.querySelector('#inactive-color');
+    const inactiveColorInput = this.root.querySelector('#inactive-color');
     if (inactiveColorInput && !(inactiveColorInput as BoundElement)._nanoleaf_bound) {
-      (inactiveColorInput as BoundElement)._nanoleaf_bound = true;
+      Object.assign(inactiveColorInput as BoundElement, { _nanoleaf_bound: true });
       inactiveColorInput.addEventListener('input', (e: Event) => {
         const target = e.target as HTMLInputElement;
         this._config = {
@@ -318,9 +319,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
     }
 
     // Show icon/name/compact switches
-    const showIcon = this.shadowRoot!.querySelector('#show-icon');
+    const showIcon = this.root.querySelector('#show-icon');
     if (showIcon && !(showIcon as BoundElement)._nanoleaf_bound) {
-      (showIcon as BoundElement)._nanoleaf_bound = true;
+      Object.assign(showIcon as BoundElement, { _nanoleaf_bound: true });
       showIcon.addEventListener('change', (e: Event) => {
         const target = e.target as HTMLInputElement;
         this._config = {
@@ -331,9 +332,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.renderEffectsArea();
       });
     }
-    const showName = this.shadowRoot!.querySelector('#show-name');
+    const showName = this.root.querySelector('#show-name');
     if (showName && !(showName as BoundElement)._nanoleaf_bound) {
-      (showName as BoundElement)._nanoleaf_bound = true;
+      Object.assign(showName as BoundElement, { _nanoleaf_bound: true });
       showName.addEventListener('change', (e: Event) => {
         const target = e.target as HTMLInputElement;
         this._config = {
@@ -344,9 +345,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.renderEffectsArea();
       });
     }
-    const compactSwitch = this.shadowRoot!.querySelector('#compact-style');
+    const compactSwitch = this.root.querySelector('#compact-style');
     if (compactSwitch && !(compactSwitch as BoundElement)._nanoleaf_bound) {
-      (compactSwitch as BoundElement)._nanoleaf_bound = true;
+      Object.assign(compactSwitch as BoundElement, { _nanoleaf_bound: true });
       compactSwitch.addEventListener('change', (e: Event) => {
         const target = e.target as HTMLInputElement;
         this._config = {
@@ -359,9 +360,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
     }
 
     // Show Off / None toggles
-    const showOff = this.shadowRoot!.querySelector('#show-off');
+    const showOff = this.root.querySelector('#show-off');
     if (showOff && !(showOff as BoundElement)._nanoleaf_bound) {
-      (showOff as BoundElement)._nanoleaf_bound = true;
+      Object.assign(showOff as BoundElement, { _nanoleaf_bound: true });
       showOff.addEventListener('change', (e: Event) => {
         const target = e.target as HTMLInputElement;
         this._config = { ...this._config, show_off: target.checked };
@@ -369,9 +370,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
         this.renderEffectsArea();
       });
     }
-    const showNone = this.shadowRoot!.querySelector('#show-none');
+    const showNone = this.root.querySelector('#show-none');
     if (showNone && !(showNone as BoundElement)._nanoleaf_bound) {
-      (showNone as BoundElement)._nanoleaf_bound = true;
+      Object.assign(showNone as BoundElement, { _nanoleaf_bound: true });
       showNone.addEventListener('change', (e: Event) => {
         const target = e.target as HTMLInputElement;
         this._config = { ...this._config, show_none: target.checked };
@@ -381,9 +382,9 @@ class NanoleafEffectCardEditor extends HTMLElement {
     }
 
     // Add effect button (partial render)
-    const addEffectButton = this.shadowRoot!.querySelector('#add-effect');
+    const addEffectButton = this.root.querySelector('#add-effect');
     if (addEffectButton && !(addEffectButton as BoundElement)._nanoleaf_bound) {
-      (addEffectButton as BoundElement)._nanoleaf_bound = true;
+      Object.assign(addEffectButton as BoundElement, { _nanoleaf_bound: true });
       addEffectButton.addEventListener('click', (e: Event) => {
         e.preventDefault();
         const effects = [
@@ -416,7 +417,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     // Preserve focused input state so re-render doesn't interrupt typing
     this.saveInputState();
 
-    this.shadowRoot!.innerHTML = /* html */ `
+    this.root.innerHTML = /* html */ `
       <style>
         .editor-container {
           padding: 16px;
@@ -712,23 +713,23 @@ slot="icon"
     this.attachEffectsListeners();
 
     // Initialize per-effect `card-editor-effect-picker` elements and wire them to hass/entity/value
-    this.shadowRoot!.querySelectorAll('.effect-picker').forEach((picker) => {
+    this.root.querySelectorAll('.effect-picker').forEach((picker) => {
       try {
-        const p = picker as Element & { hass: HomeAssistant | null; entity: string; value: string };
-        // set hass, entity and initial value
-        p.hass = this._hass;
-        p.entity = this._config.entity ?? '';
-        const idx = parseInt((picker as HTMLElement).dataset.index ?? '0');
-        p.value = this._config.effects?.[idx]?.name ?? '';
-      } catch (e) {
+        const idx = parseInt((picker as HTMLElement).dataset.index ?? '0', 10);
+        Object.assign(picker as BoundElement, {
+          hass: this._hass,
+          entity: this._config.entity ?? '',
+          value: this._config.effects?.[idx]?.name ?? '',
+        });
+      } catch (_e) {
         // ignore
       }
 
       if ((picker as BoundElement)._nanoleaf_bound) return;
-      (picker as BoundElement)._nanoleaf_bound = true;
+      Object.assign(picker as BoundElement, { _nanoleaf_bound: true });
       picker.addEventListener('value-changed', (e: Event) => {
         const customEv = e as CustomEvent<{ value: string }>;
-        const idx = parseInt((picker as HTMLElement).dataset.index ?? '0');
+        const idx = parseInt((picker as HTMLElement).dataset.index ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -736,11 +737,11 @@ slot="icon"
         this._config = { ...this._config, effects };
         this.configChanged(this._config);
         // update the corresponding text input (if present) and validation
-        const input = this.shadowRoot!.querySelector(`.effect-name-input[data-index="${idx}"]`);
+        const input = this.root.querySelector(`.effect-name-input[data-index="${idx}"]`);
         if (input) {
           input.value = customEv.detail.value ?? '';
           const isValid = !customEv.detail.value
-                        || (this._effectList && this._effectList.includes(customEv.detail.value));
+                        || this._effectList?.includes(customEv.detail.value);
           input.classList.toggle('invalid', !isValid);
         }
       });
@@ -754,20 +755,20 @@ slot="icon"
     }
 
     // Initialize element properties that can't be set via innerHTML
-    const entityPicker = this.shadowRoot!.querySelector('#entity-picker');
+    const entityPicker = this.root.querySelector('#entity-picker');
     if (entityPicker) {
-      (entityPicker as Element & { hass: HomeAssistant | null; value: string }).hass = this._hass;
-      if (this._config.entity) {
-        (entityPicker as Element & { value: string }).value = this._config.entity;
-      }
+      Object.assign(entityPicker as BoundElement, {
+        hass: this._hass,
+        ...(this._config.entity ? { value: this._config.entity } : {}),
+      });
     }
 
     // initialize global style chooser value
-    const globalChooser = this.shadowRoot!.querySelector('#global-style-chooser');
+    const globalChooser = this.root.querySelector('#global-style-chooser');
     if (globalChooser) {
       try {
-        (globalChooser as Element & { value: ColorDisplayConfig }).value = this._config.button_style?.color_display ?? {};
-      } catch (e) {
+        Object.assign(globalChooser as BoundElement & { value: ColorDisplayConfig }, { value: this._config.button_style?.color_display ?? {} });
+      } catch (_e) {
         // ignore
       }
       globalChooser.addEventListener('value-changed', (e: Event) => {
@@ -781,30 +782,26 @@ slot="icon"
     }
 
     // Set radio checked states
-    this.shadowRoot!.querySelectorAll('ha-radio').forEach((radio) => {
-      const r = radio as HTMLInputElement;
-      if (r.value === (this._config.display ?? 'buttons')) {
-        r.checked = true;
-      } else {
-        r.checked = false;
-      }
+    this.root.querySelectorAll('ha-radio').forEach((radio) => {
+      const checked = (radio as BoundElement).value === (this._config.display ?? 'buttons');
+      Object.assign(radio as HTMLInputElement, { checked });
     });
 
     // Set icon-picker values and color inputs for effects
-    this.shadowRoot!.querySelectorAll('.effect-icon').forEach((picker, idx) => {
+    this.root.querySelectorAll('.effect-icon').forEach((picker, idx) => {
       const val = (this._config.effects?.[idx]?.icon)
                 ?? 'mdi:lightbulb';
       try {
-        (picker as Element & { value: string }).value = val;
-      } catch (e) {
+        Object.assign(picker as BoundElement, { value: val });
+      } catch (_e) {
         /* some environments may not expose property */
       }
     });
-    this.shadowRoot!.querySelectorAll('.color-input').forEach((input) => {
+    this.root.querySelectorAll('.color-input').forEach((input) => {
       // color inputs already have value attribute in markup; ensure it's synced
       const el = input as HTMLInputElement;
-      const effectIndex = parseInt(el.dataset.effectIndex ?? '0');
-      const colorIndex = parseInt(el.dataset.colorIndex ?? '0');
+      const effectIndex = parseInt(el.dataset.effectIndex ?? '0', 10);
+      const colorIndex = parseInt(el.dataset.colorIndex ?? '0', 10);
       const color = this._config.effects?.[effectIndex]?.colors?.[colorIndex]
                 ?? this._config.effects?.[effectIndex]?.color
                 ?? '#CCCCCC';
@@ -812,11 +809,12 @@ slot="icon"
     });
 
     // Initialize per-effect style chooser components
-    this.shadowRoot!.querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser').forEach((comp, idx) => {
+    this.root.querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser').forEach((comp, idx) => {
       try {
-        (comp as Element & { value: ColorDisplayConfig }).value = (this._config.effects?.[idx]?.button_style?.color_display)
-                        ?? {};
-      } catch (e) {
+        Object.assign(comp as BoundElement & { value: ColorDisplayConfig }, {
+          value: (this._config.effects?.[idx]?.button_style?.color_display) ?? {},
+        });
+      } catch (_e) {
         // ignore
       }
     });
@@ -841,9 +839,9 @@ slot="icon"
   // Attach listeners that are specific to the effects area (name inputs, color inputs, add/delete color, reorder)
   attachEffectsListeners(): void {
     // ha-sortable for reordering effects
-    const sortable = this.shadowRoot!.querySelector('#effects-sortable');
+    const sortable = this.root.querySelector('#effects-sortable');
     if (sortable && !(sortable as BoundElement)._nanoleaf_bound) {
-      (sortable as BoundElement)._nanoleaf_bound = true;
+      Object.assign(sortable as BoundElement, { _nanoleaf_bound: true });
       sortable.addEventListener('item-moved', (e: Event) => {
         const customEv = e as CustomEvent<{ oldIndex: number; newIndex: number }>;
         const effects = [
@@ -858,12 +856,12 @@ slot="icon"
     }
 
     // Effect name inputs
-    this.shadowRoot!.querySelectorAll('.effect-name-input').forEach((input) => {
+    this.root.querySelectorAll('.effect-name-input').forEach((input) => {
       if ((input as BoundElement)._nanoleaf_bound) return;
-      (input as BoundElement)._nanoleaf_bound = true;
+      Object.assign(input as BoundElement, { _nanoleaf_bound: true });
       input.addEventListener('input', (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const index = parseInt(target.dataset.index ?? '0');
+        const index = parseInt(target.dataset.index ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -872,19 +870,19 @@ slot="icon"
         this.configChanged(this._config);
         // validate against effect_list suggestions (if available)
         const val = target.value?.trim();
-        const isValid = !val || (this._effectList && this._effectList.includes(val));
+        const isValid = !val || this._effectList?.includes(val);
         target.classList.toggle('invalid', !isValid);
         // avoid re-rendering here to not disrupt typing/focus
       });
     });
 
     // Effect icon pickers
-    this.shadowRoot!.querySelectorAll('.effect-icon').forEach((picker) => {
+    this.root.querySelectorAll('.effect-icon').forEach((picker) => {
       if ((picker as BoundElement)._nanoleaf_bound) return;
-      (picker as BoundElement)._nanoleaf_bound = true;
+      Object.assign(picker as BoundElement, { _nanoleaf_bound: true });
       picker.addEventListener('value-changed', (e: Event) => {
         const customEv = e as CustomEvent<{ value: string }>;
-        const index = parseInt((picker as HTMLElement).dataset.index ?? '0');
+        const index = parseInt((picker as HTMLElement).dataset.index ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -895,13 +893,13 @@ slot="icon"
     });
 
     // Color inputs
-    this.shadowRoot!.querySelectorAll('.color-input').forEach((input) => {
+    this.root.querySelectorAll('.color-input').forEach((input) => {
       if ((input as BoundElement)._nanoleaf_bound) return;
-      (input as BoundElement)._nanoleaf_bound = true;
+      Object.assign(input as BoundElement, { _nanoleaf_bound: true });
       input.addEventListener('input', (e: Event) => {
         const target = e.target as HTMLInputElement;
-        const effectIndex = parseInt(target.dataset.effectIndex ?? '0');
-        const colorIndex = parseInt(target.dataset.colorIndex ?? '0');
+        const effectIndex = parseInt(target.dataset.effectIndex ?? '0', 10);
+        const colorIndex = parseInt(target.dataset.colorIndex ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -921,12 +919,12 @@ slot="icon"
     });
 
     // Add color buttons
-    this.shadowRoot!.querySelectorAll('.add-color').forEach((button) => {
+    this.root.querySelectorAll('.add-color').forEach((button) => {
       if ((button as BoundElement)._nanoleaf_bound) return;
-      (button as BoundElement)._nanoleaf_bound = true;
+      Object.assign(button as BoundElement, { _nanoleaf_bound: true });
       button.addEventListener('click', (e: Event) => {
         e.preventDefault();
-        const effectIndex = parseInt((button as HTMLElement).dataset.effectIndex ?? '0');
+        const effectIndex = parseInt((button as HTMLElement).dataset.effectIndex ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -947,13 +945,13 @@ slot="icon"
     });
 
     // Delete color buttons (trash) - remove a color from an effect
-    this.shadowRoot!.querySelectorAll('.delete-color').forEach((button) => {
+    this.root.querySelectorAll('.delete-color').forEach((button) => {
       if ((button as BoundElement)._nanoleaf_bound) return;
-      (button as BoundElement)._nanoleaf_bound = true;
+      Object.assign(button as BoundElement, { _nanoleaf_bound: true });
       button.addEventListener('click', (e: Event) => {
         e.preventDefault();
-        const effectIndex = parseInt((button as HTMLElement).dataset.effectIndex ?? '0');
-        const colorIndex = parseInt((button as HTMLElement).dataset.colorIndex ?? '0');
+        const effectIndex = parseInt((button as HTMLElement).dataset.effectIndex ?? '0', 10);
+        const colorIndex = parseInt((button as HTMLElement).dataset.colorIndex ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -974,12 +972,12 @@ slot="icon"
     });
 
     // Delete effect buttons
-    this.shadowRoot!.querySelectorAll('.delete').forEach((button) => {
+    this.root.querySelectorAll('.delete').forEach((button) => {
       if ((button as BoundElement)._nanoleaf_bound) return;
-      (button as BoundElement)._nanoleaf_bound = true;
+      Object.assign(button as BoundElement, { _nanoleaf_bound: true });
       button.addEventListener('click', (e: Event) => {
         e.preventDefault();
-        const index = parseInt((button as HTMLElement).dataset.index ?? '0');
+        const index = parseInt((button as HTMLElement).dataset.index ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -991,12 +989,12 @@ slot="icon"
     });
 
     // Button style value-changed events for per-effect choosers only
-    this.shadowRoot!.querySelectorAll('.effect-item').forEach((item) => {
+    this.root.querySelectorAll('.effect-item').forEach((item) => {
       const comp = item.querySelector('nanoleaf-effect-card-card-editor-button-style-chooser');
       if (!comp) return;
       if ((comp as BoundElement)._nanoleaf_bound) return;
-      (comp as BoundElement)._nanoleaf_bound = true;
-      const index = parseInt((item as HTMLElement).dataset.index ?? '0');
+      Object.assign(comp as BoundElement, { _nanoleaf_bound: true });
+      const index = parseInt((item as HTMLElement).dataset.index ?? '0', 10);
       comp.addEventListener('value-changed', (e: Event) => {
         const customEv = e as CustomEvent<{ value: ColorDisplayConfig }>;
         const effects = [

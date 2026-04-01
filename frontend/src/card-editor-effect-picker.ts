@@ -5,8 +5,6 @@ interface PickerOption {
   value: string;
 }
 
-type BoundElement = Element & { _nanoleaf_bound?: boolean };
-
 class CardEditorEffectPicker extends HTMLElement {
   private _hass: HomeAssistant | null = null;
 
@@ -103,9 +101,13 @@ class CardEditorEffectPicker extends HTMLElement {
     }
   }
 
+  private get root(): ShadowRoot {
+    return this.shadowRoot as ShadowRoot;
+  }
+
   render(): void {
     // Minimal styling; host can size the element as needed
-    this.shadowRoot!.innerHTML = /* html */ `
+    this.root.innerHTML = /* html */ `
       <style>
         :host { display: block; }
         ha-generic-picker { width: 100%; }
@@ -113,7 +115,7 @@ class CardEditorEffectPicker extends HTMLElement {
       <ha-generic-picker></ha-generic-picker>
     `;
 
-    const picker = this.shadowRoot!.querySelector('ha-generic-picker');
+    const picker = this.root.querySelector('ha-generic-picker');
     if (!picker) return;
 
     // Initialize properties

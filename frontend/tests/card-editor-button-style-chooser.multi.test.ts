@@ -33,11 +33,11 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser multiple instances'
 
     chooser1.value = val1;
     chooser2.value = val2;
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // Sanity check initial states
-    const btn1 = chooser1.shadowRoot!.querySelector('[data-key="full_background"] .btn-active') as HTMLElement;
-    const btn2 = chooser2.shadowRoot!.querySelector('[data-key="full_background"] .btn-active') as HTMLElement;
+    const btn1 = (chooser1.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"] .btn-active') as HTMLElement;
+    const btn2 = (chooser2.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"] .btn-active') as HTMLElement;
     expect(btn1.classList.contains('active')).toBe(true);
     expect(btn2.classList.contains('active')).toBe(false);
 
@@ -47,16 +47,16 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser multiple instances'
       lastValue1 = (e as CustomEvent<{ value: ColorDisplayConfig }>).detail.value;
     });
     btn1.click();
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // chooser1 should have active false now
-    expect(chooser1.value.full_background!.active).toBe(false);
+    expect(chooser1.value.full_background?.active).toBe(false);
     expect(lastValue1).toBeTruthy();
-    expect(lastValue1!.full_background!.active).toBe(false);
+    expect((lastValue1 as ColorDisplayConfig).full_background?.active).toBe(false);
 
     // chooser2 must remain unchanged
-    expect(chooser2.value.full_background!.active).toBe(false);
-    const btn2After = chooser2.shadowRoot!.querySelector('[data-key="full_background"] .btn-active')!;
+    expect(chooser2.value.full_background?.active).toBe(false);
+    const btn2After = (chooser2.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"] .btn-active') as Element;
     expect(btn2After.classList.contains('active')).toBe(false);
   });
 });

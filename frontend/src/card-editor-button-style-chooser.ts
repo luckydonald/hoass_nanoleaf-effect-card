@@ -49,21 +49,22 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
   }
 
   private _updateKey(key: StyleKey): void {
-    const root = this.shadowRoot!;
+    const root = this.shadowRoot;
+    if (!root) return;
     const item = root.querySelector(`.item[data-key="${key}"]`);
     if (!item) return;
-    const btnActive = item.querySelector('.btn-active')!;
-    const btnInactive = item.querySelector('.btn-inactive')!;
+    const btnActive = item.querySelector('.btn-active');
+    const btnInactive = item.querySelector('.btn-inactive');
     const btnHover = item.querySelector('.btn-hover');
     const current: ButtonStyleColorState = this._value[key] ?? { active: false, inactive: false, hover: false };
-    current.active = btnActive.classList.contains('active');
-    current.inactive = btnInactive.classList.contains('active');
+    current.active = btnActive?.classList.contains('active') ?? false;
+    current.inactive = btnInactive?.classList.contains('active') ?? false;
     current.hover = btnHover ? btnHover.classList.contains('active') : false;
     this._value = { ...this._value, [key]: current };
     let out: ColorDisplayConfig;
     try {
       out = JSON.parse(JSON.stringify(this._value)) as ColorDisplayConfig;
-    } catch (e) {
+    } catch (_e) {
       out = { ...this._value };
     }
     this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
@@ -72,9 +73,13 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
       Promise.resolve().then(() => {
         this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
       });
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
+  }
+
+  private get root(): ShadowRoot {
+    return this.shadowRoot as ShadowRoot;
   }
 
   render(): void {
@@ -87,7 +92,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
       { key: 'animated_icon', label: 'Animated Icon' },
     ];
 
-    this.shadowRoot!.innerHTML = /* html */ `
+    this.root.innerHTML = /* html */ `
       <style>
         .group { display:flex; flex-direction:column; gap:6px; }
         .group.compact { flex-direction:row; flex-wrap:wrap; gap:12px; }
@@ -124,7 +129,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
      `;
 
     // After injecting HTML, attach per-button listeners (guarded) to ensure reliable events
-    this.shadowRoot!.querySelectorAll('.toggle-btn').forEach((btn) => {
+    this.root.querySelectorAll('.toggle-btn').forEach((btn) => {
       const b = btn as BoundElement;
       if (b._nanoleaf_bound) return;
       b._nanoleaf_bound = true;
