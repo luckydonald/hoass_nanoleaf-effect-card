@@ -1,6 +1,6 @@
 {
     "name": "nanoleaf-effect-card",
-    "version": "0.0.0-dev0",
+    "version": "0.0.0-pre4",
     "description": "Lovelace card for Nanoleaf Effect Card for Home Assistant",
     "main": "dist/nanoleaf-effect-card.js",
     "type": "module",
