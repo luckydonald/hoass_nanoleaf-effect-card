@@ -21,16 +21,11 @@ describe('Visual editor crash (getConfigElement)', () => {
     // Mock a broken editor module: it defines the custom element but doesn't implement setConfig
     vi.doMock('../src/card-editor', () => {
       class BrokenEditor extends HTMLElement {
-        constructor() {
-          super();
-          // Do NOT manipulate DOM in the constructor. jsdom may throw if child nodes are unexpected.
-          // Keep this constructor minimal and safe; the module intentionally does not provide setConfig.
-        }
       }
       // define the element in the mocked module context as well
       try {
         customElements.define('nanoleaf-effect-card-editor', BrokenEditor);
-      } catch (e) {
+      } catch (_e) {
         // ignore if already defined
       }
       return {};
@@ -58,14 +53,14 @@ describe('Visual editor crash (getConfigElement)', () => {
 
     // Calling setConfig should store the config on the element and log a warning
     const cfg = { entity: 'light.test' };
-    el.setConfig!(cfg);
+    el.setConfig?.(cfg);
     expect(el._config).toEqual(cfg);
     expect(warnSpy).toHaveBeenCalled();
 
     // The fallback should render a visible UI indicating the editor is unavailable
-    const fallbackInShadow = el.shadowRoot && el.shadowRoot.querySelector('.nanoleaf-editor-fallback');
-    const fallbackInLight = el.querySelector && el.querySelector('.nanoleaf-editor-fallback');
-    expect(fallbackInShadow || fallbackInLight).toBeTruthy();
+    const fallbackInShadow = el.shadowRoot?.querySelector('.nanoleaf-editor-fallback');
+    const fallbackInLight = el.querySelector?.('.nanoleaf-editor-fallback');
+    expect(fallbackInShadow ?? fallbackInLight).toBeTruthy();
 
     warnSpy.mockRestore();
   });

@@ -178,7 +178,7 @@ describe('NanoleafEffectCard', () => {
       // Provide a minimal fake Home Assistant object so static helpers that inspect ha.states work
       const fakeHa = {
         states: {
-          'light.example_nanoleaf_shapes': {
+          ['light.example_nanoleaf_shapes']: {
             entity_id: 'light.example_nanoleaf_shapes',
             attributes: {
               effect_list: [],
@@ -234,7 +234,7 @@ describe('NanoleafEffectCard', () => {
     it('selecting "None" should call light.turn_on without an effect', () => {
       const mockHass = {
         states: {
-          'light.test_nanoleaf': {
+          ['light.test_nanoleaf']: {
             state: 'on',
             attributes: {
               effect_list: [

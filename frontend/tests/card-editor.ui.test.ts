@@ -35,7 +35,7 @@ describe('Nanoleaf Effect Card Editor - UI toggles', () => {
     // wait for deferred render
     await Promise.resolve();
 
-    const switchEl = editor.shadowRoot!.querySelector('#show-off') as HTMLInputElement;
+    const switchEl = (editor.shadowRoot as ShadowRoot).querySelector('#show-off') as HTMLInputElement;
     expect(switchEl).toBeTruthy();
 
     let received: Record<string, unknown> | null = null;
@@ -67,7 +67,7 @@ describe('Nanoleaf Effect Card Editor - UI toggles', () => {
     });
     await Promise.resolve();
 
-    const switchEl = editor.shadowRoot!.querySelector('#show-none') as HTMLInputElement;
+    const switchEl = (editor.shadowRoot as ShadowRoot).querySelector('#show-none') as HTMLInputElement;
     expect(switchEl).toBeTruthy();
 
     let received: Record<string, unknown> | null = null;

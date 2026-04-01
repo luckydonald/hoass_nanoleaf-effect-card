@@ -51,9 +51,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     expect(fullHover.classList.contains('active')).toBe(true);
     expect(fullInactive.classList.contains('active')).toBe(false);
 
-    const smallActive = smallRow.querySelector('.btn-active')!;
-    const smallInactive = smallRow.querySelector('.btn-inactive')!;
-    const smallHover = smallRow.querySelector('.btn-hover')!;
+    const smallActive = smallRow.querySelector('.btn-active') as Element;
+    const smallInactive = smallRow.querySelector('.btn-inactive') as Element;
+    const smallHover = smallRow.querySelector('.btn-hover') as Element;
 
     expect(smallActive.classList.contains('active')).toBe(false);
     expect(smallInactive.classList.contains('active')).toBe(true);
@@ -76,7 +76,7 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
       lastValue = (e as CustomEvent<{ value: ColorDisplayConfig }>).detail.value;
     });
 
-    const fullRow = chooser.shadowRoot!.querySelector('[data-key="full_background"]')!;
+    const fullRow = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"]') as Element;
     const fullActive = fullRow.querySelector('.btn-active') as HTMLElement;
     const fullHover = fullRow.querySelector('.btn-hover') as HTMLElement;
 
@@ -84,20 +84,20 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     fullActive.click();
     await new Promise<void>((r) => { setTimeout(r, 0); });
     expect(lastValue).toBeTruthy();
-    expect(lastValue!.full_background!.active).toBe(true);
-    expect(chooser.value.full_background!.active).toBe(true);
+    expect((lastValue as ColorDisplayConfig).full_background?.active).toBe(true);
+    expect(chooser.value.full_background?.active).toBe(true);
 
     // Click hover
     fullHover.click();
     await new Promise<void>((r) => { setTimeout(r, 0); });
-    expect(lastValue!.full_background!.hover).toBe(true);
-    expect(chooser.value.full_background!.hover).toBe(true);
+    expect((lastValue as ColorDisplayConfig).full_background?.hover).toBe(true);
+    expect(chooser.value.full_background?.hover).toBe(true);
 
     // Toggle active off
     fullActive.click();
     await new Promise<void>((r) => { setTimeout(r, 0); });
-    expect(chooser.value.full_background!.active).toBe(false);
-    expect(lastValue!.full_background!.active).toBe(false);
+    expect(chooser.value.full_background?.active).toBe(false);
+    expect((lastValue as ColorDisplayConfig).full_background?.active).toBe(false);
   });
 
   it('supports keyboard navigation (focus order and activation)', async () => {
@@ -113,8 +113,8 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // Find controls
-    const fullRow = chooser.shadowRoot!.querySelector('[data-key="full_background"]')!;
-    const smallRow = chooser.shadowRoot!.querySelector('[data-key="small_bar"]')!;
+    const fullRow = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"]') as Element;
+    const smallRow = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="small_bar"]') as Element;
     const fullActive = fullRow.querySelector('.btn-active') as HTMLElement;
     const smallActive = smallRow.querySelector('.btn-active') as HTMLElement;
 
@@ -141,9 +141,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     fullActive.click(); // emulate browser activation via keyboard
     await new Promise<void>((r) => { setTimeout(r, 0); });
 
-    expect(chooser.value.full_background!.active).toBe(true);
+    expect(chooser.value.full_background?.active).toBe(true);
     expect(lastValue).toBeTruthy();
-    expect(lastValue!.full_background!.active).toBe(true);
+    expect((lastValue as ColorDisplayConfig).full_background?.active).toBe(true);
 
     // Move focus to the next control (simulate Tab)
     smallActive.focus();
@@ -156,7 +156,7 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     smallActive.click();
     await new Promise<void>((r) => { setTimeout(r, 0); });
 
-    expect(chooser.value.small_bar!.active).toBe(true);
-    expect(lastValue!.small_bar!.active).toBe(true);
+    expect(chooser.value.small_bar?.active).toBe(true);
+    expect((lastValue as ColorDisplayConfig).small_bar?.active).toBe(true);
   });
 });

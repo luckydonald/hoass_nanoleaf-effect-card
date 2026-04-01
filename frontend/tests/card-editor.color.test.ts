@@ -34,15 +34,15 @@ describe('Card Editor - color removal', () => {
     };
 
     (editor as unknown as { setConfig: (c: typeof config) => void }).setConfig(config);
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // initial: two color inputs
-    const colorButtons = editor.shadowRoot!.querySelectorAll('.colors-container .delete-color');
+    const colorButtons = (editor.shadowRoot as ShadowRoot).querySelectorAll('.colors-container .delete-color');
     expect(colorButtons.length).toBe(2);
 
     // click the first trash -> should remove first color
     (colorButtons[0] as HTMLElement).click();
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // verify config updated
     const editorConfig = (editor as unknown as { _config: { effects: { colors: string[] }[] } })._config;
@@ -50,10 +50,10 @@ describe('Card Editor - color removal', () => {
     expect(editorConfig.effects[0].colors[0]).toBe('#222222');
 
     // Now remove the last color
-    const remainingTrash = editor.shadowRoot!.querySelectorAll('.colors-container .delete-color');
+    const remainingTrash = (editor.shadowRoot as ShadowRoot).querySelectorAll('.colors-container .delete-color');
     expect(remainingTrash.length).toBe(1);
     (remainingTrash[0] as HTMLElement).click();
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise<void>((r) => { setTimeout(r, 0); });
 
     // After removing the last color the colors array should be empty (no fallback in editor)
     // Re-read _config in case it was replaced with a new object reference on re-render
