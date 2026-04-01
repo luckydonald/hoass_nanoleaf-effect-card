@@ -73,13 +73,13 @@ class NanoleafEffectCardEditor extends HTMLElement {
         id: active.id ?? null,
         tagName: active.tagName ?? null,
         className: active.className ?? null,
-        dataset: { ...active.dataset },
+        dataset: Object.fromEntries(Object.entries(active.dataset)),
         value: active.value ?? null,
         selectionStart: active.selectionStart ?? null,
         selectionEnd: active.selectionEnd ?? null,
       };
       this._savedInputState = state;
-    } catch (e) {
+    } catch {
       this._savedInputState = null;
     }
   }
@@ -114,7 +114,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           try {
             el.focus();
             el.setSelectionRange(s.selectionStart, s.selectionEnd ?? s.selectionStart);
-          } catch (e) {
+          } catch {
             // ignore if element doesn't support selection
             el.focus();
           }
@@ -122,7 +122,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
           el.focus();
         }
       }
-    } catch (e) {
+    } catch {
       // ignore
     } finally {
       this._savedInputState = null;
@@ -146,7 +146,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     if (this._hass && this._config?.entity) {
       try {
         this.updateEffectListSuggestions(this._config.entity);
-      } catch (_e) {
+      } catch {
         // ignore if called before render
       }
     }
@@ -155,11 +155,11 @@ class NanoleafEffectCardEditor extends HTMLElement {
       this.shadowRoot?.querySelectorAll('.effect-picker').forEach((picker) => {
         try {
           Object.assign(picker as BoundElement, { hass, ...(this._config?.entity ? { entity: this._config.entity } : {}) });
-        } catch (_e) {
+        } catch {
           // ignore
         }
       });
-    } catch (_e) {
+    } catch {
       // ignore
     }
   }
@@ -176,7 +176,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     const prev = this._config ?? {};
 
     // Merge top-level simple props
-    const merged: CardConfig = Object.assign({}, prev, incoming) as CardConfig;
+    const merged: CardConfig = { ...prev, ...incoming };
 
     // Merge button_style top-level
     merged.button_style = { ...(prev.button_style ?? {}), ...(incoming.button_style ?? {}) };
@@ -194,7 +194,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
 
     // Iterate over incoming effects and merge with prev by name if possible
     incomingEffects.forEach((inc, i) => {
-      let p: Effect = {};
+      let p: Partial<Effect> = {};
       if (inc?.name && prevByName[inc.name]) {
         p = prevByName[inc.name].e;
       } else if (prevEffects[i]) {
@@ -271,7 +271,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
       Object.assign(entityPicker as BoundElement, { _nanoleaf_bound: true });
       try {
         Object.assign(entityPicker as BoundElement, { hass: this._hass });
-      } catch (_e) {
+      } catch {
         // ignore
       }
       entityPicker.addEventListener('value-changed', (e: Event) => {
@@ -721,7 +721,7 @@ slot="icon"
           entity: this._config.entity ?? '',
           value: this._config.effects?.[idx]?.name ?? '',
         });
-      } catch (_e) {
+      } catch {
         // ignore
       }
 
@@ -739,7 +739,7 @@ slot="icon"
         // update the corresponding text input (if present) and validation
         const input = this.root.querySelector(`.effect-name-input[data-index="${idx}"]`);
         if (input) {
-          input.value = customEv.detail.value ?? '';
+          (input as HTMLInputElement).value = customEv.detail.value ?? '';
           const isValid = !customEv.detail.value
                         || this._effectList?.includes(customEv.detail.value);
           input.classList.toggle('invalid', !isValid);
@@ -768,7 +768,7 @@ slot="icon"
     if (globalChooser) {
       try {
         Object.assign(globalChooser as BoundElement & { value: ColorDisplayConfig }, { value: this._config.button_style?.color_display ?? {} });
-      } catch (_e) {
+      } catch {
         // ignore
       }
       globalChooser.addEventListener('value-changed', (e: Event) => {
@@ -793,7 +793,7 @@ slot="icon"
                 ?? 'mdi:lightbulb';
       try {
         Object.assign(picker as BoundElement, { value: val });
-      } catch (_e) {
+      } catch {
         /* some environments may not expose property */
       }
     });
@@ -814,7 +814,7 @@ slot="icon"
         Object.assign(comp as BoundElement & { value: ColorDisplayConfig }, {
           value: (this._config.effects?.[idx]?.button_style?.color_display) ?? {},
         });
-      } catch (_e) {
+      } catch {
         // ignore
       }
     });
@@ -1002,7 +1002,7 @@ slot="icon"
         ];
         // Try to resolve the correct effect by its name (more robust when reordered)
         const nameInput = item.querySelector('.effect-name-input');
-        const effectName = nameInput?.value?.trim();
+        const effectName = (nameInput as HTMLInputElement | null)?.value?.trim();
         let targetIndex = index;
         if (effectName) {
           const found = effects.findIndex((ef) => ef?.name === effectName);

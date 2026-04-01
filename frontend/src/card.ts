@@ -255,9 +255,9 @@ data-effect="${isOn ? currentEffect : 'Off'}"
         if (globalCfg.active || globalCfg.inactive) return true;
         return (this._config.effects ?? []).some((ef) => {
           const cfg = ef?.button_style?.color_display?.border ?? {};
-          return Boolean(cfg.active || cfg.inactive);
+          return Boolean(cfg.active) || Boolean(cfg.inactive);
         });
-      } catch (_e) {
+      } catch {
         // ignore
       }
       return false;
@@ -269,9 +269,9 @@ data-effect="${isOn ? currentEffect : 'Off'}"
         if (globalCfg.active || globalCfg.inactive) return true;
         return (this._config.effects ?? []).some((ef) => {
           const cfg = ef?.button_style?.color_display?.small_bar ?? {};
-          return Boolean(cfg.active || cfg.inactive);
+          return Boolean(cfg.active) || Boolean(cfg.inactive);
         });
-      } catch (_e) {
+      } catch {
         // ignore
       }
       return false;
@@ -480,7 +480,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
             message,
             level: 'warning',
           });
-        } catch (_e) {
+        } catch {
           // eslint-disable-next-line no-console
           console.warn(message);
         }
@@ -494,7 +494,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
     // Dynamically import the editor module so the custom element is defined
     try {
       await import('./card-editor');
-    } catch (_e) {
+    } catch {
       // If import fails, still return an element so callers can handle it; setConfig may be undefined
     }
     const el = document.createElement('nanoleaf-effect-card-editor') as HTMLElement & {
@@ -510,7 +510,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
         try {
           // eslint-disable-next-line no-console
           console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
-        } catch (_e) {
+        } catch {
           // ignore in environments without console
         }
         // Render a minimal visible UI informing the user the visual editor is unavailable
@@ -525,19 +525,12 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
                         </div>
                     `;
           // Prefer shadow DOM if available, but fall back to light DOM
-          const self = this as HTMLElement & {
-            attachShadow?: (opts: ShadowRootInit) => ShadowRoot;
-            shadowRoot?: ShadowRoot | null;
-          };
-          if (self.attachShadow && self.shadowRoot) {
-            self.shadowRoot.innerHTML = msg;
-          } else if (self.attachShadow) {
-            self.attachShadow({ mode: 'open' });
-            (self.shadowRoot as ShadowRoot).innerHTML = msg;
+          if (this.shadowRoot) {
+            this.shadowRoot.innerHTML = msg;
           } else {
-            this.innerHTML = msg;
+            this.attachShadow({ mode: 'open' }).innerHTML = msg;
           }
-        } catch (_e) {
+        } catch {
           // swallow any rendering errors in fallback
         }
       };
