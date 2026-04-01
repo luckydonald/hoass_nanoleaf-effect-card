@@ -54,7 +54,9 @@ describe('card-editor-effect-picker', () => {
     expect(internal.options[0].value).toBe('A');
 
     let last: string | null = null;
-    picker.addEventListener('value-changed', (e) => { last = (e as CustomEvent<{ value: string }>).detail.value; });
+    picker.addEventListener('value-changed', (e) => {
+      last = (e as CustomEvent<{ value: string }>).detail.value;
+    });
 
     // simulate inner picker dispatch
     const ev = new window.CustomEvent('value-changed', { detail: { value: 'B' } });
@@ -77,7 +79,9 @@ describe('card-editor-effect-picker', () => {
     expect(internal.options).toEqual([]);
 
     let last: string | null = null;
-    picker.addEventListener('value-changed', (e) => { last = (e as CustomEvent<{ value: string }>).detail.value; });
+    picker.addEventListener('value-changed', (e) => {
+      last = (e as CustomEvent<{ value: string }>).detail.value;
+    });
     const ev = new window.CustomEvent('value-changed', { detail: { value: '' } });
     internal.dispatchEvent(ev);
     expect(last).toBe('');
@@ -87,7 +91,7 @@ describe('card-editor-effect-picker', () => {
     const picker = document.createElement('card-editor-effect-picker') as PickerElement;
     document.body.appendChild(picker);
 
-    const hass = { states: { ['light.test']: { attributes: { effect_list: [] } } } };
+    const hass = { states: { 'light.test': { attributes: { effect_list: [] } } } };
     picker.hass = hass;
     picker.entity = 'light.test';
 
