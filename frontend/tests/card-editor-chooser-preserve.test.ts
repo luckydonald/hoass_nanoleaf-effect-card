@@ -36,7 +36,9 @@ describe('Nanoleaf Effect Card Editor - chooser state preservation', () => {
 
     (editor as unknown as { setConfig: (c: typeof cfg) => void }).setConfig(cfg);
     // wait for deferred render
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     // Find the per-effect chooser
     const chooser = (editor.shadowRoot as ShadowRoot).querySelector('.effect-item nanoleaf-effect-card-card-editor-button-style-chooser') as HTMLElement & { value: ColorDisplayConfig };
@@ -48,12 +50,16 @@ describe('Nanoleaf Effect Card Editor - chooser state preservation', () => {
 
     // click to set active true
     btnActive.click();
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
     expect(chooser.value.full_background?.active).toBe(true);
 
     // Now call setConfig with essentially the same config (simulate external update)
     (editor as unknown as { setConfig: (c: typeof cfg) => void }).setConfig({ ...cfg });
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     // The chooser should retain the active state after merge
     const btnActiveAfter = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"] .btn-active') as Element;

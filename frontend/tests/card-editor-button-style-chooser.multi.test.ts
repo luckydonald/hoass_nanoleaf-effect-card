@@ -33,7 +33,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser multiple instances'
 
     chooser1.value = val1;
     chooser2.value = val2;
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     // Sanity check initial states
     const btn1 = (chooser1.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"] .btn-active') as HTMLElement;
@@ -47,7 +49,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser multiple instances'
       lastValue1 = (e as CustomEvent<{ value: ColorDisplayConfig }>).detail.value;
     });
     btn1.click();
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     // chooser1 should have active false now
     expect(chooser1.value.full_background?.active).toBe(false);

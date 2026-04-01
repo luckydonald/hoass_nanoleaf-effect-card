@@ -35,7 +35,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
 
     // Set value and yield to allow the component to render
     chooser.value = initial;
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     const fullRow = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"]') as Element;
     const smallRow = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="small_bar"]') as Element;
@@ -69,7 +71,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     };
 
     chooser.value = initial;
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     let lastValue: ColorDisplayConfig | null = null;
     chooser.addEventListener('value-changed', (e) => {
@@ -82,20 +86,26 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
 
     // Click active
     fullActive.click();
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
     expect(lastValue).toBeTruthy();
     expect((lastValue as ColorDisplayConfig).full_background?.active).toBe(true);
     expect(chooser.value.full_background?.active).toBe(true);
 
     // Click hover
     fullHover.click();
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
     expect((lastValue as ColorDisplayConfig).full_background?.hover).toBe(true);
     expect(chooser.value.full_background?.hover).toBe(true);
 
     // Toggle active off
     fullActive.click();
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
     expect(chooser.value.full_background?.active).toBe(false);
     expect((lastValue as ColorDisplayConfig).full_background?.active).toBe(false);
   });
@@ -110,7 +120,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     };
 
     chooser.value = initial;
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     // Find controls
     const fullRow = (chooser.shadowRoot as ShadowRoot).querySelector('[data-key="full_background"]') as Element;
@@ -139,7 +151,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     // Simulate Enter activation by dispatching a key event then invoking click()
     fullActive.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     fullActive.click(); // emulate browser activation via keyboard
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     expect(chooser.value.full_background?.active).toBe(true);
     expect(lastValue).toBeTruthy();
@@ -154,7 +168,9 @@ describe('Nanoleaf Effect Card Editor - Button Style Chooser', () => {
     // Simulate Space activation on the smallActive control
     smallActive.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
     smallActive.click();
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     expect(chooser.value.small_bar?.active).toBe(true);
     expect((lastValue as ColorDisplayConfig).small_bar?.active).toBe(true);
