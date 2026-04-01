@@ -73,7 +73,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
         id: active.id ?? null,
         tagName: active.tagName ?? null,
         className: active.className ?? null,
-        dataset: Object.fromEntries(Object.entries(active.dataset)),
+        dataset: Object.fromEntries(Object.entries(active.dataset)) as Record<string, string>,
         value: active.value ?? null,
         selectionStart: active.selectionStart ?? null,
         selectionEnd: active.selectionEnd ?? null,

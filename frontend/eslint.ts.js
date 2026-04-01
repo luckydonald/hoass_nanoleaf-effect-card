@@ -65,6 +65,7 @@ export default [
                 { selector: 'objectLiteralProperty', format: null, filter: { regex: '^--[a-z0-9-]+$', match: true } },
                 { selector: 'method', format: ['camelCase', 'PascalCase'], leadingUnderscore: 'allow' },
                 { selector: 'function', format: ['camelCase', 'PascalCase'], leadingUnderscore: 'allow' },
+                { selector: 'parameter', format: ['camelCase', 'snake_case', 'PascalCase', 'UPPER_CASE'], leadingUnderscore: 'allow' },
             ],
 
             '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: true, variables: true }],

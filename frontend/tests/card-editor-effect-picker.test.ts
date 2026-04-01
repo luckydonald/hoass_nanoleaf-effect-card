@@ -91,7 +91,12 @@ describe('card-editor-effect-picker', () => {
     const picker = document.createElement('card-editor-effect-picker') as PickerElement;
     document.body.appendChild(picker);
 
-    const hass = { states: { 'light.test': { attributes: { effect_list: [] } } } };
+    const hass = {
+      states: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'light.test': { attributes: { effect_list: [] } },
+      },
+    };
     picker.hass = hass;
     picker.entity = 'light.test';
 
