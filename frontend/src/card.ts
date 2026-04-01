@@ -594,7 +594,7 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
     return supportedEntityIds[0] ?? 'light.example_nanoleaf_shapes';
   }
 
-  static getStubConfig(ha: HomeAssistant, stateObj?: unknown): CardConfig {
+  static getStubConfig(ha: HomeAssistant, _stateObj?: unknown): CardConfig {
     const entity = this.getExampleEntityId(ha);
     return {
       type: 'custom:nanoleaf-effect-card',
@@ -608,8 +608,8 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
 }
 
 class NanoleafEffectEntity extends NanoleafEffectCard {
-  static override getStubConfig(ha: HomeAssistant, stateObj?: unknown): Record<string, unknown> {
-    const baseConfig = super.getStubConfig(ha, stateObj);
+  static override getStubConfig(ha: HomeAssistant, _stateObj?: unknown): Record<string, unknown> {
+    const baseConfig = super.getStubConfig(ha);
     const { entity } = baseConfig;
     return {
       type: 'entities',
@@ -617,12 +617,8 @@ class NanoleafEffectEntity extends NanoleafEffectCard {
       entities: [
         { entity },
         {
-          // make sure the type is up top:
-          type: 'custom:nanoleaf-effect-entity',
-          // inherit the actual config stuff:
           ...baseConfig,
-          // make sure `baseConfig` does not overwrite it:
-          ...{ type: 'custom:nanoleaf-effect-entity' },
+          type: 'custom:nanoleaf-effect-entity',
         },
       ],
     };
@@ -630,15 +626,11 @@ class NanoleafEffectEntity extends NanoleafEffectCard {
 }
 
 class NanoleafEffectFeature extends NanoleafEffectCard {
-  static override getStubConfig(ha: HomeAssistant, stateObj?: unknown): Record<string, unknown> {
-    const baseConfig = super.getStubConfig(ha, stateObj);
+  static override getStubConfig(ha: HomeAssistant, _stateObj?: unknown): Record<string, unknown> {
+    const baseConfig = super.getStubConfig(ha);
     return {
-      // make sure the type is up top:
-      type: 'custom:nanoleaf-effect-feature',
-      // inherit the actual config stuff:
       ...baseConfig,
-      // make sure `baseConfig` does not overwrite it:
-      ...{ type: 'custom:nanoleaf-effect-feature' },
+      type: 'custom:nanoleaf-effect-feature',
     };
   }
 }

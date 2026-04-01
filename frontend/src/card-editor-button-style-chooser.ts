@@ -64,7 +64,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
     let out: ColorDisplayConfig;
     try {
       out = JSON.parse(JSON.stringify(this._value)) as ColorDisplayConfig;
-    } catch (_e) {
+    } catch {
       out = { ...this._value };
     }
     this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
@@ -73,7 +73,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
       Promise.resolve().then(() => {
         this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: out }, bubbles: true, composed: true }));
       });
-    } catch (_e) {
+    } catch {
       // ignore
     }
   }
