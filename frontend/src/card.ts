@@ -10,8 +10,6 @@ import type {
   HomeAssistant, StyleKey,
 } from './types';
 
-type BoundElement = Element & { _nanoleaf_bound?: boolean };
-
 class NanoleafEffectCard extends HTMLElement {
   protected _config: CardConfig = {};
 
@@ -20,6 +18,10 @@ class NanoleafEffectCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+  }
+
+  private get root(): ShadowRoot {
+    return this.shadowRoot as ShadowRoot;
   }
 
   setConfig(config: Partial<CardConfig>): void {
@@ -49,7 +51,7 @@ class NanoleafEffectCard extends HTMLElement {
         ...ef,
         button_style: {
           ...(ef.button_style ?? {}),
-          color_display: { ...defaultColorDisplays, ...((ef.button_style ?? {}).color_display ?? {}) },
+          color_display: { ...defaultColorDisplays, ...(ef.button_style?.color_display ?? {}) },
         },
       })),
       show_off: config.show_off !== false, // default true
@@ -65,7 +67,7 @@ class NanoleafEffectCard extends HTMLElement {
   }
 
   getCardSize(): number {
-    return this._config.display === 'dropdown' ? 1 : Math.ceil((this._config.effects!.length + 1) / 3);
+    return this._config.display === 'dropdown' ? 1 : Math.ceil(((this._config.effects ?? []).length + 1) / 3);
   }
 
   render(): void {
@@ -77,7 +79,7 @@ class NanoleafEffectCard extends HTMLElement {
     const currentEffect = (entity?.attributes?.effect as string | undefined) ?? null;
     const isOn = Boolean(entity?.state === 'on');
 
-    this.shadowRoot!.innerHTML = /* html */ `
+    this.root.innerHTML = /* html */ `
       <style>
         ${this.getStyles()}
       </style>
@@ -91,7 +93,7 @@ class NanoleafEffectCard extends HTMLElement {
     this.attachEventListeners();
 
     // Ensure compact classes are applied in the DOM (helps tests and dynamic updates)
-    const containerEl = this.shadowRoot!.querySelector('.buttons-container');
+    const containerEl = this.root.querySelector('.buttons-container');
     if (containerEl) {
       if (this._config.button_style?.compact) {
         containerEl.classList.add('compact-grid');
@@ -99,7 +101,7 @@ class NanoleafEffectCard extends HTMLElement {
         containerEl.classList.remove('compact-grid');
       }
       // Apply compact class to each button as needed (global fallback)
-      this.shadowRoot!.querySelectorAll('.effect-button').forEach((btn) => {
+      this.root.querySelectorAll('.effect-button').forEach((btn) => {
         const effectName = btn.getAttribute('data-effect');
         const effect = (this._config.effects ?? []).find((e) => e.name === effectName) ?? null;
         const perEffectCompact = effect?.button_style?.compact === true;
@@ -251,11 +253,11 @@ data-effect="${isOn ? currentEffect : 'Off'}"
       try {
         const globalCfg = this._config.button_style?.color_display?.border ?? {};
         if (globalCfg.active || globalCfg.inactive) return true;
-        for (const ef of this._config.effects ?? []) {
+        return (this._config.effects ?? []).some((ef) => {
           const cfg = ef?.button_style?.color_display?.border ?? {};
-          if (cfg.active || cfg.inactive) return true;
-        }
-      } catch (e) {
+          return Boolean(cfg.active || cfg.inactive);
+        });
+      } catch (_e) {
         // ignore
       }
       return false;
@@ -265,11 +267,11 @@ data-effect="${isOn ? currentEffect : 'Off'}"
       try {
         const globalCfg = this._config.button_style?.color_display?.small_bar ?? {};
         if (globalCfg.active || globalCfg.inactive) return true;
-        for (const ef of this._config.effects ?? []) {
+        return (this._config.effects ?? []).some((ef) => {
           const cfg = ef?.button_style?.color_display?.small_bar ?? {};
-          if (cfg.active || cfg.inactive) return true;
-        }
-      } catch (e) {
+          return Boolean(cfg.active || cfg.inactive);
+        });
+      } catch (_e) {
         // ignore
       }
       return false;
@@ -344,9 +346,11 @@ data-effect="${isOn ? currentEffect : 'Off'}"
                     : 'background: transparent;';
                   // When not active, make it less visible but reserve space; if globally no small bar configured, omit entirely
                   if (!anySmallBarConfigured) return '';
-                  return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${
-                    applyStyle('small_bar') ? (applyHover('small_bar') ? 0.6 : 1) : 0
-                  };"></div>`;
+                  let smallBarOpacity = 0;
+                  if (applyStyle('small_bar')) {
+                    smallBarOpacity = applyHover('small_bar') ? 0.6 : 1;
+                  }
+                  return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${smallBarOpacity};"></div>`;
                 })();
 
                 // Border: reserve spacing only if anyBorderConfigured
@@ -420,14 +424,14 @@ data-effect="${isOn ? currentEffect : 'Off'}"
 
   attachEventListeners(): void {
     if (this._config.display === 'dropdown') {
-      const dropdown = this.shadowRoot!.querySelector('.effect-dropdown');
+      const dropdown = this.root.querySelector('.effect-dropdown');
       if (dropdown) {
         dropdown.addEventListener('change', (e: Event) => {
           this.handleEffectSelect((e.target as HTMLSelectElement).value);
         });
       }
     } else {
-      const buttons = this.shadowRoot!.querySelectorAll('.effect-button');
+      const buttons = this.root.querySelectorAll('.effect-button');
       buttons.forEach((button) => {
         button.addEventListener('click', (e: Event) => {
           const effectName = (e.currentTarget as HTMLElement).getAttribute('data-effect');
@@ -440,7 +444,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
   handleEffectSelect(effectName: string | null): void {
     if (!this._hass) return;
 
-    const entity = this._hass.states[this._config.entity!];
+    const entity = this._hass.states[this._config.entity as string];
     if (!entity) return;
 
     const serviceData: Record<string, unknown> = { entity_id: this._config.entity };
@@ -465,7 +469,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
       }
     } else {
       const effectList = (entity.attributes.effect_list as string[] | undefined) ?? [];
-      if (effectList.includes(effectName!)) {
+      if (effectName && effectList.includes(effectName)) {
         this._hass.callService('light', 'turn_on', { entity_id: this._config.entity, effect: effectName });
       } else {
         // eslint-disable-next-line no-console
@@ -476,9 +480,9 @@ data-effect="${isOn ? currentEffect : 'Off'}"
             message,
             level: 'warning',
           });
-        } catch (e) {
+        } catch (_e) {
           // eslint-disable-next-line no-console
-          console.warn(message, e);
+          console.warn(message);
         }
       }
       return;
@@ -490,7 +494,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
     // Dynamically import the editor module so the custom element is defined
     try {
       await import('./card-editor');
-    } catch (e) {
+    } catch (_e) {
       // If import fails, still return an element so callers can handle it; setConfig may be undefined
     }
     const el = document.createElement('nanoleaf-effect-card-editor') as HTMLElement & {
@@ -506,7 +510,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
         try {
           // eslint-disable-next-line no-console
           console.warn('nanoleaf-effect-card-editor: fallback setConfig called with', cfg);
-        } catch (e) {
+        } catch (_e) {
           // ignore in environments without console
         }
         // Render a minimal visible UI informing the user the visual editor is unavailable
@@ -529,11 +533,11 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
             self.shadowRoot.innerHTML = msg;
           } else if (self.attachShadow) {
             self.attachShadow({ mode: 'open' });
-            self.shadowRoot!.innerHTML = msg;
+            (self.shadowRoot as ShadowRoot).innerHTML = msg;
           } else {
             this.innerHTML = msg;
           }
-        } catch (e) {
+        } catch (_e) {
           // swallow any rendering errors in fallback
         }
       };
@@ -597,7 +601,7 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
     return supportedEntityIds[0] ?? 'light.example_nanoleaf_shapes';
   }
 
-  static getStubConfig(ha: HomeAssistant, _stateObj?: unknown): CardConfig {
+  static getStubConfig(ha: HomeAssistant, stateObj?: unknown): CardConfig {
     const entity = this.getExampleEntityId(ha);
     return {
       type: 'custom:nanoleaf-effect-card',
