@@ -22,7 +22,8 @@ describe('NanoleafEffectCard - compact style', () => {
 
     const hass = {
       states: {
-        ['light.test_nanoleaf']: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'light.test_nanoleaf': {
           state: 'on',
           attributes: {
             effect: 'Rainbow',
@@ -54,7 +55,9 @@ describe('NanoleafEffectCard - compact style', () => {
     });
 
     // allow render
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     const container = (card.shadowRoot as ShadowRoot).querySelector('.buttons-container') as HTMLElement;
     expect(container.classList.contains('compact-grid')).toBe(true);
