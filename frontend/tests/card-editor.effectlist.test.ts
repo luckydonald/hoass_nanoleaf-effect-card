@@ -47,7 +47,9 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     });
 
     // allow render
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     // The editor now uses per-effect <card-editor-effect-picker> elements.
     const pickers = (editor.shadowRoot as ShadowRoot).querySelectorAll('.effect-picker');
@@ -80,7 +82,9 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     // Now update hass to include 'Custom' in effect_list and ensure validation updates
     hass.states['light.test_light'].attributes.effect_list.push('Custom');
     (editor as unknown as { hass: typeof hass }).hass = hass; // setter will call updateEffectListSuggestions
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
 
     expect(second.classList.contains('invalid')).toBe(false);
 
@@ -99,7 +103,9 @@ describe('Nanoleaf Effect Card Editor - effect_list suggestions', () => {
     // Simulate user editing the second input to an unknown name -> becomes invalid
     second.value = 'NotAnEffect';
     second.dispatchEvent(new Event('input', { bubbles: true }));
-    await new Promise<void>((r) => { setTimeout(r, 0); });
+    await new Promise<void>((r) => {
+      setTimeout(r, 0);
+    });
     expect(second.classList.contains('invalid')).toBe(true);
   });
 });
