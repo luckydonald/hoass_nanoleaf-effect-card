@@ -54,8 +54,7 @@ def _git_bytes(*args: str) -> bytes:
 
 def _is_inside_base_repo(subproject_root: Path) -> bool:
     """True iff we are inside the `base` meta-repo: subproject directory named
-    `base`, remotes are exactly `empty` and `origin`, origin pointing at
-    luckydonald/base.
+    `base`, with origin pointing at luckydonald/base.
 
     In a stand-alone consuming repo, subproject_root == git_root and the name
     won't be `base`, so this returns False. In a monorepo, subproject_root is
@@ -63,10 +62,17 @@ def _is_inside_base_repo(subproject_root: Path) -> bool:
     """
     if subproject_root.name != "base":
         return False
-    remotes = sorted(_git_text("remote").split())
-    if remotes != ["empty", "origin"]:
-        return False
-    return bool(re.search(r"luckydonald/base(\.git)?$", _git_text("remote", "get-url", "origin")))
+    origin = _git_text("remote", "get-url", "origin")
+    return bool(re.search(r"(^|[:/])luckydonald/base(\.git)?/?$", origin, re.I))
+
+
+def base_ai_commit_subject(msg: str) -> str:
+    """Prefix base-repo AI auto-commit subjects with ``[base] ``."""
+    if msg.startswith("[base] "):
+        return msg
+    if _is_inside_base_repo(_subproject_root()):
+        return f"[base] {msg}"
+    return msg
 
 
 def _subproject_root() -> Path:
@@ -85,14 +91,38 @@ def _chdir_to_git_root() -> Path:
     return Path(root)
 
 
+def _read_by_issue(subproject: Path, ai_prefix: str) -> str:
+    """Read the issue key from <subproject>/<ai_prefix>/.by-issue.
+
+    Returns the stripped content (e.g. ``PROJ-1234``) or ``""`` when the file
+    is absent or empty."""
+    by_issue = subproject / ai_prefix / ".by-issue"
+    if by_issue.is_file():
+        return by_issue.read_text(encoding="utf-8").strip()
+    return ""
+
+
 def resolve_log_path(default_relpath: str, base_relpath: str) -> Path:
     """Return the absolute AI-artifact path under the *subproject* root (with
-    the base-repo reroute applied) and cd to the git root so subsequent git
-    operations resolve relpaths uniformly. Creates parent directories as
-    needed."""
+    the base-repo reroute and optional ``by-issue/<KEY>/`` sub-directory
+    applied) and cd to the git root so subsequent git operations resolve
+    relpaths uniformly. Creates parent directories as needed.
+
+    When ``ai[/°base]/.by-issue`` exists and contains an issue key such as
+    ``PROJ-1234``, every path is routed through
+    ``ai[/°base]/by-issue/PROJ-1234/…`` instead of ``ai[/°base]/…``."""
     subproject = _subproject_root()
     _chdir_to_git_root()
-    relpath = base_relpath if _is_inside_base_repo(subproject) else default_relpath
+    is_base = _is_inside_base_repo(subproject)
+    ai_prefix = "ai/°base" if is_base else "ai"
+    relpath = base_relpath if is_base else default_relpath
+
+    issue = _read_by_issue(subproject, ai_prefix)
+    if issue:
+        # Insert by-issue/<KEY>/ immediately after the ai prefix.
+        rest = relpath[len(ai_prefix) + 1:]  # strip "ai[/°base]/"
+        relpath = f"{ai_prefix}/by-issue/{issue}/{rest}"
+
     log_path = (subproject / relpath).resolve()
     log_path.parent.mkdir(parents=True, exist_ok=True)
     return log_path
@@ -124,9 +154,9 @@ def _commit_message(template_relpath: str, default_msg: str) -> str:
     # (relevant in monorepos where cwd is the git root, not the subproject).
     template = _subproject_root() / template_relpath
     if not template.is_file():
-        return default_msg
+        return base_ai_commit_subject(default_msg)
     text = template.read_text(encoding="utf-8").replace("\n", "").replace("\r", "").strip()
-    return text or default_msg
+    return base_ai_commit_subject(text or default_msg)
 
 
 def _restore_staged(snap: tuple[Path, Path], relpath: str) -> None:
@@ -173,7 +203,7 @@ def append_and_commit(
     # `git commit --only` requires the path to be tracked, so make sure the
     # file is in the index first. Idempotent on already-tracked files.
     subprocess.run(["git", "add", "--", relpath], capture_output=True)
-    subprocess.run(["git", "commit", "--only", relpath, "-m", msg], capture_output=True)
+    subprocess.run(["git", "commit", "--no-verify", "--only", relpath, "-m", msg], capture_output=True)
 
     if snap is not None:
         _restore_staged(snap, relpath)

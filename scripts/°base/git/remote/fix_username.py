@@ -15,6 +15,10 @@ from urllib.parse import SplitResult, urlsplit, urlunsplit
 
 
 PROMPT_TOOLKIT_PACKAGE = "prompt_toolkit"
+REQUIRED_REMOTES: dict[str, str] = {
+    "empty": "https://luckydonald@github.com/EmptyAAS/empty.git",
+    "base": "https://luckydonald@github.com/luckydonald/base.git",
+}
 BOOTSTRAP_ENV = "GIT_REMOTE_FIX_BOOTSTRAPPED"
 DEFAULT_THEME_NAME = "rounded"
 INPUT_WIDTH = 40
@@ -344,6 +348,20 @@ def rewrite_github_https_url(
     return urlunsplit(split._replace(netloc=netloc, path=path))
 
 
+def github_lfs_locksverify_key(url: str) -> str | None:
+    info = parse_github_https_url(url)
+    if info is None:
+        return None
+    endpoint = urlunsplit(
+        info.split._replace(
+            path=f"{info.path_without_suffix}.git/info/lfs",
+            query="",
+            fragment="",
+        )
+    )
+    return f"lfs.{endpoint}.locksverify"
+
+
 def make_url_selection(kind: Literal["fetch", "push"], url: str) -> RemoteUrlSelection:
     github = parse_github_https_url(url)
     return RemoteUrlSelection(
@@ -468,6 +486,24 @@ def build_execution_plan(remotes: Sequence[RemoteSelection], username: str) -> E
 def apply_execution_plan(plan: ExecutionPlan, repo_root: Path) -> None:
     for command in plan.commands:
         run_command(command, cwd=repo_root)
+
+
+def apply_lfs_locksverify_fix(repo_root: Path, remotes: Sequence[RemoteSelection] | None = None) -> list[str]:
+    remotes = list(remotes) if remotes is not None else discover_remotes(repo_root)
+    keys: list[str] = []
+    seen: set[str] = set()
+    for remote in remotes:
+        for selection in remote.descendants():
+            key = github_lfs_locksverify_key(selection.original_url)
+            if key is None or key in seen:
+                continue
+            seen.add(key)
+            current = git_output(["config", "--local", "--get", key], cwd=repo_root, check=False)
+            if current.lower() == "false":
+                continue
+            run_command(["git", "config", "--local", key, "false"], cwd=repo_root)
+            keys.append(key)
+    return keys
 
 
 def ensure_prompt_toolkit(argv: Sequence[str]) -> None:
@@ -1713,13 +1749,17 @@ def run_tui(
     return app.run()
 
 
-def print_applied_summary(plan: ExecutionPlan) -> None:
+def print_applied_summary(plan: ExecutionPlan, lfs_keys: Sequence[str] = ()) -> None:
     if not plan.previews:
-        print("No changes were applied.")
-        return
-    print(f"Applied {len(plan.previews)} remote URL change(s):")
-    for preview in plan.previews:
-        print(f"- {preview.remote_name} {preview.kind}: {preview.old_url} -> {preview.new_url}")
+        print("No remote URL changes were applied.")
+    else:
+        print(f"Applied {len(plan.previews)} remote URL change(s):")
+        for preview in plan.previews:
+            print(f"- {preview.remote_name} {preview.kind}: {preview.old_url} -> {preview.new_url}")
+    if lfs_keys:
+        print(f"Disabled Git LFS lock verification for {len(lfs_keys)} endpoint(s):")
+        for key in lfs_keys:
+            print(f"- {key}")
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -1728,12 +1768,56 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--username", help="Prefill the username field.")
     parser.add_argument(
+        "--fix-lfs-locks-only",
+        action="store_true",
+        help="Only disable Git LFS lock verification for discovered GitHub HTTPS remotes, then exit.",
+    )
+    parser.add_argument(
+        "--fix-remotes",
+        action="store_true",
+        help="Automatically fix missing or wrong required remotes without prompting.",
+    )
+    parser.add_argument(
         "--theme",
         choices=sorted(THEMES),
         default=DEFAULT_THEME_NAME,
         help=f"Visual theme to use. Defaults to {DEFAULT_THEME_NAME}.",
     )
     return parser.parse_args(argv)
+
+
+def check_and_fix_required_remotes(remotes: list[RemoteSelection], repo_root: Path, *, yes: bool = False) -> list[RemoteSelection]:
+    remote_urls = {r.name: r.fetch.original_url for r in remotes}
+    problems: list[tuple[str, str, str]] = []  # (name, expected_url, action)
+    for name, expected in REQUIRED_REMOTES.items():
+        actual = remote_urls.get(name)
+        if actual is None:
+            print(f'\033[31mERROR: remote "{name}" is not set (should be "{expected}")\033[0m', file=sys.stderr)
+            problems.append((name, expected, "add"))
+        elif actual != expected:
+            print(f'\033[31mERROR: remote "{name}" is "{actual}" (should be "{expected}")\033[0m', file=sys.stderr)
+            problems.append((name, expected, "set-url"))
+
+    if not problems:
+        return remotes
+
+    if not yes:
+        if not sys.stdin.isatty():
+            return remotes
+        print(f'\nFix {len(problems)} remote(s)? [Y/n] ', end='', flush=True)
+        answer = sys.stdin.readline().strip().lower()
+        if answer not in ('', 'y', 'yes'):
+            return remotes
+
+    for name, url, action in problems:
+        cmd = ["git", "remote", "add", name, url] if action == "add" else ["git", "remote", "set-url", name, url]
+        try:
+            run_command(cmd, cwd=repo_root)
+            print(f'  \033[32mFixed:\033[0m {name} → {url}')
+        except GitCommandError as exc:
+            print(f'  \033[31mFailed to fix "{name}": {exc}\033[0m', file=sys.stderr)
+
+    return discover_remotes(repo_root)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1748,6 +1832,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not remotes:
         print("No git remotes found in this repository.", file=sys.stderr)
         return 1
+
+    remotes = check_and_fix_required_remotes(remotes, repo_root, yes=args.fix_remotes)
+
+    if args.fix_lfs_locks_only:
+        try:
+            lfs_keys = apply_lfs_locksverify_fix(repo_root, remotes)
+        except GitCommandError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        if lfs_keys:
+            print(f"Disabled Git LFS lock verification for {len(lfs_keys)} endpoint(s).")
+        else:
+            print("Git LFS lock verification was already disabled for discovered GitHub HTTPS remotes.")
+        return 0
 
     if not sys.stdin.isatty() or not sys.stdout.isatty():
         print("This script requires an interactive terminal.", file=sys.stderr)
@@ -1766,11 +1864,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         apply_execution_plan(plan, repo_root)
+        lfs_keys = apply_lfs_locksverify_fix(repo_root)
     except GitCommandError as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
-    print_applied_summary(plan)
+    print_applied_summary(plan, lfs_keys)
     return 0
 
 

@@ -40,4 +40,3 @@ Generate me a Homeassistant plugin based on the following description.
 
 #### Previous user prompts:
 
-

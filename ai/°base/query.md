@@ -69,8 +69,6 @@ as well.
 
 ❯ Commit.
 
-❯ /rebase-ai-prompt-commits
-
 ❯ /btw, is there a character suited for folder/file prefixes to imply "this is not very useful folder, don't look inside" like the dot would - and not taking up much space (dot is just a small symbol at the bottom of the "character field"), but which will in a typical folder/file sort appear _after_ all others - i.e. after `Z`?
 ❯ I've used `ai/°base` now, as that one is still easy enough to type on pretty much every system.
 
@@ -86,7 +84,7 @@ So check that:
 ❯ That readme change for git lfs install is not very thorough. It shall be part of the installation section properly, and definitly also in the quick copy-past command block.
 ❯ Also add the command for pre-commit, too.
 
-❯ Edit @scripts/°base/ai/hooks/save-prompt/hook.sh to ignore if the message is just a single command of the following list: `/committing-with-lplp-style`, `/rebase-ai-prompt-commits`.
+❯ Edit @scripts/°base/ai/hooks/save-prompt/hook.sh to ignore if the message is just a single command of the following list: `/commit-with-lplp-style`.
 
 ❯ Earlier you managed to commit with `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic>` again. Analyze why this managed to get past the `PermissionRequest` check.
 The commit which I since rebased and fixed was `base 5338ebc` with the title `ai: skip logging for internal tooling prompt command`, so you can match it in the earlier log.
@@ -514,7 +512,7 @@ From claude session 5693b7f1-e540-44aa-94d7-4a01d9a535ff.
 >   }
 > }
 > ```
-> 
+>
 
 > Should thing C also be included?
 > - Yes, add C
@@ -544,7 +542,336 @@ From claude session 5693b7f1-e540-44aa-94d7-4a01d9a535ff.
 >   }
 > }
 > ```
-> 
+>
 
 ❯ /plan another fun test run
+
+› /plan
+› Check out the settings of claude in this project. I want codex to follow that too, but I would like to _not_ maintain two separate versions of it, where possible.
+> ```text
+> Question 1/2 (2 unanswered)
+> Which parts of the Claude setup should Codex inherit?
+>
+>   1. › Full parity (Recommended)  Mirror hooks, command policy, prompt/decision/plan/memory logging, and
+>                                 the two command docs for Codex.
+>   2. Safety only                Mirror command/secret policy and commit guardrails, but do not add
+>                                 auto-logging or auto-commit hooks for Codex.
+>   3. Logging only               Mirror prompt/decision/plan/memory capture, but keep Codex command
+>                                 approvals separate.
+>   4. None of the above          Optionally, add details in notes (tab).
+>
+> › However, that prompt logging should already be present (?) (the `›` mentioned)
+> ```
+> ```text
+>   Question 2/2 (1 unanswered)
+> How should we avoid maintaining two hand-edited configs?
+>
+>   1. › Shared generator (Recommended)  Keep a small shared source and generate Claude/Codex adapter files
+>                                      from it during setup/checks.
+>   2. Claude canonical                Keep `.claude/settings.json` hand-edited and generate Codex files
+>                                      from it as a derived mirror.
+>   3. Documented copy                 Add Codex files now and document that changes must be kept in
+>                                      sync manually.
+>   4. None of the above               Optionally, add details in notes (tab).
+>
+> › tries to be as tool-agnostic as possible - also in sync in both directions for easy user input.
+>   Note this is both for `.claude/settings.json` and the (currently not existing) `.claude/
+>   settings.local.json` (which is usually not git tracked).
+> ```
+> ```text
+> • Questions 2/2 answered
+>   • Which parts of the Claude setup should Codex inherit?
+>     answer: Full parity (Recommended)
+>     note: However, thaa promt logging should already be present (?) (the `›` mentioned)
+>   • How should we avoid maintaining two hand-edited configs?
+>     answer: Shared generator (Recommended)
+>     note: It rather shall be a sync tool. Either codex or claude may add rules to their own files, and in
+>           that case those shall be replicated for the other as well. You should take into account how those
+>           rules must be defined - which might have different syntax per ai tool - also create one base file
+>           which tries to be as tool-agnostic as possible - also in sync in both directions for easy user
+>           input.
+>           Note this is both for `.claude/settings.json` and the (currently not existing) `.claude/
+>           settings.local.json` (which is usually not git tracked).
+> ```
+> ```text
+> • There are two remaining design choices that materially affect safety: when the sync runs, and how it treats conflicting/deleted rules. The rest can be specified from the repo and Codex’s local hook/config surface.
+> ```
+> ```text
+> Question 1/2 (2 unanswered)
+> When should the cross-tool settings sync run?
+>
+>   1. Session + manual (Recommended)  Run on Claude/Codex session start and provide a manual script for
+>                                      explicit sync or repair.
+>   2. Manual only                     No automatic config rewrites; user runs the sync command after
+>                                      editing either side.
+> › 3. Pre-commit too                  Run in session start, manual command, and a pre-commit/check hook
+>                                      to catch unsynced settings.
+>   4. None of the above               Optionally, add details in notes (tab).
+>
+> tab to add notes | enter to submit answer | ←/→ to navigate questions | esc to interrupt
+> ```
+> ```text
+> Question 2/2 (1 unanswered)
+> How should the sync handle conflicts and deletions?
+>
+>   1. Union + report (Recommended)  Add new rules both ways, never delete implicitly, and stop with a clear report on irreconcilable conflicts.
+> › 2. Last writer wins              Use file mtimes to decide which side overwrites the other when values disagree.
+>   3. Strict canonical              Only the neutral base files are authoritative; native edits are rejected unless imported manually.
+>   4. None of the above             Optionally, add details in notes (tab).
+>
+> › Actually the git diff might allow for a line-based "what is newer" - if available (the `*.local.json` variants may or may not be not git-tracked).
+> ```
+> ```text
+> • Questions 2/2 answered
+>   • When should the cross-tool settings sync run?
+>     answer: Pre-commit too
+>   • How should the sync handle conflicts and deletions?
+>     answer: Last writer wins
+>     note: Actually the git diff might allow for a line-based "what is newer" - if available (the `*.local.json` variants may or may not be not git-tracked).
+> ```
+
+› ⚠ skipping async hook in /home/user/git/luckydonald/base/.codex/hooks.json: async hooks are not supported yet
+› ⚠ `[features].codex_hooks` is deprecated. Use `[features].hooks` instead.
+Enable it with `--enable hooks` or `[features].hooks` in config.toml. See https://developers.openai.com/codex/config-basic#feature-flags for details.
+› Instead, have a python part in the sync script check for that - and fix it after a y/n/exit. Exit shows the path exactly for convenience.
+
+› Fix the `°base` folder selection for automatic `ai: updated prompt` commits broken with either b142385153f6b44d208532036b95a1cb4dd9c9b2 - or they were never working for `codex` before (only `claude`). While at it, make sure those automated commits - including plans and such will prefix commit with `[base] ` like usual for this repository.
+› A previous agent produced the plan below to accomplish the user's task. Implement the plan in a fresh context. Treat the plan as the source of user intent, re-read files as needed, and carry the work through implementation and verification.
+
+› the codex plan hook is not writing a correct file to the system:
+See commit dbe390bf1766c8227fc3d9c37315a00e7629d8a9 first writing the plan to the query file,
+and then immediatly after writing garbage (stdout apparently) to a new plan file in 8f9f93cf2fa3eec36bc3cc69c5f16faac49e584c.
+Instead it should write what was in the query file to the plan file.
+Make sure to not corrupt the code for claude, the fix only applies to codex.
+Also check if this message starting of the plan gets autocommited at least.
+
+› Note that the files mentioned in the commits where fixed manually later by me.
+
+› Migrate claude hook setup to also have a claude param to the script - the commit one already does it like that.
+
+› A previous agent produced the plan below to accomplish the user's task. Implement the plan in a fresh context. Treat the plan as the source of user intent, re-read files as needed, and carry the work through implementation and verification.
+› If claude generates new skills or commands, the script shall sync/convert those as well. I.e. it should be able to handle claude adding new ones it it's own format.
+
+› Also, line-based git diffs can be used.
+
+› Okay, working on the hooks still. I want to check that it is working, and fix bugs afterwards. Please enter planning mode, ask me all the fun question formats and then write the plan file multiple times. In the end @ai/°base/plans/ and @ai/°base/query.md shall be updated and reflect each of those actions (questions, messages, plan updates). If not we need to fix it.
+
+› Hook verification message: exercise Codex prompt logging before structured question and repeated plan snapshots.
+
+> Which question format should this hook test emphasize?
+> - Structured (Recommended)
+> - Plain text
+> - Both
+>
+> How many plan snapshot writes should I trigger?
+> - Three writes (Recommended)
+> - Two writes
+> - Four writes
+>
+> After the hook check, how should I handle failures?
+> - Fix failures (Recommended)
+> - Report only
+> - Add tests first
+> → Both
+>   Three writes (Recommended)
+>   Fix failures (Recommended)
+> ```json
+> {
+>   "questions": [
+>     {
+>       "header": "Question UI",
+>       "id": "question_ui",
+>       "question": "Which question format should this hook test emphasize?",
+>       "options": [
+>         {
+>           "label": "Structured (Recommended)",
+>           "description": "Use the native multi-choice shape."
+>         },
+>         {
+>           "label": "Plain text",
+>           "description": "Use regular prompt logging."
+>         },
+>         {
+>           "label": "Both",
+>           "description": "Exercise both capture paths."
+>         }
+>       ]
+>     },
+>     {
+>       "header": "Plan Writes",
+>       "id": "plan_writes",
+>       "question": "How many plan snapshot writes should I trigger?",
+>       "options": [
+>         {
+>           "label": "Three writes (Recommended)",
+>           "description": "Initial plan, renamed update, same-file update."
+>         },
+>         {
+>           "label": "Two writes",
+>           "description": "Shorter update test."
+>         },
+>         {
+>           "label": "Four writes",
+>           "description": "Extra stress write."
+>         }
+>       ]
+>     },
+>     {
+>       "header": "Bug Fixing",
+>       "id": "bug_fixing",
+>       "question": "After the hook check, how should I handle failures?",
+>       "options": [
+>         {
+>           "label": "Fix failures (Recommended)",
+>           "description": "Patch hook bugs immediately."
+>         },
+>         {
+>           "label": "Report only",
+>           "description": "Only summarize broken behavior."
+>         },
+>         {
+>           "label": "Add tests first",
+>           "description": "Write failing tests first."
+>         }
+>       ]
+>     }
+>   ]
+> }
+> ```
+>
+
+› fix d1b384ae896fcf347b6280b5f3a6c5730813f42a not syncing files but just deleting local ones.
+
+› Alright, the skills are next. Claude has for some reason created them as commands, however creating a proper skill should work, too. Try to not have the full file duplicated for both AIs. What can we do there? Give some options.
+> ```text
+> • Questions 1/1 answered
+>   • Which direction should the implementation plan target?
+>     answer: Generated Skills (Recommended)
+>     note: + the wrapper commands for keeping the commands around in claude - it should still be migrated to proper claude skills though.
+> ```
+› The marker shall be a line of the commit, favoribly the last one preceeded by a single empty line. Above the usual commit message stuff including optional `[base] ` prefix shall happen - create a script to delete a memory with creating a wellformatted delete commit, too.
+
+› git lfs activation causes now on push:
+Push failed: Authentication error: Authentication required: You must have push access to verify locks failed to push some refs to 'https://github.com/luckydonald/base.git'
+› alright, ran the push. Worked. But I don't want to repeat that for every Repo which includes this base. Maybe the fix git script can be extended?
+
+› Fix _Full test discovery still has the pre-existing ai.scripts import issue in the TUI tests_
+
+› Add `uv run --project scripts/°base python -m unittest discover -s scripts/°base/tests -v` to the allowed commands, pretty far down with the other `°base` stuff.
+
+› The $commit-with-lplp-style skill is not good in selecting the word after the `[where]`. Currently it often writes stuff like `[fronend] fix: ai: Run: …`, but it shouldn't be this feat/fix/… commit style (forgot the name), but the component or topic of the change. I.e. `[frontend] admin: Implemented user deletion UI.` or `[backend] models: Added models for cool feature.`. If we're rather on a feature branch or doing a lot of work on the same feature `[backend] cool feature: Added the models.` or similar is possible too. Also notice that every commit shall be ended with a sentence separator, e.g. `.:,!?`. It doesn't need to be a full sentence for that, and the choice is rather based on the rest of the message; Like if you need the information in the detailed rest of the commit message, then it would indicate that with an `:`, otherwise, if it can stand on it's own, and the body is only enhancing it, it would be `.` Usually `.` is the right choice.
+
+› it's missing `ai: Run:` now.
+
+› @ai/°base/errors/1.md
+› Wait is the script file now optional - or the command in the script? Depending if I can it with xcode git or normal git it is available or not.
+
+› Hmm. That one is weird. PYcharm uses that xcode specific git, and now I got @ai/errors/2.md
+
+› Can't you fix it instead to work with uv and `git lfs` instead?
+
+❯ Fix the write query/decision/plan hooks in @scripts/°base/ai/hooks/ to honor `ai/.by-issue` which would contain something like `PROJ-1234` or similar (possibly tailing empty line), which would - if set - instruct all of those functions to write to `ai/by-issue/PROJ-1234/…`, so adding the directory `by-issue/${.by-issue}/` after `ai/` to all pathes. Note, for the base repo, it would be `ai/°base/.by-issue`. Unify that in a shared helper resolving the actual path.
+
+› ai/°base/errors/3.md
+› Fix `uv` to work there.
+
+› Fix loading the path of UV and git-lfs in @ai/°base/errors/3.md
+
+› you can use $commit-with-lplp-style, then test again.
+
+› Merge the @ai/skills/rebase-ai-prompt-commits/SKILL.md and /Users/user/git/luckydonald/AllMyStorage/ai/memory/feedback_lplp_plan_commits.md into @ai/skills/commit-with-lplp-style/SKILL.md ; and cleanup any old `rebase-ai-prompt-commits` mention.
+› Rename the lplp commit skill to `commit-with-lplp-style` for grammar reasons.
+Also include a very short section about the base itself using `[base] [optional source repo] something: ai: …` (see latest 20 commits to refine that).
+› Add: For normal use, multiple `[where]` parts can be written as `[backend|frontend]`.
+
+› I want a github workflow (or multiple) in which in an Issue I can write either `@claude` or `@codex` and the online integration of that service will work on that issue. Either in the issue body itself, or a separate message containing that. If that separate comment is just that (not a diff etc.), address the issue itself.
+› Document how to set up codex github issues in the `README.md`, and link to further documentation.
+› Does that also work with the openai subscription? Where do I get the `OPENAI_API_KEY`?
+› Is there an alternative with codex to use the normal chatgpt subscription?
+› Alright, make sure the integrations are gracefully disabled when the required env keys are not set.
+❯ With the requirements `ai/°base/query.md:786-792` executed, check if your @.github/workflows/claude-issue-agent.yml is correct.
+❯ Document how to set up claude github issues in the `README.md`, and link to further documentation.
+
+❯ I noticed claude sometimes writes something like @ai/°base/errors/4.diff to the query.
+1. Figure out/research where that comes from (which hook).
+2. I want to have that instead as a summary listing:
+   ```markdown
+   > - Task `a6bc9ead58e284556`: <kbd>completed</kbd>
+   > - > $summary
+   > - [Query (`123` chars)](../agents/001.a6bc9ead58e284556/prompt.md)
+   > - [Answer (`4567` chars)](../agents/001.a6bc9ead58e284556/result.md)
+   ```
+3. The query must be fetched from the relevant parts of the file at `<output-file>…</…>` and written to disk, to be linked to.
+4. the answer is already contained in the `<result>`…</…>` and written to disk and linked to.
+5. Both files are in `/ai/agents/number.task-id/` or the `/°base/ai/agents/…` equivalent.
+❯ Ah, add `> - [Raw log (`2 MB`)]($output-file)`, at the end, too. Make sure the _`NNN` chars_ and _`N UNIT`_ are calculated from the files/query strings/etc.
+❯ An, first line shall be `❯ Task Notification:` and the `>` shall only happens on the lines after that.
+
+› Fix `d9f02a321021fee6f419d48b944f220a15009a1e` not working as expected:
+1. Query is empty.
+2. Format them all: [Text (`NNN` chars, `NN UNIT`)](…)
+3. Under the task add: > - Tool `$tool-use-id`
+4. Add last row: > - `6` tools, `67643` tokens, `1.16395 s`
+
+❯ Improve @scripts/°base/ai/settings/sync.py to list the changes it is doing directly/verbosely, and reduce the flags to just sync on default and have a `--dry-run` to not actually sync it.
+
+❯ update the `--apply` reference in `.claude/settings.json` too, and when mentioning it in the commit hook errors and skill templates.
+
+❯ Fix it not finding the query to commit in `/tmp/claude-1000/-home-user-git-luckydonald-AnonAddyThunderbirdExtension/1abb04fc-3d31-4211-91c7-489aa39ff26d/tasks/a6b3737b13b9c067c.output` - see the @scripts/°base/ai/hooks/save-prompt/hook.py
+It claimed to be an 0 bytes query.
+
+❯ When having the `AI tool settings are out of sync` error, also write how to solve this - i.e. running `./scripts/°base/…`. Note I have fixed to no longer need `--apply`.
+
+❯ The install/start script should check that the two origins base and empty are available.
+
+❯ Actually, add them instead of erroring.
+
+❯ github.com/EmptyAAS/empty.git
+
+❯ In this repo (we are base), yes base and origin will be the same. In the implementing ones, not, obviously. You can skip the check for this (already matching) origin, I guess.
+
+❯ Write into the lplp style that it should also consider commits like the following:
+- ai: updated prompt
+- ai: agent 001.ada93802ed45e55f6 results
+- ai: record memory MEMORY
+- ai: record memory feedback_commit_amend_over_reset
+
+❯ Actually, _Do **not** squash or amend `ai: Plan …`, `ai: Plan Update …`, or `ai: save plan <NNN>_<slug>` commits into implementation commits. Plan commits are meaningful revision history for plan files and must remain separate commits._ could be softened.
+Like it's fine to add code and plan, the issue is if the plan is overwritten by a later plan - i.e. loosing the history of plan changes.
+Same goes with merging the prompt file commits etc. If it meaningfully changes the query - or is a totally separate topic altoghether, it should stay separate.
+
+❯ Add the git username config to the README. In the copy block, add as last line that the name should be `Lucky Lucy` - the email can be different and does not need to be checked. Below add a second code block setting the git local vars for email + name, using this repo as values for now.
+
+❯ No, in the first block don't SET it, ASSERT it, calling it out if wrong in red text
+
+❯ I reverted that commit. I meant @scripts/°base/git/remote/fix_username.py
+
+❯ It's a TUI app. Ask to fix it.
+
+❯ Add a flag to yes them ahead of time. If they are correct it's a noop.
+
+› Codex likes to submit the implementations start after planning as full prompt, starting with the prefix:
+
+> A previous agent produced the plan below to accomplish the user's task. Implement the plan in a fresh context. Treat the plan as the source of user intent, re-read files as needed, and carry the work through implementation and verification.
+
+(blockquote me, not in prompt). Then it repeats the full file we just captured earlier with the `save plan …` commit. That shall be stripped.
+
+› I want it to also check the last plan file if it is a lengthy block of text (filesize, linebreak count) matching the characteristics of a plan file.
+
+› Only apply the check for codex. Claude is doing fine _here_.
+
+› The alternative file-comparison shall happen if the prefix is not detected verbatim - likely because a system prompt was updated, etc. In that case (+ a successful file-based detect) also warn the user that an update may be needed.
+
+› Implement the plan.
+
+› In fact, if you detect it, instead of ommitting it completely, put (with blockquote)
+> › Implement the [Plan](./plans/….md).
+
+› Attempt to do the same for non-resetting session where the text is just `Implement the plan.` (without quotes), and the plan is _not_ repeated.
+
+› The long one shall have `> › Implement the [Plan](./plans/….md). <kbd>cleared</kbd>`, the other one lack the cleared badge as is now.
+
+❯ /init but write it at `ai/°base/AGENTS.md`, and in the root `CLAUDE.md` instruct the AI to only read that file if you are base repo (dir name, git origin, whatever is fastest for you to figure out - i.e. is based on already available metadata - i.e. the system prompt, etc.). Tell immediatly that other projects using this _base_ are expected to overwrite the root `CLAUDE.md`. But as it's an automatic prompt, it shall be lightwight!
+
+❯ have the ai hooks commiting stuff skip the hooks. They know what they are doing (I hope, lol).
 

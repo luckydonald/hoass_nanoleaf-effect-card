@@ -108,6 +108,13 @@
 ## executables
 *.exe  filter=lfs diff=lfs merge=lfs -text
 *.pyc  filter=lfs diff=lfs merge=lfs -text
+## extensions (still zips)
+### Thunderbird (and Firefox?)
+*.xpi  filter=lfs diff=lfs merge=lfs -text
+### Chrom(ium)(-like)
+*.crx  filter=lfs diff=lfs merge=lfs -text
+### Opera
+*.nex  filter=lfs diff=lfs merge=lfs -text
 
 ## SOURCE CODE
 *.bat      text eol=crlf
