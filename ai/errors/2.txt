@@ -1,0 +1,22 @@
+Annotations
+7 errors and 3 warnings
+Frontend Test
+Dependencies lock file is not found in /home/runner/work/hoass_nanoleaf-effect-card/hoass_nanoleaf-effect-card. Supported file patterns: package-lock.json,npm-shrinkwrap.json,yarn.lock
+Hassfest Validation
+Process completed with exit code 1.
+Hassfest Validation
+[CONFIG_FLOW] Config flows need to be defined in the file config_flow.py
+Hassfest Validation
+[MANIFEST] Domain does not match dir name
+Hassfest Validation
+[JSON] Invalid JSON file frontend/tsconfig.json
+HACS Validation
+Repository luckydonald/hoass_nanoleaf-effect-card not loaded properly in HACS.
+HACS Validation
+<Plugin luckydonald/hoass_nanoleaf-effect-card> Repository structure for mane is not compliant
+Frontend Test
+Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Hassfest Validation
+Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+HACS Validation
+Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

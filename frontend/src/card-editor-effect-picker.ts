@@ -44,7 +44,7 @@ class CardEditorEffectPicker extends HTMLElement {
     this._hass = hass;
     // update picker hass and options
     const picker = this.shadowRoot?.querySelector('ha-generic-picker');
-    if (picker) (picker as Element & { hass: unknown }).hass = hass;
+    if (picker) (picker as Element & { hass: unknown; }).hass = hass;
     this._updateOptions();
   }
 
@@ -64,7 +64,7 @@ class CardEditorEffectPicker extends HTMLElement {
   set value(val: string) {
     this._value = val ?? '';
     const picker = this.shadowRoot?.querySelector('ha-generic-picker');
-    if (picker) (picker as Element & { value: string }).value = this._value;
+    if (picker) (picker as Element & { value: string; }).value = this._value;
   }
 
   get value(): string {
@@ -72,7 +72,7 @@ class CardEditorEffectPicker extends HTMLElement {
   }
 
   private _handlePickerValueChanged(ev: Event): void {
-    const customEv = ev as CustomEvent<{ value: string }>;
+    const customEv = ev as CustomEvent<{ value: string; }>;
     const newVal = customEv?.detail?.value;
     this._value = newVal;
     // re-dispatch as composed so host can listen outside shadow
@@ -93,10 +93,10 @@ class CardEditorEffectPicker extends HTMLElement {
 
     const picker = this.shadowRoot?.querySelector('ha-generic-picker');
     if (picker) {
-      (picker as Element & { options: PickerOption[] }).options = this._options;
+      (picker as Element & { options: PickerOption[]; }).options = this._options;
       // Keep picker value in sync
       if (this._value !== undefined && this._value !== null) {
-        (picker as Element & { value: string }).value = this._value;
+        (picker as Element & { value: string; }).value = this._value;
       }
     }
   }
@@ -119,9 +119,9 @@ class CardEditorEffectPicker extends HTMLElement {
     if (!picker) return;
 
     // Initialize properties
-    if (this._hass) (picker as Element & { hass: unknown }).hass = this._hass;
-    if (this._options) (picker as Element & { options: PickerOption[] }).options = this._options;
-    if (this._value) (picker as Element & { value: string }).value = this._value;
+    if (this._hass) (picker as Element & { hass: unknown; }).hass = this._hass;
+    if (this._options) (picker as Element & { options: PickerOption[]; }).options = this._options;
+    if (this._value) (picker as Element & { value: string; }).value = this._value;
 
     if (!this._pickerBound) {
       picker.addEventListener('value-changed', this._onPickerValueChanged);

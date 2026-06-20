@@ -23,12 +23,14 @@ import './card-editor-effect-picker';
  */
 
 import type {
-  ButtonStyle, CardConfig, ColorDisplayConfig,
+  ButtonStyle,
+  CardConfig,
+  ColorDisplayConfig,
   Effect,
   HomeAssistant,
 } from './types';
 
-type BoundElement = Element & { _nanoleaf_bound?: boolean; value?: string; hass?: unknown; entity?: string };
+type BoundElement = Element & { _nanoleaf_bound?: boolean; value?: string; hass?: unknown; entity?: string; };
 
 interface SavedInputState {
   id: string | null;
@@ -130,17 +132,17 @@ class NanoleafEffectCardEditor extends HTMLElement {
   }
 
   /**
-     * Sets the Home Assistant object.
-     * Updates the entity picker when hass changes.
-     *
-     * @param hass - Home Assistant object containing states and services
-     */
+   * Sets the Home Assistant object.
+   * Updates the entity picker when hass changes.
+   *
+   * @param hass - Home Assistant object containing states and services
+   */
   set hass(hass: HomeAssistant) {
     this._hass = hass;
     // Update entity picker if it exists
     const entityPicker = this.shadowRoot?.querySelector('#entity-picker');
     if (entityPicker) {
-      (entityPicker as Element & { hass: HomeAssistant }).hass = hass;
+      (entityPicker as Element & { hass: HomeAssistant; }).hass = hass;
     }
     // If we have an entity selected, refresh effect suggestions from hass
     if (this._hass && this._config?.entity) {
@@ -165,11 +167,11 @@ class NanoleafEffectCardEditor extends HTMLElement {
   }
 
   /**
-     * Sets the editor configuration.
-     * Called by Home Assistant when the editor is initialized.
-     *
-     * @param config - Card configuration object
-     */
+   * Sets the editor configuration.
+   * Called by Home Assistant when the editor is initialized.
+   *
+   * @param config - Card configuration object
+   */
   setConfig(config: CardConfig): void {
     // Merge incoming config with existing one to preserve transient UI state
     const incoming = config ?? {};
@@ -187,7 +189,7 @@ class NanoleafEffectCardEditor extends HTMLElement {
     const mergedEffects: Effect[] = [];
 
     // Build a map of previous effects by name for quick lookup
-    const prevByName: Record<string, { e: Effect; idx: number }> = {};
+    const prevByName: Record<string, { e: Effect; idx: number; }> = {};
     prevEffects.forEach((e, idx) => {
       if (e?.name) prevByName[e.name] = { e, idx };
     });
@@ -225,27 +227,27 @@ class NanoleafEffectCardEditor extends HTMLElement {
   }
 
   /**
-     * Fires a config-changed event.
-     * Notifies Home Assistant that the configuration has been modified.
-     *
-     * @param newConfig - Updated configuration object
-     * @fires config-changed
-     */
+   * Fires a config-changed event.
+   * Notifies Home Assistant that the configuration has been modified.
+   *
+   * @param newConfig - Updated configuration object
+   * @fires config-changed
+   */
   configChanged(newConfig: CardConfig): void {
     const event = new Event('config-changed', {
       bubbles: true,
       composed: true,
     });
-    (event as Event & { detail: unknown }).detail = { config: newConfig };
+    (event as Event & { detail: unknown; }).detail = { config: newConfig };
     this.dispatchEvent(event);
   }
 
   /**
-     * Populate the datalist with effect names from the entity's effect_list
-     * and validate existing effect name inputs (mark invalid ones).
-     * Safe to call even if hass or entity aren't available yet.
-     * @param entityId
-     */
+   * Populate the datalist with effect names from the entity's effect_list
+   * and validate existing effect name inputs (mark invalid ones).
+   * Safe to call even if hass or entity aren't available yet.
+   * @param entityId
+   */
   updateEffectListSuggestions(entityId: string): void {
     const list = this._hass?.states?.[entityId]?.attributes?.effect_list;
     this._effectList = Array.isArray(list) ? (list as string[]).slice() : [];
@@ -275,10 +277,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
         // ignore
       }
       entityPicker.addEventListener('value-changed', (e: Event) => {
-        const customEv = e as CustomEvent<{ value: string }>;
+        const customEv = e as CustomEvent<{ value: string; }>;
         const value = customEv.detail?.value
-                    ?? (e.target as HTMLInputElement).value
-                    ?? (entityPicker as Element & { value: string }).value;
+          ?? (e.target as HTMLInputElement).value
+          ?? (entityPicker as Element & { value: string; }).value;
         this._config = { ...this._config, entity: value };
         this.updateEffectListSuggestions(value);
         // Re-render effects area so per-effect pickers receive the new entity/hass
@@ -405,10 +407,10 @@ class NanoleafEffectCardEditor extends HTMLElement {
   }
 
   /**
-     * Renders the editor UI.
-     * Creates all form fields using native HA components and the effects list editor.
-     * Includes entity picker, display mode radios, button style options, and effects editor.
-     */
+   * Renders the editor UI.
+   * Creates all form fields using native HA components and the effects list editor.
+   * Includes entity picker, display mode radios, button style options, and effects editor.
+   */
   render(): void {
     if (!this._config) {
       this._config = {};
@@ -579,8 +581,8 @@ class NanoleafEffectCardEditor extends HTMLElement {
             .hass="${this._hass}"
             .value="${this._config.entity ?? ''}"
             .includedomains="${[
-              'light',
-            ]}"
+      'light',
+    ]}"
             allow-custom-entity
           ></ha-entity-picker>
           <div class="info">Select your Nanoleaf light entity</div>
@@ -683,9 +685,7 @@ style="margin-bottom: 8px;"
         <ha-sortable
 id="effects-sortable"
 handle-selector=".handle"
-.disabled="${
-  !this._config.effects || this._config.effects.length === 0
-}"
+.disabled="${!this._config.effects || this._config.effects.length === 0}"
 >
           ${this.renderEffectsList()}
         </ha-sortable>
@@ -728,7 +728,7 @@ slot="icon"
       if ((picker as BoundElement)._nanoleaf_bound) return;
       Object.assign(picker as BoundElement, { _nanoleaf_bound: true });
       picker.addEventListener('value-changed', (e: Event) => {
-        const customEv = e as CustomEvent<{ value: string }>;
+        const customEv = e as CustomEvent<{ value: string; }>;
         const idx = parseInt((picker as HTMLElement).dataset.index ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
@@ -741,7 +741,7 @@ slot="icon"
         if (input) {
           (input as HTMLInputElement).value = customEv.detail.value ?? '';
           const isValid = !customEv.detail.value
-                        || this._effectList?.includes(customEv.detail.value);
+            || this._effectList?.includes(customEv.detail.value);
           input.classList.toggle('invalid', !isValid);
         }
       });
@@ -767,12 +767,12 @@ slot="icon"
     const globalChooser = this.root.querySelector('#global-style-chooser');
     if (globalChooser) {
       try {
-        Object.assign(globalChooser as BoundElement & { value: ColorDisplayConfig }, { value: this._config.button_style?.color_display ?? {} });
+        Object.assign(globalChooser as BoundElement & { value: ColorDisplayConfig; }, { value: this._config.button_style?.color_display ?? {} });
       } catch {
         // ignore
       }
       globalChooser.addEventListener('value-changed', (e: Event) => {
-        const customEv = e as CustomEvent<{ value: ColorDisplayConfig }>;
+        const customEv = e as CustomEvent<{ value: ColorDisplayConfig; }>;
         this._config = {
           ...this._config,
           button_style: { ...(this._config.button_style ?? {}), color_display: customEv.detail.value },
@@ -790,7 +790,7 @@ slot="icon"
     // Set icon-picker values and color inputs for effects
     this.root.querySelectorAll('.effect-icon').forEach((picker, idx) => {
       const val = (this._config.effects?.[idx]?.icon)
-                ?? 'mdi:lightbulb';
+        ?? 'mdi:lightbulb';
       try {
         Object.assign(picker as BoundElement, { value: val });
       } catch {
@@ -803,15 +803,15 @@ slot="icon"
       const effectIndex = parseInt(el.dataset.effectIndex ?? '0', 10);
       const colorIndex = parseInt(el.dataset.colorIndex ?? '0', 10);
       const color = this._config.effects?.[effectIndex]?.colors?.[colorIndex]
-                ?? this._config.effects?.[effectIndex]?.color
-                ?? '#CCCCCC';
+        ?? this._config.effects?.[effectIndex]?.color
+        ?? '#CCCCCC';
       el.value = color;
     });
 
     // Initialize per-effect style chooser components
     this.root.querySelectorAll('nanoleaf-effect-card-card-editor-button-style-chooser').forEach((comp, idx) => {
       try {
-        Object.assign(comp as BoundElement & { value: ColorDisplayConfig }, {
+        Object.assign(comp as BoundElement & { value: ColorDisplayConfig; }, {
           value: (this._config.effects?.[idx]?.button_style?.color_display) ?? {},
         });
       } catch {
@@ -843,7 +843,7 @@ slot="icon"
     if (sortable && !(sortable as BoundElement)._nanoleaf_bound) {
       Object.assign(sortable as BoundElement, { _nanoleaf_bound: true });
       sortable.addEventListener('item-moved', (e: Event) => {
-        const customEv = e as CustomEvent<{ oldIndex: number; newIndex: number }>;
+        const customEv = e as CustomEvent<{ oldIndex: number; newIndex: number; }>;
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -881,7 +881,7 @@ slot="icon"
       if ((picker as BoundElement)._nanoleaf_bound) return;
       Object.assign(picker as BoundElement, { _nanoleaf_bound: true });
       picker.addEventListener('value-changed', (e: Event) => {
-        const customEv = e as CustomEvent<{ value: string }>;
+        const customEv = e as CustomEvent<{ value: string; }>;
         const index = parseInt((picker as HTMLElement).dataset.index ?? '0', 10);
         const effects = [
           ...(this._config.effects ?? []),
@@ -905,11 +905,13 @@ slot="icon"
         ];
         const colors = [
           ...(effects[effectIndex].colors
-                        ?? (effects[effectIndex].color ? [
-                          effects[effectIndex].color,
-                        ] : [
-                          '#CCCCCC',
-                        ])),
+            ?? (effects[effectIndex].color
+              ? [
+                effects[effectIndex].color,
+              ]
+              : [
+                '#CCCCCC',
+              ])),
         ];
         colors[colorIndex] = target.value;
         effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
@@ -930,11 +932,13 @@ slot="icon"
         ];
         const colors = [
           ...(effects[effectIndex].colors
-                        ?? (effects[effectIndex].color ? [
-                          effects[effectIndex].color,
-                        ] : [
-                          '#CCCCCC',
-                        ])),
+            ?? (effects[effectIndex].color
+              ? [
+                effects[effectIndex].color,
+              ]
+              : [
+                '#CCCCCC',
+              ])),
         ];
         colors.push('#CCCCCC');
         effects[effectIndex] = { ...effects[effectIndex], colors, color: undefined };
@@ -957,9 +961,11 @@ slot="icon"
         ];
         const colors = [
           ...(effects[effectIndex].colors
-                        ?? (effects[effectIndex].color ? [
-                          effects[effectIndex].color,
-                        ] : [])),
+            ?? (effects[effectIndex].color
+              ? [
+                effects[effectIndex].color,
+              ]
+              : [])),
         ];
         if (colorIndex >= 0 && colorIndex < colors.length) {
           colors.splice(colorIndex, 1);
@@ -996,7 +1002,7 @@ slot="icon"
       Object.assign(comp as BoundElement, { _nanoleaf_bound: true });
       const index = parseInt((item as HTMLElement).dataset.index ?? '0', 10);
       comp.addEventListener('value-changed', (e: Event) => {
-        const customEv = e as CustomEvent<{ value: ColorDisplayConfig }>;
+        const customEv = e as CustomEvent<{ value: ColorDisplayConfig; }>;
         const effects = [
           ...(this._config.effects ?? []),
         ];
@@ -1084,11 +1090,13 @@ title="Delete effect"
   }
 
   renderColorInputs(effect: Effect, effectIndex: number): string {
-    const colors = effect.colors ?? (effect.color ? [
-      effect.color,
-    ] : [
-      '#CCCCCC',
-    ]);
+    const colors = effect.colors ?? (effect.color
+      ? [
+        effect.color,
+      ]
+      : [
+        '#CCCCCC',
+      ]);
     const colorInputs = colors
       .map((color, colorIndex) => /* html */ `
        <div style="display:flex; align-items:center; gap:6px;">
@@ -1116,7 +1124,8 @@ title="Remove color"
 
     return (
       `${colorInputs
-        /* html */}
+        /* html */
+      }
       <button
 id="effect-${effectIndex}-add-color"
 class="icon-button add-color"

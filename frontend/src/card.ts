@@ -5,9 +5,12 @@
  */
 
 import type {
-  ButtonStyle, CardConfig, ColorDisplayConfig,
+  ButtonStyle,
+  CardConfig,
+  ColorDisplayConfig,
   Effect,
-  HomeAssistant, StyleKey,
+  HomeAssistant,
+  StyleKey,
 } from './types';
 
 class NanoleafEffectCard extends HTMLElement {
@@ -84,10 +87,10 @@ class NanoleafEffectCard extends HTMLElement {
         ${this.getStyles()}
       </style>
       ${
-        this._config.display === 'dropdown'
-          ? this.renderDropdown(currentEffect, isOn)
-          : this.renderButtons(currentEffect, isOn)
-      }
+      this._config.display === 'dropdown'
+        ? this.renderDropdown(currentEffect, isOn)
+        : this.renderButtons(currentEffect, isOn)
+    }
     `;
 
     this.attachEventListeners();
@@ -183,15 +186,17 @@ class NanoleafEffectCard extends HTMLElement {
           ],
         },
       ]),
-      ...(this._config.show_none ? [
-        {
-          name: 'None',
-          icon: 'mdi:cancel',
-          colors: [
-            '#888888',
-          ],
-        },
-      ] : []),
+      ...(this._config.show_none
+        ? [
+          {
+            name: 'None',
+            icon: 'mdi:cancel',
+            colors: [
+              '#888888',
+            ],
+          },
+        ]
+        : []),
       ...(this._config.effects ?? []),
     ];
 
@@ -202,16 +207,18 @@ class NanoleafEffectCard extends HTMLElement {
 class="effect-dropdown"
 data-effect="${isOn ? currentEffect : 'Off'}"
 >
-            ${effects
-              .map((effect) => {
-                const selected = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
-                return `
+            ${
+      effects
+        .map((effect) => {
+          const selected = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
+          return `
                 <option value="${effect.name}" ${selected ? 'selected' : ''}>
                   ${effect.name}
                 </option>
               `;
-              })
-              .join('')}
+        })
+        .join('')
+    }
           </select>
         </div>
       </div>
@@ -280,89 +287,90 @@ data-effect="${isOn ? currentEffect : 'Off'}"
     return /* html */ `
        <div class="effect-card">
          <div class="buttons-container ${this._config.button_style?.compact ? 'compact-grid' : ''}">
-           ${effects
-              .map((effect) => {
-                const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
-                // getEffectColors may return an empty array if the user removed all colors
-                const colors = this.getEffectColors(effect);
-                const buttonStyle: ButtonStyle = {
-                  ...(this._config.button_style ?? {}),
-                  ...(effect.button_style ?? {}),
-                };
-                const inactiveColor = buttonStyle.inactive_color ?? '#CCCCCC';
-                const showIcon = buttonStyle.icon !== false;
-                const showName = buttonStyle.name !== false;
+           ${
+      effects
+        .map((effect) => {
+          const isActive = (effect.name === 'Off' && !isOn) || (effect.name === currentEffect && isOn);
+          // getEffectColors may return an empty array if the user removed all colors
+          const colors = this.getEffectColors(effect);
+          const buttonStyle: ButtonStyle = {
+            ...(this._config.button_style ?? {}),
+            ...(effect.button_style ?? {}),
+          };
+          const inactiveColor = buttonStyle.inactive_color ?? '#CCCCCC';
+          const showIcon = buttonStyle.icon !== false;
+          const showName = buttonStyle.name !== false;
 
-                // Decide which styles apply depending on active/inactive flags
-                const colorDisplay: ColorDisplayConfig = buttonStyle.color_display ?? {};
+          // Decide which styles apply depending on active/inactive flags
+          const colorDisplay: ColorDisplayConfig = buttonStyle.color_display ?? {};
 
-                const applyStyle = (styleKey: StyleKey): boolean => {
-                  const cfg = colorDisplay[styleKey] ?? {};
-                  return (isActive && (cfg.active ?? false)) || (!isActive && (cfg.inactive ?? false));
-                };
+          const applyStyle = (styleKey: StyleKey): boolean => {
+            const cfg = colorDisplay[styleKey] ?? {};
+            return (isActive && (cfg.active ?? false)) || (!isActive && (cfg.inactive ?? false));
+          };
 
-                const applyHover = (styleKey: StyleKey): boolean => {
-                  const cfg = colorDisplay[styleKey] ?? {};
-                  return cfg.hover === true;
-                };
+          const applyHover = (styleKey: StyleKey): boolean => {
+            const cfg = colorDisplay[styleKey] ?? {};
+            return cfg.hover === true;
+          };
 
-                // If colors array is empty, use inactiveColor as fallback for rendering styles
-                const colorsForStyle = colors && colors.length > 0 ? colors : [
-                  inactiveColor,
-                ];
-                const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
-                const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
+          // If colors array is empty, use inactiveColor as fallback for rendering styles
+          const colorsForStyle = colors && colors.length > 0 ? colors : [
+            inactiveColor,
+          ];
+          const bgGradient = `linear-gradient(135deg, ${colorsForStyle.join(', ')})`;
+          const bgColor = isActive ? colorsForStyle[0] : inactiveColor;
 
-                // prepare inline styles
-                // Full background or flat background
-                const fullBg = applyStyle('full_background')
-                  ? `background: ${bgGradient};`
-                  : `background: ${bgColor};`;
+          // prepare inline styles
+          // Full background or flat background
+          const fullBg = applyStyle('full_background')
+            ? `background: ${bgGradient};`
+            : `background: ${bgColor};`;
 
-                // Determine text/icon gradient class and inline style when 'text' style applies
-                const textEnabled = applyStyle('text');
-                const textClass = textEnabled ? 'text-gradient' : '';
-                const textStyleInline = textEnabled
-                  ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`
-                  : '';
-                const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
+          // Determine text/icon gradient class and inline style when 'text' style applies
+          const textEnabled = applyStyle('text');
+          const textClass = textEnabled ? 'text-gradient' : '';
+          const textStyleInline = textEnabled
+            ? `background: ${bgGradient}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;`
+            : '';
+          const iconAnimatedClass = applyStyle('animated_icon') ? 'icon-animated' : '';
 
-                // compact class if globally compact or per-effect override
-                const compactClass = (effect.button_style?.compact) || this._config.button_style?.compact
-                  ? 'compact'
-                  : '';
+          // compact class if globally compact or per-effect override
+          const compactClass = (effect.button_style?.compact) || this._config.button_style?.compact
+            ? 'compact'
+            : '';
 
-                // hover data attrs
-                const hoverAttrs: string[] = [];
-                if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
-                if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
-                if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
-                if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
+          // hover data attrs
+          const hoverAttrs: string[] = [];
+          if (applyHover('border')) hoverAttrs.push('data-hover-border="true"');
+          if (applyHover('full_background')) hoverAttrs.push('data-hover-full_background="true"');
+          if (applyHover('text')) hoverAttrs.push('data-hover-text="true"');
+          if (applyHover('small_bar')) hoverAttrs.push('data-hover-small_bar="true"');
 
-                // Small bar rendering: if anySmallBarConfigured is true, reserve the bar space for all buttons
-                const smallBarHtml = (() => {
-                  const barStyle = applyStyle('small_bar')
-                    ? `background: ${bgGradient};`
-                    : 'background: transparent;';
-                  // When not active, make it less visible but reserve space; if globally no small bar configured, omit entirely
-                  if (!anySmallBarConfigured) return '';
-                  let smallBarOpacity = 0;
-                  if (applyStyle('small_bar')) {
-                    smallBarOpacity = applyHover('small_bar') ? 0.6 : 1;
-                  }
-                  return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${smallBarOpacity};"></div>`;
-                })();
+          // Small bar rendering: if anySmallBarConfigured is true, reserve the bar space for all buttons
+          const smallBarHtml = (() => {
+            const barStyle = applyStyle('small_bar')
+              ? `background: ${bgGradient};`
+              : 'background: transparent;';
+            // When not active, make it less visible but reserve space; if globally no small bar configured, omit entirely
+            if (!anySmallBarConfigured) return '';
+            let smallBarOpacity = 0;
+            if (applyStyle('small_bar')) {
+              smallBarOpacity = applyHover('small_bar') ? 0.6 : 1;
+            }
+            return `<div class="color-bar" style="margin-top:8px; width:70%; height:8px; border-radius:8px; ${barStyle}; opacity: ${smallBarOpacity};"></div>`;
+          })();
 
-                // Border: reserve spacing only if anyBorderConfigured
-                let borderStyleFinal = '';
-                if (anyBorderConfigured) {
-                  borderStyleFinal = 'border: 2px solid transparent;';
-                  if (applyStyle('border')) {
-                    borderStyleFinal += ` border-image: linear-gradient(135deg, ${colorsForStyle.join(', ')}) 1;`;
-                  }
-                }
+          // Border: reserve spacing only if anyBorderConfigured
+          let borderStyleFinal = '';
+          if (anyBorderConfigured) {
+            borderStyleFinal = 'border: 2px solid transparent;';
+            if (applyStyle('border')) {
+              borderStyleFinal += ` border-image: linear-gradient(135deg, ${colorsForStyle.join(', ')}) 1;`;
+            }
+          }
 
-                return `
+          return `
                  <button
                   class="effect-button ${isActive ? 'active' : 'inactive'} ${compactClass}"
                    data-effect="${effect.name}"
@@ -371,31 +379,28 @@ data-effect="${isOn ? currentEffect : 'Off'}"
                  >
                    <div class="button-inner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
                    ${
-                      showIcon
-                        ? `
-                    <div class="button-icon ${iconAnimatedClass} ${textClass}" ${
-                      textEnabled ? `style="${textStyleInline}"` : ''
-                    }>
+            showIcon
+              ? `
+                    <div class="button-icon ${iconAnimatedClass} ${textClass}" ${textEnabled ? `style="${textStyleInline}"` : ''}>
                       <ha-icon icon="${effect.icon ?? 'mdi:lightbulb'}"></ha-icon>
                     </div>
                    `
-                        : ''
-                    }
+              : ''
+          }
                    ${
-                      showName
-                        ? `
-                    <div class="button-name ${textClass}" ${textEnabled ? `style="${textStyleInline}"` : ''}>${
-                      effect.name
-                    }</div>
+            showName
+              ? `
+                    <div class="button-name ${textClass}" ${textEnabled ? `style="${textStyleInline}"` : ''}>${effect.name}</div>
                    `
-                        : ''
-                    }
+              : ''
+          }
                    ${smallBarHtml}
                    </div>
                  </button>
                `;
-              })
-              .join('')}
+        })
+        .join('')
+    }
            </div>
          </div>
        `;
@@ -503,7 +508,7 @@ data-effect="${isOn ? currentEffect : 'Off'}"
     };
     // Defensive: if the editor element doesn't expose setConfig (broken editor), provide a no-op fallback
     if (typeof el.setConfig !== 'function') {
-      el.setConfig = function (cfg: CardConfig) {
+      el.setConfig = function(cfg: CardConfig) {
         // Minimal fallback: store the config so callers that inspect the element don't crash
         this._config = cfg;
         // Log a warning so integrators can detect missing editor behavior in the frontend
@@ -540,14 +545,18 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
 
   static getSupportedEntityIds(ha: HomeAssistant): string[] {
     return Object.values(ha.states)
-      .filter((entity) => entity.entity_id.startsWith('light.')
-                    && entity.attributes
-                    && (entity.attributes.supported_color_modes as string[] | undefined)
-                    && (entity.attributes.supported_color_modes as string[]).find((mode) => [
-                      'hs',
-                      'rgb',
-                      'xy',
-                    ].includes(mode)))
+      .filter((entity) =>
+        entity.entity_id.startsWith('light.')
+        && entity.attributes
+        && (entity.attributes.supported_color_modes as string[] | undefined)
+        && (entity.attributes.supported_color_modes as string[]).find((mode) =>
+          [
+            'hs',
+            'rgb',
+            'xy',
+          ].includes(mode)
+        )
+      )
       .filter((entity) => {
         const attrs = entity.attributes;
 
@@ -560,7 +569,7 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
         if (mode === 'color_temp') {
           if (
             !Array.isArray(attrs.supported_color_modes)
-                        || !(attrs.supported_color_modes as string[]).includes('color_temp')
+            || !(attrs.supported_color_modes as string[]).includes('color_temp')
           ) {
             return false;
           }
@@ -568,15 +577,15 @@ style="padding:12px;border:1px solid #f0ad4e;background:#fff9e6;color:#333;borde
         } else if (mode === 'hs') {
           if (
             !Array.isArray(attrs.supported_color_modes)
-                        || !(attrs.supported_color_modes as string[]).includes('hs')
+            || !(attrs.supported_color_modes as string[]).includes('hs')
           ) {
             return false;
           }
           if (
             !Array.isArray(attrs.hs_color)
-                        || (attrs.hs_color as unknown[]).length !== 2
-                        || typeof (attrs.hs_color as unknown[])[0] !== 'number'
-                        || typeof (attrs.hs_color as unknown[])[1] !== 'number'
+            || (attrs.hs_color as unknown[]).length !== 2
+            || typeof (attrs.hs_color as unknown[])[0] !== 'number'
+            || typeof (attrs.hs_color as unknown[])[1] !== 'number'
           ) {
             return false;
           }
@@ -665,11 +674,11 @@ console.info(
   '\n %c (Nanoleaf) Effect Chooser %c v0.0.0 %c \n',
   // left label – deep violet background, white text
   'background-color:#4b0082;color:#fff;padding:3px 2px 3px 3px;border-radius:3px 0 0 3px;'
-        + 'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
+    + 'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
   // main label – pink‑violet gradient, white text
   'background-color:#c71585;background-image:linear-gradient(90deg,#ff69b4,#8a2be2);color:#fff;'
-        + 'padding:3px 3px 3px 2px;border-radius:0 3px 3px 0;'
-        + 'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
+    + 'padding:3px 3px 3px 2px;border-radius:0 3px 3px 0;'
+    + 'font-family:DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow:0 1px 0 rgba(0,0,0,0.3)',
   // trailing space – transparent (no background)
   'background-color:transparent',
 );

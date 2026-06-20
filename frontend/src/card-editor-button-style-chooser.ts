@@ -2,7 +2,7 @@
 
 import type { ButtonStyleColorState, ColorDisplayConfig, StyleKey } from './types';
 
-type BoundElement = Element & { _nanoleaf_bound?: boolean; dataset?: DOMStringMap; _handled?: string };
+type BoundElement = Element & { _nanoleaf_bound?: boolean; dataset?: DOMStringMap; _handled?: string; };
 
 class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
   private _value: ColorDisplayConfig = {};
@@ -84,7 +84,7 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
 
   render(): void {
     const v = this._value;
-    const styles: { key: StyleKey; label: string }[] = [
+    const styles: { key: StyleKey; label: string; }[] = [
       { key: 'full_background', label: 'Full Background' },
       { key: 'small_bar', label: 'Small Bar' },
       { key: 'text', label: 'Text' },
@@ -104,27 +104,23 @@ class NanoleafEffectCardCardEditorButtonStyleChooser extends HTMLElement {
         .toggle-btn.active { background:var(--primary-color); color:white; border-color:var(--primary-color); }
       </style>
       <div class="group ${this.hasAttribute('compact') ? 'compact' : ''}">
-        ${styles
-          .map((s) => {
-            const cfg = v[s.key] ?? { active: false, inactive: false, hover: false };
-            return `
+        ${
+      styles
+        .map((s) => {
+          const cfg = v[s.key] ?? { active: false, inactive: false, hover: false };
+          return `
             <div class="item ${this.hasAttribute('compact') ? 'compact' : ''}" data-key="${s.key}">
               <div class="label">${s.label}</div>
               <div class="toggles">
-                <button type="button" class="toggle-btn btn-active ${
-                  cfg.active ? 'active' : ''
-                }" data-mode="active">Active</button>
-                <button type="button" class="toggle-btn btn-inactive ${
-                  cfg.inactive ? 'active' : ''
-                }" data-mode="inactive">Inactive</button>
-                <button type="button" class="toggle-btn btn-hover ${
-                  cfg.hover ? 'active' : ''
-                }" data-mode="hover">Hover</button>
+                <button type="button" class="toggle-btn btn-active ${cfg.active ? 'active' : ''}" data-mode="active">Active</button>
+                <button type="button" class="toggle-btn btn-inactive ${cfg.inactive ? 'active' : ''}" data-mode="inactive">Inactive</button>
+                <button type="button" class="toggle-btn btn-hover ${cfg.hover ? 'active' : ''}" data-mode="hover">Hover</button>
                </div>
              </div>
            `;
-          })
-          .join('')}
+        })
+        .join('')
+    }
        </div>
      `;
 

@@ -143,19 +143,19 @@ else
     echo -e "${YELLOW}No changes to ai/query.md${NC}"
 fi
 
-# Commit ai/errors.md if it has changes
+# Commit ai/errors/*.{md,txt,log} if it has changes
 if git diff --name-only | grep -q "^ai/errors.md$"; then
     echo -e "${GREEN}Committing ai/errors.md...${NC}"
     echo "Showing diff for ai/errors.md:"
-    git --no-pager diff -- ai/errors.md || true
-    git add ai/errors.md
+    git --no-pager diff -- ai/1.md || true
+    git add ai/1.md
     git commit -m "${COMMIT_PREFIX}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 elif [ -f "ai/errors.md" ] && git ls-files --others --exclude-standard | grep -q "^ai/errors.md$"; then
     echo -e "${GREEN}Committing ai/errors.md (new file)...${NC}"
     echo "Contents of new ai/errors.md:"
-    sed -n '1,200p' ai/errors.md || true
-    git add ai/errors.md
+    sed -n '1,200p' ai/1.md || true
+    git add ai/1.md
     git commit -m "${COMMIT_PREFIX}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 else
@@ -181,14 +181,14 @@ fi
 if git diff --name-only | grep -q "^ai/nanoleaf_effect_card/errors.md$"; then
     echo -e "${GREEN}Committing ai/nanoleaf_effect_card/errors.md...${NC}"
     echo "Showing diff for ai/nanoleaf_effect_card/errors.md:"
-    git --no-pager diff -- ai/nanoleaf_effect_card/errors.md || true
-    git add ai/nanoleaf_effect_card/errors.md
+    git --no-pager diff -- ai/nanoleaf_effect_card/1.md || true
+    git add ai/nanoleaf_effect_card/1.md
     git commit -m "${COMMIT_PREFIX_TEMPLATE}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 elif [ -f "ai/nanoleaf_effect_card/errors.md" ] && git ls-files --others --exclude-standard | grep -q "^ai/nanoleaf_effect_card/errors.md$"; then
     echo -e "${GREEN}Committing ai/nanoleaf_effect_card/errors.md (new file)...${NC}"
-    sed -n '1,200p' ai/nanoleaf_effect_card/errors.md || true
-    git add ai/nanoleaf_effect_card/errors.md
+    sed -n '1,200p' ai/nanoleaf_effect_card/1.md || true
+    git add ai/nanoleaf_effect_card/1.md
     git commit -m "${COMMIT_PREFIX_TEMPLATE}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 fi
