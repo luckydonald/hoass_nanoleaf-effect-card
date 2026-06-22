@@ -268,5 +268,5 @@ as we are compiling it now anyway.
 
 › Fix @ai/errors/4.txt
 
-› Fix @ai/errors/5.txt
+› Fix @ai/errors/5.md
 
