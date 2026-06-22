@@ -252,3 +252,5 @@ as we are compiling it now anyway.
 
 #### Previous user prompts (added via commit hook):
 
+› The build artifact should not be tracked in git.
+

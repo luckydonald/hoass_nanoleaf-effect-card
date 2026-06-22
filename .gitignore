@@ -954,7 +954,8 @@ home-assistant_v2.db
 ##### END OF hoass_template's `.gitignore` #####
 ################################################
 
-
+# Release artifacts
+nanoleaf-effect-card.js
 
 
 
