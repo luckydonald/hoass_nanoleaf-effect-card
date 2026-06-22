@@ -274,3 +274,5 @@ as we are compiling it now anyway.
 
 › Fix @ai/errors/7.md
 
+› Also fix `.github/workflows/release.yml` from @ai/errors/7.md
+
