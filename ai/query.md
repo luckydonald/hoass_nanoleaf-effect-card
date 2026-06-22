@@ -254,3 +254,7 @@ as we are compiling it now anyway.
 
 › The build artifact should not be tracked in git.
 
+❯ /commit-with-lplp-style, but with the local style documented in the README.
+
+› Fix the release process of this HACS plugin to work with current HACS system. See also @ai/errors/2.txt
+

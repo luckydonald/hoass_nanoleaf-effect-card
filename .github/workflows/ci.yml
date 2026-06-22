@@ -21,36 +21,25 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: '22'
-                  cache: 'npm'
+                  cache: 'yarn'
+                  cache-dependency-path: frontend/yarn.lock
 
             - name: Enable Corepack and activate package manager (from package.json)
               run: |
                   chmod +x ./scripts/ensure_yarn.sh || true
                   ./scripts/ensure_yarn.sh
 
-            # - name: Install dependencies
-            #   working-directory: frontend
-            #   run: |
-            #       # If a lockfile exists, use immutable install (Yarn v4 expects this)
-            #       if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
-            #         echo "Lockfile found, running immutable install"
-            #         yarn install --immutable
-            #       else
-            #         echo "No lockfile found, running regular install (will create lockfile)"
-            #         yarn install
-            #       fi
-
-            - name: Install dependencies (legacy)
-              run: npm ci
-
-            - name: Check code formatting
-              run: npm run check-prettier
+            - name: Install dependencies
+              working-directory: frontend
+              run: yarn install --immutable
 
             - name: Run tests
-              run: npm test
+              working-directory: frontend
+              run: yarn test
 
             - name: Generate coverage report
-              run: npm run coverage
+              working-directory: frontend
+              run: yarn test:coverage
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3
@@ -68,7 +57,7 @@ jobs:
             - name: HACS Validation
               uses: hacs/action@main
               with:
-                  category: plugin
+                  category: integration
                   ignore: brands
 
     hassfest:

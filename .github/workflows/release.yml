@@ -67,13 +67,16 @@ jobs:
 
             - name: Update manifest version
               run: |
-                  sed -i 's/"version": ".*"/"version": "${{ steps.version.outputs.version }}"/' manifest.json
+                  sed -i 's/"version": ".*"/"version": "${{ steps.version.outputs.version }}"/' custom_components/nanoleaf_effect_card/manifest.json
 
             - name: Create release zip
               run: |
-                  # hacs.json has content_in_root: true, so HACS expects manifest.json at the zip root
+                  # Zip contains integration files at root; HACS places them in custom_components/<domain>/
                   mkdir -p zip_contents/www
-                  cp manifest.json zip_contents/
+                  cp custom_components/nanoleaf_effect_card/manifest.json zip_contents/
+                  cp custom_components/nanoleaf_effect_card/__init__.py zip_contents/
+                  cp custom_components/nanoleaf_effect_card/const.py zip_contents/
+                  cp custom_components/nanoleaf_effect_card/config_flow.py zip_contents/
                   cp custom_components/nanoleaf_effect_card/www/nanoleaf-effect-card-card.js zip_contents/www/
                   cd zip_contents
                   zip -r ../nanoleaf-effect-card.zip .
