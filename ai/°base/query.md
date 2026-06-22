@@ -875,3 +875,28 @@ Same goes with merging the prompt file commits etc. If it meaningfully changes t
 
 ❯ have the ai hooks commiting stuff skip the hooks. They know what they are doing (I hope, lol).
 
+❯ fix @ai/°base/errors/6.txt
+
+❯ commit this
+
+› For the fix of @ai/°base/errors/6.txt you said to set the full path to make it work. Create a script for that into the `init` script dir of `°base`.
+
+› Fix ai/°base/errors/7.txt
+
+❯ From `../AllMyStorage`, "cherry pick" commits 72aebb66ba6fe50a300ea0b4a4790194ee33d599 427426a27c6f71fa201142798801a7624f61f07f 2891f5f924551e8d52629ea177874b5c8435cca0, please.
+> › we modified the ai query hook to ignore long codex plans being repeated.
+> We need something similar for claude's online worker having a big standard "system" prompt added to it's working.
+> See luckydonald/AllMyStorage@3a1b1b8 or luckydonald/AllMyStorage@95c46b1.
+>
+> › i already cleaned that up into a previous commit.
+>
+> > › The result shall be a quoted section again:
+> > ❯ [query](./plans/NNN_….md) for issue [#$issue_nzmber](https://...fill-me.../issues/$issue_number):
+> > type: `$event-type`
+> > trigger: @$trigger_username ($trigger_display_name) via _$trigger_phrase_.
+> > comment: $trigger_comment
+> > $trigger_comment
+>
+> etc.
+>
+> Write the resulting "almost the same" part to `ai/plans/000_online_query.md` (including `°base` if needed.), and include in the commit. Having diffs there is fine.

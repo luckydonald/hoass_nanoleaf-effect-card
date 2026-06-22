@@ -30,6 +30,11 @@ CODEX_FORWARDED_PLAN_PREFIX = (
 PLAN_LIKE_MIN_BYTES = 1024
 PLAN_LIKE_MIN_NEWLINES = 8
 CODEX_SHORT_PLAN_PROMPT = "Implement the plan."
+CLAUDE_GITHUB_WORKER_PREFIX = (
+    "You are Claude, an AI assistant designed to help with GitHub issues and pull requests. "
+    "Think carefully as you analyze the context and respond appropriately. "
+    "Here's the context for your current task:"
+)
 
 # Single-command prompts we never want to log: internal tooling invocations
 # and the most common "please commit now" reminders.
@@ -49,6 +54,7 @@ SKIP_PROMPTS = {
 class PromptLogEntry(NamedTuple):
     text: str
     preformatted: bool = False
+    extra_paths: tuple[Path, ...] = ()
 
 
 def _latest_numbered_plan(plans_dir: Path) -> Path | None:
@@ -115,6 +121,128 @@ def _strip_codex_forwarded_plan_prompt(prompt: str, plans_dir: Path) -> PromptLo
     if exact_prefix and re.match(r"(?s)^#\s+\S.*", search_text):
         return PromptLogEntry("")
     return PromptLogEntry(prompt)
+
+
+def _xmlish_tag_text(prompt: str, tag: str) -> str:
+    m = re.search(rf"<{re.escape(tag)}>(.*?)</{re.escape(tag)}>", prompt, re.DOTALL)
+    return m.group(1).strip() if m else ""
+
+
+def _context_field_text(prompt: str, field: str) -> str:
+    m = re.search(rf"(?m)^{re.escape(field)}:\s*(.*?)\s*$", prompt)
+    return m.group(1).strip() if m else ""
+
+
+def _remove_trigger_phrase(text: str, trigger_phrase: str) -> str:
+    if not trigger_phrase:
+        return text.strip()
+    escaped = re.escape(trigger_phrase.strip())
+    text = re.sub(rf"(?im)^\s*{escaped}\s*$", "", text)
+    text = re.sub(rf"(?i)^\s*{escaped}\s+", "", text).lstrip()
+    text = re.sub(rf"(?i)\s*{escaped}\s*$", "", text).rstrip()
+    return text.strip()
+
+
+def _quote_lines(text: str) -> str:
+    return "\n".join(f"> {line}" if line else ">" for line in text.splitlines())
+
+
+def _online_query_issue_url(repository: str, issue_number: str) -> str:
+    if not repository or not issue_number:
+        return ""
+    return f"https://github.com/{repository}/issues/{issue_number}"
+
+
+def _online_query_artifact_text(
+    *,
+    issue_title: str,
+    issue_number: str,
+    issue_url: str,
+    event_type: str,
+    trigger_username: str,
+    trigger_display_name: str,
+    trigger_phrase: str,
+    trigger_comment: str,
+    request: str,
+) -> str:
+    lines = [
+        "# Online Query",
+        "",
+        f"Issue: #{issue_number} {issue_title}".rstrip(),
+    ]
+    if issue_url:
+        lines.append(f"URL: {issue_url}")
+    lines.extend(
+        [
+            f"Event type: {event_type or 'unknown'}",
+            f"Trigger: @{trigger_username or 'unknown'}"
+            f" ({trigger_display_name or 'unknown'}) via {trigger_phrase or 'unknown'}",
+            "",
+            "## Trigger Comment",
+            "",
+            trigger_comment or "(none)",
+            "",
+            "## Query",
+            "",
+            request,
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _strip_claude_github_worker_prompt(prompt: str, log_path: Path) -> PromptLogEntry:
+    """Collapse Claude GitHub action's stock worker prompt to the user request."""
+    stripped = prompt.strip()
+    if not stripped.startswith(CLAUDE_GITHUB_WORKER_PREFIX):
+        return PromptLogEntry(prompt)
+
+    trigger_phrase = _xmlish_tag_text(stripped, "trigger_phrase") or "@claude"
+    trigger_comment = _xmlish_tag_text(stripped, "trigger_comment")
+    issue_body = _xmlish_tag_text(stripped, "pr_or_issue_body")
+    issue_title = _context_field_text(stripped, "Issue Title")
+    issue_number = _xmlish_tag_text(stripped, "issue_number")
+    event_type = _xmlish_tag_text(stripped, "event_type")
+    repository = _xmlish_tag_text(stripped, "repository")
+    trigger_username = _xmlish_tag_text(stripped, "trigger_username")
+    trigger_display_name = _xmlish_tag_text(stripped, "trigger_display_name")
+
+    request = _remove_trigger_phrase(trigger_comment, trigger_phrase)
+    if not request:
+        request = _remove_trigger_phrase(issue_body, trigger_phrase)
+    if not request:
+        return PromptLogEntry("")
+
+    artifact_path = log_path.parent / "plans" / "000_online_query.md"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    issue_url = _online_query_issue_url(repository, issue_number)
+    artifact_path.write_text(
+        _online_query_artifact_text(
+            issue_title=issue_title,
+            issue_number=issue_number,
+            issue_url=issue_url,
+            event_type=event_type,
+            trigger_username=trigger_username,
+            trigger_display_name=trigger_display_name,
+            trigger_phrase=trigger_phrase,
+            trigger_comment=trigger_comment,
+            request=request,
+        ),
+        encoding="utf-8",
+    )
+
+    issue_link = f"#{issue_number}" if issue_number else "unknown issue"
+    if issue_url:
+        issue_link = f"[#{issue_number}]({issue_url})"
+    summary = (
+        f"❯ [query](./plans/{artifact_path.name}) for issue {issue_link}:\n"
+        f"type: `{event_type or 'unknown'}`\n"
+        f"trigger: @{trigger_username or 'unknown'} ({trigger_display_name or 'unknown'}) "
+        f"via _{trigger_phrase}_.\n"
+        f"comment: {trigger_comment or '(none)'}\n"
+        f"{request}"
+    )
+    return PromptLogEntry(_quote_lines(summary), preformatted=True, extra_paths=(artifact_path,))
 
 
 def _parse_task_notification(prompt: str) -> dict | None:
@@ -319,8 +447,15 @@ def main() -> int:
 
     log_path = resolve_log_path("ai/query.md", "ai/°base/query.md")
     preformatted_prompt = False
+    entry = PromptLogEntry(prompt)
     if ai_tool == "codex":
         entry = _strip_codex_forwarded_plan_prompt(prompt, log_path.parent / "plans")
+        prompt = entry.text
+        preformatted_prompt = entry.preformatted
+        if not prompt.strip():
+            return 0
+    elif ai_tool == "claude":
+        entry = _strip_claude_github_worker_prompt(prompt, log_path)
         prompt = entry.text
         preformatted_prompt = entry.preformatted
         if not prompt.strip():
@@ -339,6 +474,7 @@ def main() -> int:
         content,
         commit_template_relpath="ai/commit-templates/prompt.md",
         default_commit_msg="ai: updated prompt",
+        extra_paths=entry.extra_paths,
     )
     return 0
 
