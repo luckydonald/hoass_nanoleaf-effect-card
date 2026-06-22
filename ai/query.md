@@ -130,6 +130,8 @@ entities:
                 - '#2F4F4F'
 ```
 
+#### Previous user prompts:
+
 ———————
 
 Prefer `yarn` commands for local development and testing over `npm`.
@@ -248,5 +250,5 @@ as we are compiling it now anyway.
 ———
 
 
-#### Previous user prompts:
+#### Previous user prompts (added via commit hook):
 
