@@ -937,7 +937,7 @@ coverage/
 
 # Build outputs
 frontend/dist/
-custom_components/calendar_alarm_clock/www/
+custom_components/*/www/
 
 # TypeScript build info
 frontend/vite.config.js
