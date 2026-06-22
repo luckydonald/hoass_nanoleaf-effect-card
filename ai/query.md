@@ -260,3 +260,13 @@ as we are compiling it now anyway.
 
 ❯ Before rebasing, it should also include the emoji styles from `make commit` (additionally see @CLAUDE_PROJECT_TEMPLATE.md ). See also the commit history (ignoring `base` or `template` originating commits).
 
+› Fix @3.txt
+
+› Fix commits after version bump to adhere to LPLP style.
+
+› Including @ai/skills/commit-with-lplp-style/README.md
+
+› Fix @ai/errors/4.txt
+
+› Fix @ai/errors/5.txt
+
