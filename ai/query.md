@@ -258,3 +258,5 @@ as we are compiling it now anyway.
 
 › Fix the release process of this HACS plugin to work with current HACS system. See also @ai/errors/2.txt
 
+❯ Before rebasing, it should also include the emoji styles from `make commit` (additionally see @CLAUDE_PROJECT_TEMPLATE.md ). See also the commit history (ignoring `base` or `template` originating commits).
+
