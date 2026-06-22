@@ -270,3 +270,5 @@ as we are compiling it now anyway.
 
 › Fix @ai/errors/5.md
 
+› Fix @ai/errors/6.txt
+
