@@ -272,3 +272,5 @@ as we are compiling it now anyway.
 
 › Fix @ai/errors/6.txt
 
+› Fix @ai/errors/7.md
+
