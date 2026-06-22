@@ -1,0 +1,13 @@
+Annotations
+4 errors
+Frontend Test
+error This project's package.json defines "packageManager": "yarn@4.12.0". However the current global version of Yarn is 1.22.22.
+
+Presence of the "packageManager" field indicates that the project is meant to be used with Corepack, a tool included by default with all official Node.js distributions starting from 16.9 and 14.19.
+Corepack must currently be enabled by running corepack enable in your terminal. For more information, check out https://yarnpkg.com/corepack.
+HACS Validation
+<Integration luckydonald/hoass_nanoleaf-effect-card> 2/7 checks failed
+HACS Validation
+<Validation description> failed: The repository has no description (More info: https://hacs.xyz/docs/publish/include#check-repository )
+HACS Validation
+<Validation topics> failed: The repository has no valid topics (More info: https://hacs.xyz/docs/publish/include#check-repository )
