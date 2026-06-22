@@ -8,12 +8,12 @@ jobs:
         name: Check Yarn 4 availability
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
-                  node-version: '18'
+                  node-version: '24'
 
             - name: Enable Corepack and activate package manager (from package.json)
               run: |
