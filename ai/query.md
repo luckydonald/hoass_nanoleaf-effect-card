@@ -276,3 +276,6 @@ as we are compiling it now anyway.
 
 › Also fix `.github/workflows/release.yml` from @ai/errors/7.md
 
+› Fix @ ai/errors/8.md and also have the `release.yml` one wait for the `update-compat.yml`.
+The `update-compat.yml` needs to be able to commit properly from a worker.
+

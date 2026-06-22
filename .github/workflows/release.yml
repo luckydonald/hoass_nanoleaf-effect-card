@@ -9,8 +9,17 @@ permissions:
     contents: write
 
 jobs:
+    update-compat:
+        name: Update README compatibility
+        uses: ./.github/workflows/update-compat.yml
+        permissions:
+            contents: write
+        with:
+            target_ref: mane
+
     build:
         name: Build Frontend
+        needs: update-compat
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
@@ -83,7 +92,7 @@ jobs:
                   zip -r ../nanoleaf-effect-card.zip .
 
             - name: Create GitHub Release
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               with:
                   files: nanoleaf-effect-card.zip
                   generate_release_notes: true
@@ -94,6 +103,7 @@ jobs:
 
     hacs-validate:
         name: HACS Validation
+        needs: update-compat
         runs-on: ubuntu-latest
         steps:
             - name: Checkout

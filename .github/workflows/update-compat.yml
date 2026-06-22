@@ -4,18 +4,36 @@ on:
     push:
         paths:
             - 'hacs.json'
-    workflow_dispatch: {}
+    workflow_dispatch:
+        inputs:
+            target_ref:
+                description: Branch to update.
+                required: false
+                default: mane
+    workflow_call:
+        inputs:
+            target_ref:
+                description: Branch to update.
+                required: false
+                default: mane
+                type: string
     schedule:
         - cron: '0 6 * * *' # daily at 06:00 UTC
+
+permissions:
+    contents: write
 
 jobs:
     update-compat:
         runs-on: ubuntu-latest
+        env:
+            TARGET_REF: ${{ inputs.target_ref || github.ref_name }}
         steps:
             - name: Checkout
               uses: actions/checkout@v7
               with:
                   fetch-depth: 0
+                  ref: ${{ env.TARGET_REF }}
             - name: Set up Python
               uses: actions/setup-python@v6
               with:
@@ -32,7 +50,7 @@ jobs:
                   if ! git diff --quiet; then
                     git add README.md
                     git commit -m "chore: update compatibility table from hacs.json"
-                    git push origin HEAD:"${GITHUB_REF_NAME}"
+                    git push origin HEAD:"${TARGET_REF}"
                   else
                     echo "No changes to commit"
                   fi
