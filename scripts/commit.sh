@@ -143,23 +143,18 @@ else
     echo -e "${YELLOW}No changes to ai/query.md${NC}"
 fi
 
-# Commit ai/errors/*.{md,txt,log} if it has changes
-if git diff --name-only | grep -q "^ai/errors.md$"; then
-    echo -e "${GREEN}Committing ai/errors.md...${NC}"
-    echo "Showing diff for ai/errors.md:"
-    git --no-pager diff -- ai/1.md || true
-    git add ai/1.md
-    git commit -m "${COMMIT_PREFIX}${COMMIT_MSG_ERRORS}"
-    echo "  Done"
-elif [ -f "ai/errors.md" ] && git ls-files --others --exclude-standard | grep -q "^ai/errors.md$"; then
-    echo -e "${GREEN}Committing ai/errors.md (new file)...${NC}"
-    echo "Contents of new ai/errors.md:"
-    sed -n '1,200p' ai/1.md || true
-    git add ai/1.md
+# Commit ai/errors files if they have changes
+AI_ERROR_PATHS=(':(glob)ai/errors/*.txt' ':(glob)ai/errors/*.log' ':(glob)ai/errors/*.md')
+if git diff --name-only | grep -qE "^ai/errors/[^/]+\.(txt|log|md)$" || \
+   git ls-files --others --exclude-standard | grep -qE "^ai/errors/[^/]+\.(txt|log|md)$"; then
+    echo -e "${GREEN}Committing ai/errors files...${NC}"
+    echo "Showing diff for ai/errors files:"
+    git --no-pager diff -- "${AI_ERROR_PATHS[@]}" || true
+    git add -- "${AI_ERROR_PATHS[@]}"
     git commit -m "${COMMIT_PREFIX}${COMMIT_MSG_ERRORS}"
     echo "  Done"
 else
-    echo -e "${YELLOW}No changes to ai/errors.md${NC}"
+    echo -e "${YELLOW}No changes to ai/errors files${NC}"
 fi
 
 # Commit nanoleaf_effect_card query/errors with diffs shown

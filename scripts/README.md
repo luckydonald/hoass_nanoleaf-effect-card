@@ -44,6 +44,27 @@ The script performs the following operations:
 
 ### Usage
 
+#### First setup
+```shell
+mkdir -P /path/to/homeassistant_plugins/
+cd /path/to/homeassistant_plugins/
+```
+```shell
+mkdir hoass_<your-plugin-name>
+cd hoass_<your-plugin-name>
+```
+```shell
+git init
+git remote add template 'https://luckydonald@github.com/luckydonald/hoass_plugin-template'
+set-url template
+git remote add template '../hoass_template'
+git remote set-url template --push 'https://luckydonald@github.com/luckydonald/hoass_plugin-template'
+git fetch template
+git branch --move mane
+git checkout --no-track -b mane  template/mane
+```
+
+#### Pull in updates.
 ```bash
 # Navigate to the template repository
 cd /path/to/hoass_<your-plugin-name>
