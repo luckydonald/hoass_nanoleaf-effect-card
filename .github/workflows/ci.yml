@@ -31,15 +31,15 @@ jobs:
 
             - name: Install dependencies
               working-directory: frontend
-              run: yarn install --immutable
+              run: corepack yarn install --immutable
 
             - name: Run tests
               working-directory: frontend
-              run: yarn test
+              run: corepack yarn test
 
             - name: Generate coverage report
               working-directory: frontend
-              run: yarn test:coverage
+              run: corepack yarn test:coverage
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3

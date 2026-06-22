@@ -94,12 +94,14 @@ pm_install() {
         return 1
     fi
     if echo "${FRONTEND_PM}" | grep -q '^yarn' >/dev/null 2>&1; then
-        (cd "${FRONTEND_DIR}" && if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then yarn install --silent --immutable || yarn install --silent; else yarn install --silent; fi)
+        (cd "${FRONTEND_DIR}" && if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then corepack yarn install --silent --immutable || corepack yarn install --silent; else corepack yarn install --silent; fi)
     elif echo "${FRONTEND_PM}" | grep -q '^pnpm' >/dev/null 2>&1; then
         (cd "${FRONTEND_DIR}" && pnpm install --silent)
     else
         # No explicit PM declared or unknown: prefer yarn if available
-        if command -v yarn >/dev/null 2>&1; then
+        if command -v corepack >/dev/null 2>&1; then
+            (cd "${FRONTEND_DIR}" && if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then corepack yarn install --silent --immutable || corepack yarn install --silent; else corepack yarn install --silent; fi)
+        elif command -v yarn >/dev/null 2>&1; then
             (cd "${FRONTEND_DIR}" && if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then yarn install --silent --immutable || yarn install --silent; else yarn install --silent; fi)
         elif command -v npm >/dev/null 2>&1; then
             # Warn when falling back to npm
@@ -121,11 +123,13 @@ pm_run_script() {
         return 1
     fi
     if echo "${FRONTEND_PM}" | grep -q '^yarn' >/dev/null 2>&1; then
-        (cd "${FRONTEND_DIR}" && yarn "${script_name}" "$@")
+        (cd "${FRONTEND_DIR}" && corepack yarn "${script_name}" "$@")
     elif echo "${FRONTEND_PM}" | grep -q '^pnpm' >/dev/null 2>&1; then
         (cd "${FRONTEND_DIR}" && pnpm run "${script_name}" "$@")
     else
-        if command -v yarn >/dev/null 2>&1; then
+        if command -v corepack >/dev/null 2>&1; then
+            (cd "${FRONTEND_DIR}" && corepack yarn "${script_name}" "$@")
+        elif command -v yarn >/dev/null 2>&1; then
             (cd "${FRONTEND_DIR}" && yarn "${script_name}" "$@")
         elif command -v npm >/dev/null 2>&1; then
             # Use npm run for scripts

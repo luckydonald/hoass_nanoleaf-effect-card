@@ -39,10 +39,10 @@ run_script() {
     PM=$(node -e "try{console.log(require('./package.json').packageManager||'')}catch(e){console.log('')}") || true
     PM=$(echo "$PM" | tr -d '\r')
   fi
-  # Prefer packageManager declared (yarn/pnpm), otherwise prefer yarn, then npm
-  if echo "$PM" | grep -q '^yarn' >/dev/null 2>&1 || command -v yarn >/dev/null 2>&1; then
-    echo "Running: yarn ${name}"
-    yarn "${name}"
+  # Prefer packageManager declared (yarn/pnpm), otherwise prefer corepack/yarn, then npm
+  if echo "$PM" | grep -q '^yarn' >/dev/null 2>&1 || command -v corepack >/dev/null 2>&1 || command -v yarn >/dev/null 2>&1; then
+    echo "Running: corepack yarn ${name}"
+    corepack yarn "${name}"
   elif echo "$PM" | grep -q '^pnpm' >/dev/null 2>&1 || command -v pnpm >/dev/null 2>&1; then
     echo "Running: pnpm run ${name}"
     pnpm run "${name}"

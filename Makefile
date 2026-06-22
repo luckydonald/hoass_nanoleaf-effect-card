@@ -150,7 +150,7 @@ ifeq ($(FRONTEND),1)
 	@echo "Running frontend tests..."
 	@if [ -n "$(FRONTEND_DIR)" ]; then \
 		cd $(FRONTEND_DIR) && if [ -f package.json ]; then \
-			if command -v npm >/dev/null 2>&1; then npm run test; elif command -v yarn >/dev/null 2>&1; then yarn test; else echo "No npm/yarn found"; fi; \
+			if command -v npm >/dev/null 2>&1; then npm run test; elif command -v corepack >/dev/null 2>&1 || command -v yarn >/dev/null 2>&1; then corepack yarn test; else echo "No npm/yarn found"; fi; \
 		fi; \
 	fi
 else
@@ -171,7 +171,7 @@ endif
 test-coverage-ts:
 ifeq ($(FRONTEND),1)
 	@echo "Running frontend tests with coverage..."
-	cd frontend && yarn test:coverage
+	cd frontend && corepack yarn test:coverage
 	@echo "Frontend coverage report generated in frontend/coverage/"
 else
 	@echo "No frontend sources detected – skipping frontend coverage."
@@ -229,7 +229,7 @@ ifeq ($(FRONTEND),1)
 	@echo "Building frontend..."
 	@if [ -n "$(FRONTEND_DIR)" ]; then \
 		cd $(FRONTEND_DIR) && if [ -f package.json ]; then \
-			if command -v npm >/dev/null 2>&1; then npm install --silent && npm run build; elif command -v yarn >/dev/null 2>&1; then yarn install --silent && yarn build; else echo "No npm/yarn found"; fi; \
+			if command -v npm >/dev/null 2>&1; then npm install --silent && npm run build; elif command -v corepack >/dev/null 2>&1 || command -v yarn >/dev/null 2>&1; then corepack yarn install --silent && corepack yarn build; else echo "No npm/yarn found"; fi; \
 		fi; \
 	fi
 else

@@ -30,16 +30,16 @@ jobs:
               working-directory: frontend
               run: |
                   if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
-                    echo "Lockfile found, running yarn install --immutable"
-                    yarn install --immutable
+                    echo "Lockfile found, running corepack yarn install --immutable"
+                    corepack yarn install --immutable
                   else
-                    echo "No lockfile present, running regular yarn install"
-                    yarn install
+                    echo "No lockfile present, running regular corepack yarn install"
+                    corepack yarn install
                   fi
 
             - name: Build frontend
               working-directory: frontend
-              run: yarn build
+              run: corepack yarn build
 
             - name: Upload frontend artifact
               uses: actions/upload-artifact@v4

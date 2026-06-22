@@ -4,3 +4,5 @@
 
 › Including @ai/skills/commit-with-lplp-style/README.md
 
+› Fix @ai/errors/4.txt
+

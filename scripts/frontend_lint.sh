@@ -35,9 +35,9 @@ run_script() {
   if command -v npm >/dev/null 2>&1; then
     echo "Running: npm run ${name}"
     npm run "${name}"
-  elif command -v yarn >/dev/null 2>&1; then
-    echo "Running: yarn ${name}"
-    yarn "${name}"
+  elif command -v corepack >/dev/null 2>&1 || command -v yarn >/dev/null 2>&1; then
+    echo "Running: corepack yarn ${name}"
+    corepack yarn "${name}"
   else
     return 127
   fi

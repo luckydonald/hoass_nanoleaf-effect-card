@@ -18,8 +18,16 @@ if [ -x "$SCRIPT_DIR/ensure_yarn.sh" ]; then
 fi
 
 cd "$FRONTEND_DIR_ARG"
-# Prefer yarn if available
-if command -v yarn >/dev/null 2>&1; then
+# Prefer Yarn via Corepack when available so packageManager is respected.
+if command -v corepack >/dev/null 2>&1; then
+  if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
+    echo "Lockfile found, running immutable corepack yarn install"
+    corepack yarn install --immutable
+  else
+    echo "No lockfile found, running regular corepack yarn install"
+    corepack yarn install
+  fi
+elif command -v yarn >/dev/null 2>&1; then
   if [ -f yarn.lock ] || [ -f .yarn/lock.yml ]; then
     echo "Lockfile found, running immutable yarn install"
     yarn install --immutable

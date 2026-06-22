@@ -21,6 +21,6 @@ jobs:
                   ./scripts/ensure_yarn.sh
 
             - name: Install dependencies (immutable)
-              run: yarn install --immutable
+              run: corepack yarn install --immutable
               env:
                   CI: true
