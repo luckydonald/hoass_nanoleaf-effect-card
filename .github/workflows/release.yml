@@ -14,12 +14,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
-                  node-version: '22'
+                  node-version: '24'
 
             - name: Enable Corepack and activate package manager (from package.json)
               run: |
@@ -53,7 +53,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: Download frontend artifact
               uses: actions/download-artifact@v4
@@ -96,7 +96,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: HACS Validation
               uses: hacs/action@main
