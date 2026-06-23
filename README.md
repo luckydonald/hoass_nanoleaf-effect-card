@@ -307,3 +307,12 @@ For developers and maintainers, additional documentation is available in the `ai
 ## Credits
 
 Inspired by the excellent `rgb-light-card` and other Home Assistant custom cards.
+
+
+## 📚 Compatibility
+
+<!-- compat-table-start -->
+Min. Homeassistant | Max. `plugin_template`
+-- | --
+[2024.1.0](https://www.home-assistant.io/) | [0.0.0](https://github.com/luckydonald/hoass_plugin_template/releases/tag/0.0.0)
+<!-- compat-table-end -->
